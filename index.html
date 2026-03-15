@@ -1908,27 +1908,66 @@ Rules:
       btn.disabled = true; return;
     }
 
-    let rec = null, active = false;
+    let rec = null, active = false, finalText = '';
 
-    btn.addEventListener('click', () => {
-      if (active) { rec.stop(); return; }
+    function startRec() {
       rec = new SR();
-      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
-      let final = '';
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = 'en-US';
+
+      rec.onstart = () => {
+        btn.classList.add('recording');
+        label.textContent = 'Recording… tap to stop';
+      };
+
       rec.onresult = e => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+        }
+        // Show final text in textarea; interim shown live while speaking
         let interim = '';
         for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-          else interim += e.results[i][0].transcript;
+          if (!e.results[i].isFinal) interim += e.results[i][0].transcript;
         }
-        transcript.value = final + interim;
+        transcript.value = finalText + interim;
       };
-      rec.onstart = () => { active = true; btn.classList.add('recording'); label.textContent = 'Recording… tap to stop'; };
+
+      rec.onerror = e => {
+        // 'no-speech' is normal during pauses — restart silently
+        if (e.error === 'no-speech') { return; }
+        console.error('Speech recognition error:', e.error);
+        label.textContent = 'Error: ' + e.error + ' — tap to retry';
+        btn.classList.remove('recording');
+        active = false;
+      };
+
       rec.onend = () => {
-        active = false; btn.classList.remove('recording'); label.textContent = 'Tap to speak';
-        if (transcript.value.trim()) parseBtn.classList.remove('hidden');
+        // If still meant to be recording (e.g. browser stopped after silence),
+        // restart automatically rather than going dead
+        if (active) {
+          try { rec.start(); } catch { /* already starting */ }
+          return;
+        }
+        btn.classList.remove('recording');
+        label.textContent = 'Tap to speak';
+        if (finalText.trim()) parseBtn.classList.remove('hidden');
       };
+
       rec.start();
+    }
+
+    btn.addEventListener('click', () => {
+      if (active) {
+        active = false;   // signal onend not to restart
+        rec.stop();
+        return;
+      }
+      active = true;
+      finalText = '';
+      transcript.value = '';
+      parseBtn.classList.add('hidden');
+      startRec();
     });
 
     parseBtn.addEventListener('click', () => {
