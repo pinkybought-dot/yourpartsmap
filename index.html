@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Parts Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111009;
+      --bg-sky: #1a1530;
+      --surface: #1c1916;
+      --surface-hover: #252018;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8e4dc;
+      --text-dim: #9a9488;
+      --text-faint: #5a5650;
+      --gold: #c8a246;
+      --gold-dim: rgba(200,162,70,0.15);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      overflow: hidden;
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; width: 100%; height: 100vh; }
+    .screen.active { display: flex; }
+
+    /* ── PIN SCREEN ── */
+    #screen-pin {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.75rem;
+      padding: 2rem;
+    }
+
+    .pin-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.22em;
+      color: var(--text-faint);
+      text-transform: uppercase;
+    }
+
+    .pin-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .pin-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .pin-input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.1rem;
+      text-align: center;
+      letter-spacing: 0.3em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .pin-input:focus { border-color: rgba(255,255,255,0.18); }
+    .pin-input.shake { animation: shake 0.4s ease; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .pin-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,162,70,0.25);
+      border-radius: 8px;
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .pin-btn:hover { background: rgba(200,162,70,0.22); border-color: rgba(200,162,70,0.4); }
+
+    .pin-hint {
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    /* ── APP HEADER ── */
+    #screen-app { flex-direction: column; }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mode-badge {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 0.18rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      padding: 0.38rem 0.65rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .icon-btn:hover { background: var(--surface); color: var(--text); border-color: rgba(255,255,255,0.12); }
+
+    /* ── THREE PANELS ── */
+    .panels {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .panel:last-child { border-right: none; }
+
+    #panel-map   { flex: 1.5; }
+    #panel-input { flex: 1; }
+    #panel-log   { flex: 0.85; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    /* ── MAP CANVAS ── */
+    #map-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #map-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .part-node { cursor: pointer; }
+    .part-node .node-shape { transition: filter 0.15s; }
+    .part-node:hover .node-shape { filter: brightness(1.35) drop-shadow(0 0 6px currentColor); }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .part-archetypal { animation: float 6s ease-in-out infinite; }
+      .part-archetypal:nth-child(2n) { animation-duration: 7.5s; animation-delay: -2.5s; }
+      .part-archetypal:nth-child(3n) { animation-duration: 5.2s; animation-delay: -4s; }
+      .aura-ring { animation: pulse-aura 3s ease-in-out infinite; }
+      .assembly-glow { animation: fire-glow 4s ease-in-out infinite; }
+
+      @keyframes float {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      @keyframes pulse-aura {
+        0%,100% { opacity: 0.18; }
+        50% { opacity: 0.45; }
+      }
+      @keyframes fire-glow {
+        0%,100% { opacity: 0.5; }
+        50% { opacity: 0.85; }
+      }
+    }
+
+    /* ── DETAIL PANEL ── */
+    #detail-panel {
+      position: absolute;
+      top: 0; right: 0;
+      width: 280px;
+      height: 100%;
+      background: rgba(15,14,8,0.97);
+      border-left: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      transform: translateX(100%);
+      transition: transform 0.28s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 10;
+    }
+    #detail-panel.open { transform: translateX(0); }
+
+    .detail-close {
+      position: absolute;
+      top: 0.7rem; right: 0.8rem;
+      background: none; border: none;
+      color: var(--text-faint);
+      font-size: 1.3rem;
+      cursor: pointer; line-height: 1;
+      transition: color 0.15s;
+    }
+    .detail-close:hover { color: var(--text); }
+
+    .detail-header {
+      padding: 1.2rem 1.2rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-part-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 0.35rem;
+      padding-right: 1.5rem;
+    }
+
+    .detail-tier-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .detail-tier {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      border: 1px solid transparent;
+    }
+
+    .detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .detail-section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 0.35rem;
+    }
+
+    .detail-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text-dim);
+    }
+
+    .key-moment-item {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+    }
+    .key-moment-item:last-child { border-bottom: none; }
+
+    .detail-footer {
+      padding: 0.9rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .detail-btn {
+      flex: 1;
+      padding: 0.55rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .detail-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .detail-btn.danger { border-color: rgba(200,80,60,0.3); color: rgba(200,100,80,0.8); }
+    .detail-btn.danger:hover { background: rgba(200,80,60,0.1); color: #d09080; }
+
+    /* Edit form inside detail */
+    .edit-form {
+      padding: 0.9rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      overflow-y: auto;
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .form-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .form-input {
+      padding: 0.55rem 0.75rem;
+      background: #141208;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: rgba(255,255,255,0.16); }
+
+    textarea.form-input { resize: vertical; min-height: 72px; line-height: 1.5; }
+    select.form-input option { background: #141208; color: var(--text); }
+
+    .form-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.2rem; }
+
+    .btn-secondary {
+      padding: 0.5rem 0.9rem;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-secondary:hover { background: var(--surface); color: var(--text); }
+
+    .btn-primary {
+      padding: 0.5rem 1rem;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,162,70,0.25);
+      border-radius: 5px;
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-primary:hover { background: rgba(200,162,70,0.22); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── SESSION INPUT ── */
+    .input-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .input-tab {
+      flex: 1;
+      padding: 0.55rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-faint);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 0.04em;
+    }
+    .input-tab.active { color: var(--text); border-bottom-color: var(--gold); }
+
+    .input-scroll {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-pane {
+      flex: 1;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .session-textarea {
+      flex: 1;
+      min-height: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      padding: 0.7rem 0.85rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .session-textarea:focus { border-color: rgba(255,255,255,0.13); }
+    .session-textarea::placeholder { color: var(--text-faint); }
+
+    .parse-btn {
+      padding: 0.7rem;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,162,70,0.22);
+      border-radius: 6px;
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 0.04em;
+    }
+    .parse-btn:hover { background: rgba(200,162,70,0.22); border-color: rgba(200,162,70,0.38); }
+    .parse-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .parse-status {
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      text-align: center;
+      padding: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .voice-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      flex: 1;
+      min-height: 120px;
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .voice-btn:hover { border-color: rgba(255,255,255,0.12); color: var(--text); }
+    .voice-btn.recording {
+      border-color: rgba(200,80,60,0.4);
+      color: #c89080;
+      background: rgba(200,80,60,0.07);
+      animation: pulse-record 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-record {
+      0%,100% { box-shadow: 0 0 0 0 rgba(200,80,60,0.15); }
+      50% { box-shadow: 0 0 0 10px rgba(200,80,60,0); }
+    }
+
+    .voice-icon { font-size: 1.9rem; }
+
+    /* ── SUGGESTION CARDS ── */
+    .suggestions-area {
+      padding: 0 0.75rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .sugg-section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding-top: 0.25rem;
+    }
+
+    .sugg-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: opacity 0.2s;
+    }
+
+    .sugg-card-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.08rem;
+    }
+
+    .sugg-card-desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .sugg-card-meta {
+      font-size: 0.7rem;
+      color: var(--text-faint);
+    }
+
+    .sugg-actions { display: flex; gap: 0.45rem; margin-top: 0.2rem; }
+
+    .sugg-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-dim);
+    }
+    .sugg-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .sugg-btn.add { background: var(--gold-dim); border-color: rgba(200,162,70,0.22); color: var(--gold); }
+    .sugg-btn.add:hover { background: rgba(200,162,70,0.22); }
+    .sugg-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .key-moment-card {
+      background: rgba(200,162,70,0.04);
+      border: 1px solid rgba(200,162,70,0.13);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    .key-moment-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+
+    /* ── PROGRESS LOG ── */
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .log-entry {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .log-entry:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .log-entry-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.55rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .log-session-num {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .log-date { font-size: 0.73rem; color: var(--text-faint); }
+
+    .log-key-moment {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.98rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.6;
+      margin-bottom: 0.35rem;
+    }
+
+    .log-note {
+      font-size: 0.84rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+
+    .log-client-note {
+      margin-left: 0.9rem;
+      border-left: 2px solid rgba(200,162,70,0.18);
+      padding-left: 0.75rem;
+    }
+
+    .log-client-note .log-note {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    /* ── DASHBOARD ── */
+    #screen-dashboard {
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+      overflow-y: auto;
+    }
+
+    .dashboard-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem;
+      font-weight: 300;
+    }
+
+    .new-client-btn {
+      padding: 0.55rem 1.1rem;
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,162,70,0.28);
+      border-radius: 6px;
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .new-client-btn:hover { background: rgba(200,162,70,0.22); }
+
+    .map-list {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .map-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.18s;
+    }
+    .map-row:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.11); }
+
+    .map-row-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      flex: 1;
+    }
+
+    .map-row-meta { font-size: 0.77rem; color: var(--text-faint); text-align: right; }
+
+    .empty-state {
+      color: var(--text-faint);
+      font-size: 0.88rem;
+      text-align: center;
+      padding: 3rem 1rem;
+      line-height: 1.8;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+      padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: #1a1914;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem;
+      font-weight: 300;
+    }
+
+    .modal .form-field { gap: 0.35rem; }
+    .modal .form-input { padding: 0.65rem 0.9rem; font-size: 0.9rem; }
+
+    .modal-actions { display: flex; gap: 0.65rem; justify-content: flex-end; }
+
+    .created-info {
+      background: rgba(200,162,70,0.07);
+      border: 1px solid rgba(200,162,70,0.18);
+      border-radius: 8px;
+      padding: 1.1rem;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+    }
+    .created-info strong { color: var(--gold); }
+    .created-info .url-line { word-break: break-all; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .panels { flex-direction: column; }
+
+      #panel-map {
+        flex: none;
+        height: 42vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mobile-panel-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .mobile-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+
+      .mobile-tab {
+        flex: 1;
+        padding: 0.65rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-faint);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .mobile-tab.active { color: var(--text); border-bottom-color: var(--gold); }
+
+      #panel-input, #panel-log {
+        border-right: none;
+        flex: 1;
+      }
+
+      #panel-input.mobile-hidden,
+      #panel-log.mobile-hidden { display: none; }
+
+      #detail-panel { width: 100%; }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-tabs { display: none; }
+      .mobile-panel-area { display: contents; }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 2px; }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════ PIN SCREEN ═══════════════════════════════ -->
+  <div id="screen-pin" class="screen">
+    <div class="pin-wordmark">Your Parts Map</div>
+    <div class="pin-title" id="pin-map-title">Enter your PIN</div>
+    <div class="pin-box">
+      <input type="password" class="pin-input" id="pin-input"
+        placeholder="· · · ·" maxlength="20" autocomplete="off" inputmode="numeric">
+      <button class="pin-btn" id="pin-submit-btn">Enter</button>
+      <div class="pin-hint" id="pin-hint"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ MAIN APP ════════════════════════════════ -->
+  <div id="screen-app" class="screen">
+    <header class="app-header">
+      <div class="app-title" id="app-map-title">Map</div>
+      <span class="mode-badge" id="mode-badge">Practitioner</span>
+      <button class="icon-btn" id="btn-add-part" title="Add a part">+ Part</button>
+      <button class="icon-btn" id="btn-share" title="Copy client link">Share</button>
+      <button class="icon-btn" id="btn-dashboard" title="Dashboard">⌂</button>
+    </header>
+
+    <div class="panels">
+
+      <!-- Panel 1: Map -->
+      <div class="panel" id="panel-map">
+        <div class="panel-header">
+          <span class="panel-title">Map</span>
+        </div>
+        <div id="map-container">
+          <svg id="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <radialGradient id="glow-gold" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#c8a246" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#c8a246" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g id="map-zones"></g>
+            <g id="map-connections"></g>
+            <g id="map-parts"></g>
+          </svg>
+
+          <!-- Detail slide-over -->
+          <div id="detail-panel">
+            <button class="detail-close" id="detail-close">×</button>
+            <div class="detail-header">
+              <div class="detail-part-name" id="detail-name"></div>
+              <div class="detail-tier-row">
+                <span class="detail-tier" id="detail-tier"></span>
+                <span class="status-badge hidden" id="detail-status"></span>
+              </div>
+            </div>
+            <div class="detail-body" id="detail-body">
+              <div>
+                <div class="detail-section-label">Description</div>
+                <div class="detail-desc" id="detail-desc"></div>
+              </div>
+              <div id="detail-moments-section" class="hidden">
+                <div class="detail-section-label">Key Moments</div>
+                <div id="detail-moments"></div>
+              </div>
+            </div>
+            <div class="detail-footer" id="detail-footer-pract">
+              <button class="detail-btn" id="detail-edit-btn">Edit</button>
+              <button class="detail-btn danger" id="detail-delete-btn">Delete</button>
+            </div>
+            <div class="edit-form hidden" id="edit-form">
+              <div class="form-field">
+                <label class="form-label">Name</label>
+                <input class="form-input" id="edit-name" type="text">
+              </div>
+              <div class="form-field">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" id="edit-desc"></textarea>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Color</label>
+                <select class="form-input" id="edit-color">
+                  <option value="purple">Purple — Archetypal</option>
+                  <option value="blue">Blue — Protector</option>
+                  <option value="teal">Teal — Merged / Integrated</option>
+                  <option value="amber">Amber — Active Protector</option>
+                  <option value="coral">Coral — Exile</option>
+                  <option value="green">Green — Resource</option>
+                  <option value="gray">Gray — Hidden / Unknown</option>
+                  <option value="gold">Gold — Liberated</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Status</label>
+                <input class="form-input" id="edit-status" type="text" placeholder="e.g. ◎ Merged">
+              </div>
+              <div class="form-field">
+                <label class="form-label">Shape</label>
+                <select class="form-input" id="edit-shape">
+                  <option value="circle">Circle</option>
+                  <option value="ellipse">Ellipse — Vast / Expansive</option>
+                  <option value="diamond">Diamond — Resource</option>
+                  <option value="dashed">Dashed — Ambiguous</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button class="btn-secondary" id="edit-cancel-btn">Cancel</button>
+                <button class="btn-primary" id="edit-save-btn">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile tab area wrapper -->
+      <div class="mobile-panel-area">
+        <div class="mobile-tabs">
+          <button class="mobile-tab active" data-panel="input">Input</button>
+          <button class="mobile-tab" data-panel="log">Log</button>
+        </div>
+
+        <!-- Panel 2: Session Input -->
+        <div class="panel" id="panel-input">
+          <div class="panel-header">
+            <span class="panel-title">Session Input</span>
+          </div>
+
+          <!-- Practitioner input -->
+          <div id="pract-input-area" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+            <div class="input-tabs">
+              <button class="input-tab active" data-mode="type">Type / Paste</button>
+              <button class="input-tab" data-mode="speak">Speak</button>
+            </div>
+            <div class="input-scroll" id="input-scroll-area">
+              <!-- Type pane -->
+              <div class="input-pane" id="input-type-pane">
+                <textarea class="session-textarea" id="session-textarea"
+                  placeholder="Paste a transcript, type session notes, or describe what happened…"></textarea>
+                <button class="parse-btn" id="parse-btn">Parse with Claude →</button>
+                <div class="parse-status hidden" id="parse-status"></div>
+              </div>
+              <!-- Speak pane -->
+              <div class="input-pane hidden" id="input-speak-pane">
+                <button class="voice-btn" id="voice-btn">
+                  <span class="voice-icon">🎙</span>
+                  <span id="voice-label">Tap to speak</span>
+                </button>
+                <textarea class="session-textarea" id="voice-transcript"
+                  placeholder="Transcript will appear here…" readonly style="min-height:72px;"></textarea>
+                <button class="parse-btn hidden" id="voice-parse-btn">Parse with Claude →</button>
+              </div>
+              <!-- Suggestions injected here -->
+              <div class="suggestions-area hidden" id="suggestions-area"></div>
+            </div>
+          </div>
+
+          <!-- Client input -->
+          <div id="client-input-area" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+            <div class="input-pane">
+              <textarea class="session-textarea" id="client-textarea"
+                placeholder="Write a reflection about your inner work…" style="flex:1;min-height:120px;"></textarea>
+              <button class="parse-btn" id="client-save-btn"
+                style="background:none;border-color:rgba(255,255,255,0.1);color:var(--text-dim);">
+                Save Reflection
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Progress Log -->
+        <div class="panel" id="panel-log">
+          <div class="panel-header">
+            <span class="panel-title">Progress Log</span>
+            <span class="mode-badge" id="log-view-badge">Clinical</span>
+          </div>
+          <div class="log-list" id="log-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ DASHBOARD ════════════════════════════════ -->
+  <div id="screen-dashboard" class="screen">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Your Parts Map</h1>
+      <button class="new-client-btn" id="new-client-btn">+ New Client</button>
+    </div>
+    <div class="map-list" id="map-list"></div>
+  </div>
+
+  <!-- ═══════════════════════════════ NEW MAP MODAL ════════════════════════════ -->
+  <div class="modal-overlay hidden" id="new-map-modal">
+    <div class="modal">
+      <div class="modal-title">New Client Map</div>
+      <div id="modal-form-fields">
+        <div class="form-field" style="margin-bottom:0.7rem;">
+          <label class="form-label">Client Name or Code</label>
+          <input class="form-input" id="new-client-name" type="text" placeholder="e.g. Roman or R-001">
+        </div>
+        <div class="form-field" style="margin-bottom:0.7rem;">
+          <label class="form-label">Practitioner PIN</label>
+          <input class="form-input" id="new-pract-pin" type="password" placeholder="Choose a PIN you'll remember">
+        </div>
+        <div class="form-field" style="margin-bottom:0.7rem;">
+          <label class="form-label">Client PIN</label>
+          <input class="form-input" id="new-client-pin" type="password" placeholder="PIN to share with client">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="modal-cancel-btn">Cancel</button>
+          <button class="btn-primary" id="modal-create-btn">Create Map</button>
+        </div>
+      </div>
+      <div class="created-info hidden" id="created-info"></div>
+    </div>
+  </div>
+
+  <script>
+  // ════════════════════════════════════════════════════════════════════════
+  // CONFIG  (placeholders replaced by build.sh)
+  // ════════════════════════════════════════════════════════════════════════
+  const CONFIG = {
+    SUPABASE_URL: '__SUPABASE_URL__',
+    SUPABASE_KEY: '__SUPABASE_KEY__',
+    ANTHROPIC_KEY: '__ANTHROPIC_API_KEY__'
+  };
+
+  // ════════════════════════════════════════════════════════════════════════
+  // CRYPTO
+  // ════════════════════════════════════════════════════════════════════════
+  async function deriveKey(hash) {
+    const enc = new TextEncoder();
+    const km = await crypto.subtle.importKey('raw', enc.encode(hash), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: enc.encode('yourpartsmap'), iterations: 100000, hash: 'SHA-256' },
+      km,
+      { name: 'AES-GCM', length: 256 },
+      false, ['encrypt', 'decrypt']
+    );
+  }
+
+  function u8ToB64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+
+  function b64ToU8(str) {
+    return Uint8Array.from(atob(str), c => c.charCodeAt(0));
+  }
+
+  async function encryptData(data, hash) {
+    const key = await deriveKey(hash);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(JSON.stringify(data));
+    const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+    return u8ToB64(iv) + '.' + u8ToB64(new Uint8Array(enc));
+  }
+
+  async function decryptData(str, hash) {
+    const key = await deriveKey(hash);
+    const [ivB64, dataB64] = str.split('.');
+    const iv = b64ToU8(ivB64);
+    const data = b64ToU8(dataB64);
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return JSON.parse(new TextDecoder().decode(dec));
+  }
+
+  async function hashPIN(pin) {
+    const encoded = new TextEncoder().encode(pin + 'yourpartsmap-salt');
+    const h = await crypto.subtle.digest('SHA-256', encoded);
+    return u8ToB64(new Uint8Array(h));
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SUPABASE
+  // ════════════════════════════════════════════════════════════════════════
+  async function dbFetch(path, opts = {}) {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${path}`, {
+      ...opts,
+      headers: {
+        apikey: CONFIG.SUPABASE_KEY,
+        Authorization: `Bearer ${CONFIG.SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: opts.prefer || 'return=representation',
+        ...opts.headers
+      }
+    });
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    const t = await res.text();
+    return t ? JSON.parse(t) : null;
+  }
+
+  async function dbLoad(hash) {
+    const rows = await dbFetch(`maps?hash=eq.${encodeURIComponent(hash)}&select=*`);
+    return rows?.length ? rows[0] : null;
+  }
+
+  async function dbCreate(hash, encData, practHash, clientHash) {
+    return dbFetch('maps', {
+      method: 'POST',
+      body: JSON.stringify({
+        hash, data: encData,
+        practitioner_pin_hash: practHash,
+        client_pin_hash: clientHash,
+        updated_at: new Date().toISOString()
+      })
+    });
+  }
+
+  async function dbUpdate(hash, encData) {
+    return dbFetch(`maps?hash=eq.${encodeURIComponent(hash)}`, {
+      method: 'PATCH',
+      prefer: 'return=minimal',
+      body: JSON.stringify({ data: encData, updated_at: new Date().toISOString() })
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // APP STATE
+  // ════════════════════════════════════════════════════════════════════════
+  const APP = {
+    hash: null,
+    mode: null,       // 'practitioner' | 'client'
+    mapData: null,
+    dbRow: null,
+    saveTimer: null,
+    selectedPartId: null
+  };
+
+  function emptyMapData(name) {
+    return {
+      meta: {
+        title: `${name}'s Map`,
+        clientName: name,
+        sessionCount: 0,
+        createdAt: todayStr(),
+        lastSession: null
+      },
+      parts: [],
+      connections: [],
+      log: []
+    };
+  }
+
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+  function genId() { return Math.random().toString(36).slice(2, 11); }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SAVE
+  // ════════════════════════════════════════════════════════════════════════
+  function scheduleSave() {
+    if (APP.saveTimer) clearTimeout(APP.saveTimer);
+    APP.saveTimer = setTimeout(saveNow, 1000);
+  }
+
+  async function saveNow() {
+    if (!APP.hash || !APP.mapData) return;
+    try {
+      const enc = await encryptData(APP.mapData, APP.hash);
+      await dbUpdate(APP.hash, enc);
+    } catch (e) { console.error('Save failed:', e); }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // ROUTER
+  // ════════════════════════════════════════════════════════════════════════
+  function getURLHash() { return window.location.hash.slice(1) || ''; }
+
+  async function route() {
+    const h = getURLHash();
+    if (!h) { showDashboard(); return; }
+    showPINScreen(h);
+  }
+
+  window.addEventListener('hashchange', route);
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SCREEN SWITCHER
+  // ════════════════════════════════════════════════════════════════════════
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // PIN SCREEN
+  // ════════════════════════════════════════════════════════════════════════
+  function showPINScreen(hash) {
+    APP.hash = hash;
+    showScreen('screen-pin');
+    document.getElementById('pin-map-title').textContent = 'Enter your PIN';
+    document.getElementById('pin-hint').textContent = '';
+    document.getElementById('pin-input').value = '';
+    setTimeout(() => document.getElementById('pin-input').focus(), 100);
+  }
+
+  async function handlePINSubmit() {
+    const pin = document.getElementById('pin-input').value.trim();
+    if (!pin) return;
+    const hint = document.getElementById('pin-hint');
+    hint.textContent = 'Checking…';
+    try {
+      const row = await dbLoad(APP.hash);
+      if (!row) {
+        hint.textContent = '';
+        history.replaceState(null, '', window.location.pathname);
+        openNewMapModal();
+        return;
+      }
+      APP.dbRow = row;
+      const ph = await hashPIN(pin);
+      if (ph === row.practitioner_pin_hash) {
+        APP.mode = 'practitioner';
+      } else if (ph === row.client_pin_hash) {
+        APP.mode = 'client';
+      } else {
+        hint.textContent = 'Incorrect PIN. Try again.';
+        const inp = document.getElementById('pin-input');
+        inp.classList.remove('shake');
+        void inp.offsetWidth;
+        inp.classList.add('shake');
+        inp.value = '';
+        inp.focus();
+        return;
+      }
+      APP.mapData = await decryptData(row.data, APP.hash);
+      hint.textContent = '';
+      showMainApp();
+    } catch (e) {
+      hint.textContent = 'Connection error. Please try again.';
+      console.error(e);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // MAIN APP
+  // ════════════════════════════════════════════════════════════════════════
+  function showMainApp() {
+    showScreen('screen-app');
+    const title = APP.mapData?.meta?.title || 'Map';
+    document.getElementById('app-map-title').textContent = title;
+    document.getElementById('mode-badge').textContent =
+      APP.mode === 'practitioner' ? 'Practitioner' : 'Client';
+    document.getElementById('log-view-badge').textContent =
+      APP.mode === 'practitioner' ? 'Clinical' : 'Narrative';
+    document.getElementById('btn-add-part').classList.toggle('hidden', APP.mode !== 'practitioner');
+
+    // Show correct input panel
+    const practArea = document.getElementById('pract-input-area');
+    const clientArea = document.getElementById('client-input-area');
+    if (APP.mode === 'practitioner') {
+      practArea.style.display = 'flex';
+      clientArea.style.display = 'none';
+    } else {
+      practArea.style.display = 'none';
+      clientArea.style.display = 'flex';
+    }
+
+    renderMap();
+    renderLog();
+    initMobileTabs();
+
+    // Save this map to local dashboard index
+    if (APP.mode === 'practitioner') {
+      updateLocalIndex(APP.hash, title, (APP.mapData?.parts || []).length);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // COLOR DEFINITIONS
+  // ════════════════════════════════════════════════════════════════════════
+  const COLORS = {
+    purple: { fill:'#1c1830', stroke:'#8a82d0', text:'#c0baf0', label:'Archetypal' },
+    blue:   { fill:'#0e1a28', stroke:'#4e96cc', text:'#a0c8ee', label:'Protector' },
+    teal:   { fill:'#0a1e18', stroke:'#38b088', text:'#88d8bf', label:'Integrated' },
+    amber:  { fill:'#1e1608', stroke:'#d8a038', text:'#f0d090', label:'Active Protector' },
+    coral:  { fill:'#180e08', stroke:'#c86040', text:'#f0b8a0', label:'Exile' },
+    green:  { fill:'#101a08', stroke:'#70b030', text:'#c0e090', label:'Resource' },
+    gray:   { fill:'#181818', stroke:'#808070', text:'#c8c8b8', label:'Hidden' },
+    gold:   { fill:'#201608', stroke:'#c8a246', text:'#e8c870', label:'Liberated' }
+  };
+
+  // ════════════════════════════════════════════════════════════════════════
+  // MAP RENDER
+  // ════════════════════════════════════════════════════════════════════════
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  function renderMap() {
+    document.getElementById('map-zones').innerHTML = '';
+    document.getElementById('map-connections').innerHTML = '';
+    document.getElementById('map-parts').innerHTML = '';
+    renderZones();
+    renderConnections();
+    renderParts();
+  }
+
+  function renderZones() {
+    const g = document.getElementById('map-zones');
+    const W = 800, H = 600;
+    const defs = document.querySelector('#map-svg defs');
+
+    // Build gradients once
+    if (!defs.querySelector('#grad-sky')) {
+      const make = (id, stops) => {
+        const gr = svgEl('linearGradient', { id, x1:'0', y1:'0', x2:'0', y2:'1' });
+        gr.innerHTML = stops; defs.appendChild(gr);
+      };
+      make('grad-sky',
+        '<stop offset="0%" stop-color="#1a1530"/><stop offset="100%" stop-color="#111009"/>');
+      make('grad-mid',
+        '<stop offset="0%" stop-color="#111009"/><stop offset="100%" stop-color="#120f06"/>');
+      make('grad-exile',
+        '<stop offset="0%" stop-color="#120f06"/><stop offset="100%" stop-color="#180a04"/>');
+    }
+
+    g.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H*0.25, fill:'url(#grad-sky)' }));
+    g.appendChild(svgEl('rect', { x:0, y:H*0.25, width:W, height:H*0.45, fill:'url(#grad-mid)' }));
+    g.appendChild(svgEl('rect', { x:0, y:H*0.70, width:W, height:H*0.30, fill:'url(#grad-exile)' }));
+
+    // Mountain silhouette
+    g.appendChild(svgEl('path', {
+      d: `M0,${H*0.70} Q80,${H*0.63} 180,${H*0.68} Q280,${H*0.60} 400,${H*0.655}
+          Q520,${H*0.59} 620,${H*0.64} Q720,${H*0.57} 800,${H*0.62}
+          L800,${H*0.70} Z`,
+      fill: '#1a1208', opacity: '0.65'
+    }));
+
+    // Assembly Place
+    const apX = W/2, apY = H*0.675;
+    const glow = svgEl('circle', { cx:apX, cy:apY, r:22, fill:'url(#glow-gold)', class:'assembly-glow' });
+    g.appendChild(glow);
+    const glyph = svgEl('text', {
+      x: apX, y: apY+6, 'text-anchor':'middle',
+      'font-size':'16', fill:'#c8a246', opacity:'0.65', 'font-family':'serif',
+      'pointer-events':'none'
+    });
+    glyph.textContent = '⌬';
+    g.appendChild(glyph);
+
+    // Zone labels
+    const zl = (txt, x, y) => {
+      const t = svgEl('text', {
+        x, y, 'text-anchor':'middle', 'font-size':'9',
+        'font-family':"'Cormorant Garamond', serif", 'font-style':'italic',
+        'letter-spacing':'3', fill:'rgba(255,255,255,0.09)', 'pointer-events':'none'
+      });
+      t.textContent = txt; g.appendChild(t);
+    };
+    zl('ARCHETYPAL', W/2, H*0.08);
+    zl('PROTECTORS',  W/2, H*0.44);
+    zl('EXILES',      W/2, H*0.88);
+  }
+
+  function renderConnections() {
+    const g = document.getElementById('map-connections');
+    if (!APP.mapData) return;
+    const parts = APP.mapData.parts || [];
+    for (const conn of (APP.mapData.connections || [])) {
+      const f = parts.find(p => p.id === conn.from || p.name.toLowerCase().includes(conn.from.toLowerCase()));
+      const t = parts.find(p => p.id === conn.to   || p.name.toLowerCase().includes(conn.to.toLowerCase()));
+      if (!f || !t) continue;
+      g.appendChild(svgEl('line', {
+        x1: f.x*800, y1: f.y*600, x2: t.x*800, y2: t.y*600,
+        stroke: 'rgba(255,255,255,0.1)', 'stroke-width':'1',
+        'stroke-dasharray': conn.style === 'dashed' ? '4,4' : 'none'
+      }));
+    }
+  }
+
+  function renderParts() {
+    const g = document.getElementById('map-parts');
+    if (!APP.mapData) return;
+    for (const part of (APP.mapData.parts || [])) g.appendChild(buildPartNode(part));
+    if (APP.mode === 'practitioner') initDrag();
+  }
+
+  function buildPartNode(part) {
+    const c = COLORS[part.color] || COLORS.gray;
+    const x = (part.x || 0.5) * 800;
+    const y = (part.y || 0.5) * 600;
+    const r = part.size || 32;
+
+    const g = svgEl('g', {
+      class: `part-node part-${part.color||'gray'}${part.color==='purple'?' part-archetypal':''}`,
+      'data-part-id': part.id,
+      transform: `translate(${x},${y})`
+    });
+
+    // Liberated aura ring
+    if (part.color === 'gold') {
+      g.appendChild(svgEl('circle', {
+        class:'aura-ring', cx:0, cy:0, r:r+8,
+        fill:'none', stroke:c.stroke, 'stroke-width':'1', opacity:'0.3'
+      }));
+    }
+
+    // Shape
+    let shape;
+    if (part.shape === 'ellipse') {
+      shape = svgEl('ellipse', { class:'node-shape', cx:0, cy:0, rx:r*1.4, ry:r*0.75, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+    } else if (part.shape === 'diamond') {
+      shape = svgEl('polygon', { class:'node-shape', points:`0,${-r} ${r},0 0,${r} ${-r},0`, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+    } else if (part.shape === 'dashed') {
+      shape = svgEl('circle', { class:'node-shape', cx:0, cy:0, r, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5', 'stroke-dasharray':'4,3' });
+    } else {
+      shape = svgEl('circle', { class:'node-shape', cx:0, cy:0, r, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+    }
+    g.appendChild(shape);
+
+    // Label
+    const lbl = svgEl('text', {
+      x:0, y: part.sublabel ? -4 : 1,
+      'text-anchor':'middle', 'dominant-baseline':'middle',
+      'font-size':'10', 'font-family':"'Cormorant Garamond', serif", 'font-weight':'500',
+      fill: c.text, 'pointer-events':'none'
+    });
+    lbl.textContent = part.label || shortenLabel(part.name);
+    g.appendChild(lbl);
+
+    if (part.sublabel) {
+      const sub = svgEl('text', {
+        x:0, y:9, 'text-anchor':'middle', 'dominant-baseline':'middle',
+        'font-size':'7.5', 'font-family':"'DM Sans', sans-serif",
+        fill: c.text, opacity:'0.55', 'pointer-events':'none'
+      });
+      sub.textContent = part.sublabel;
+      g.appendChild(sub);
+    }
+
+    g.addEventListener('click', e => { e.stopPropagation(); showPartDetail(part.id); });
+    return g;
+  }
+
+  function shortenLabel(name) {
+    if (!name) return '?';
+    if (name.length <= 14) return name;
+    const words = name.split(' ');
+    return words.length >= 2 ? words.slice(0, 2).join(' ') : name.slice(0, 12);
+  }
+
+  // ─── DRAG & DROP ───────────────────────────────────────────
+  function initDrag() {
+    const svg = document.getElementById('map-svg');
+    let dragging = null, partId = null;
+
+    svg.addEventListener('mousedown', e => {
+      const node = e.target.closest('.part-node');
+      if (!node) return;
+      e.preventDefault();
+      dragging = node;
+      partId = node.getAttribute('data-part-id');
+    });
+
+    svg.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const p = svgCoord(svg, e);
+      dragging.setAttribute('transform', `translate(${p.x},${p.y})`);
+    });
+
+    const endDrag = e => {
+      if (!dragging) return;
+      const p = svgCoord(svg, e);
+      const part = APP.mapData?.parts?.find(pt => pt.id === partId);
+      if (part) {
+        part.x = Math.max(0.02, Math.min(0.98, p.x / 800));
+        part.y = Math.max(0.02, Math.min(0.98, p.y / 600));
+        scheduleSave();
+        renderConnections();
+      }
+      dragging = null; partId = null;
+    };
+
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+  }
+
+  function svgCoord(svg, e) {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  // ─── PART DETAIL ───────────────────────────────────────────
+  function showPartDetail(partId) {
+    const part = APP.mapData?.parts?.find(p => p.id === partId);
+    if (!part) return;
+    APP.selectedPartId = partId;
+    const c = COLORS[part.color] || COLORS.gray;
+
+    document.getElementById('detail-name').textContent = part.name;
+    document.getElementById('detail-name').style.color = c.text;
+    document.getElementById('detail-tier').textContent = c.label;
+    document.getElementById('detail-desc').textContent = part.desc || '—';
+
+    const sb = document.getElementById('detail-status');
+    if (part.status) {
+      sb.textContent = part.status;
+      sb.style.cssText = `background:${c.fill};color:${c.text};border-color:${c.stroke}`;
+      sb.classList.remove('hidden');
+    } else {
+      sb.classList.add('hidden');
+    }
+
+    const ms = document.getElementById('detail-moments-section');
+    const md = document.getElementById('detail-moments');
+    if (part.keyMoments?.length) {
+      md.innerHTML = part.keyMoments.map(m => `<div class="key-moment-item">${m}</div>`).join('');
+      ms.classList.remove('hidden');
+    } else {
+      ms.classList.add('hidden');
+    }
+
+    const fp = document.getElementById('detail-footer-pract');
+    const ef = document.getElementById('edit-form');
+    ef.classList.add('hidden');
+    fp.classList.toggle('hidden', APP.mode !== 'practitioner');
+
+    document.getElementById('detail-panel').classList.add('open');
+  }
+
+  function closeDetailPanel() {
+    document.getElementById('detail-panel').classList.remove('open');
+    document.getElementById('edit-form').classList.add('hidden');
+    document.getElementById('detail-footer-pract').classList.remove('hidden');
+    APP.selectedPartId = null;
+  }
+
+  function openEditForm() {
+    const part = APP.mapData?.parts?.find(p => p.id === APP.selectedPartId);
+    if (!part) return;
+    document.getElementById('edit-name').value = part.name || '';
+    document.getElementById('edit-desc').value = part.desc || '';
+    document.getElementById('edit-color').value = part.color || 'gray';
+    document.getElementById('edit-status').value = part.status || '';
+    document.getElementById('edit-shape').value = part.shape || 'circle';
+    document.getElementById('detail-footer-pract').classList.add('hidden');
+    document.getElementById('edit-form').classList.remove('hidden');
+  }
+
+  function saveEditForm() {
+    const part = APP.mapData?.parts?.find(p => p.id === APP.selectedPartId);
+    if (!part) return;
+    part.name   = document.getElementById('edit-name').value.trim() || part.name;
+    part.label  = shortenLabel(part.name);
+    part.desc   = document.getElementById('edit-desc').value.trim();
+    part.color  = document.getElementById('edit-color').value;
+    part.status = document.getElementById('edit-status').value.trim();
+    part.shape  = document.getElementById('edit-shape').value;
+    renderMap();
+    showPartDetail(APP.selectedPartId);
+    scheduleSave();
+  }
+
+  function deletePart() {
+    if (!APP.selectedPartId || !confirm('Remove this part from the map?')) return;
+    APP.mapData.parts = APP.mapData.parts.filter(p => p.id !== APP.selectedPartId);
+    APP.mapData.connections = APP.mapData.connections.filter(
+      c => c.from !== APP.selectedPartId && c.to !== APP.selectedPartId
+    );
+    closeDetailPanel();
+    renderMap();
+    scheduleSave();
+  }
+
+  function addPartToMap(partData) {
+    if (!APP.mapData) return;
+    const part = {
+      id: genId(),
+      name: partData.name,
+      label: shortenLabel(partData.name),
+      color: partData.suggestedColor || 'gray',
+      shape: 'circle',
+      size: 32,
+      x: 0.18 + Math.random() * 0.64,
+      y: 0.25 + Math.random() * 0.5,
+      desc: partData.description || '',
+      status: '',
+      firstSession: (APP.mapData.meta.sessionCount || 0) + 1,
+      keyMoments: []
+    };
+    const tier = partData.suggestedTier;
+    if (tier === 'archetypal') part.y = 0.06 + Math.random() * 0.16;
+    else if (tier === 'exile')  part.y = 0.73 + Math.random() * 0.20;
+    else if (tier === 'protector') part.y = 0.28 + Math.random() * 0.32;
+    APP.mapData.parts.push(part);
+    renderMap();
+    scheduleSave();
+    return part;
+  }
+
+  // Click map background → close detail
+  document.getElementById('map-svg').addEventListener('click', e => {
+    const node = e.target.closest('.part-node');
+    if (!node) closeDetailPanel();
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SESSION INPUT TABS
+  // ════════════════════════════════════════════════════════════════════════
+  document.querySelectorAll('.input-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const mode = tab.getAttribute('data-mode');
+      document.getElementById('input-type-pane').classList.toggle('hidden', mode !== 'type');
+      document.getElementById('input-speak-pane').classList.toggle('hidden', mode !== 'speak');
+      document.getElementById('suggestions-area').classList.add('hidden');
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // CLAUDE PARSER
+  // ════════════════════════════════════════════════════════════════════════
+  const SYSTEM_PROMPT = `You are helping a somatic coach maintain a parts map for a client.
+Read this session input — it may be a raw transcript, a practitioner voice debrief, or freeform notes in any format.
+
+Extract and return JSON with this exact structure:
+{
+  "newParts": [
+    {
+      "name": "exact name or phrase used",
+      "description": "brief description using their language",
+      "suggestedColor": "purple|blue|teal|amber|coral|green|gray|gold",
+      "suggestedTier": "archetypal|protector|integration|exile"
+    }
+  ],
+  "updates": [
+    {
+      "partName": "name of existing part",
+      "field": "status|description|color",
+      "newValue": "the new value",
+      "reason": "one sentence why"
+    }
+  ],
+  "keyMoment": "one sentence capturing the most significant thing that happened",
+  "sessionSummary": {
+    "practitioner": "2-3 clinical sentences about what happened",
+    "client": "2-3 warm narrative sentences in second person, using the client's own language and imagery"
+  }
+}
+
+Rules:
+- Use the client's exact language always. A dragon is a dragon. An Ape King is an Ape King.
+- Do not rename parts or translate them into IFS terminology unless that's what was used
+- Do not invent parts that weren't clearly present
+- If input is sparse, return fewer items rather than guessing
+- Return only valid JSON, no preamble`;
+
+  async function parseSession() {
+    const text = document.getElementById('session-textarea').value.trim();
+    if (!text) return;
+
+    const btn = document.getElementById('parse-btn');
+    const status = document.getElementById('parse-status');
+    btn.disabled = true;
+    status.classList.remove('hidden');
+    status.innerHTML = '<span class="spinner"></span> Parsing with Claude…';
+
+    try {
+      const existingNames = (APP.mapData?.parts || []).map(p => p.name).join(', ');
+      const userMsg = existingNames
+        ? `Existing parts on the map: ${existingNames}\n\n---\n\n${text}`
+        : text;
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': CONFIG.ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-request-source': 'user-location'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1500,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userMsg }]
+        })
+      });
+
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const parsed = JSON.parse(data.content[0].text);
+      status.classList.add('hidden');
+      showSuggestions(parsed);
+    } catch (e) {
+      status.innerHTML = `<span style="color:#c07060">Parse failed: ${e.message}</span>`;
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function showSuggestions(parsed) {
+    const area = document.getElementById('suggestions-area');
+    area.innerHTML = '';
+    area.classList.remove('hidden');
+
+    const newParts = parsed.newParts || [];
+    const updates  = parsed.updates  || [];
+
+    if (newParts.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'sugg-section-label'; lbl.textContent = 'New Parts';
+      area.appendChild(lbl);
+
+      newParts.forEach(p => {
+        const c = COLORS[p.suggestedColor] || COLORS.gray;
+        const card = document.createElement('div');
+        card.className = 'sugg-card';
+        card.innerHTML = `
+          <div class="sugg-card-name" style="color:${c.text}">${escHtml(p.name)}</div>
+          <div class="sugg-card-desc">${escHtml(p.description)}</div>
+          <div class="sugg-card-meta">${c.label} · ${p.suggestedTier}</div>
+          <div class="sugg-actions">
+            <button class="sugg-btn add">Add to map</button>
+            <button class="sugg-btn">Skip</button>
+          </div>`;
+        const [addBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
+        addBtn.addEventListener('click', () => {
+          addPartToMap(p);
+          addBtn.textContent = '✓ Added'; addBtn.disabled = true;
+          card.style.opacity = '0.45';
+        });
+        skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
+        area.appendChild(card);
+      });
+    }
+
+    if (updates.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'sugg-section-label'; lbl.textContent = 'Updates';
+      area.appendChild(lbl);
+
+      updates.forEach(u => {
+        const card = document.createElement('div');
+        card.className = 'sugg-card';
+        card.innerHTML = `
+          <div class="sugg-card-name">${escHtml(u.partName)}</div>
+          <div class="sugg-card-desc">${escHtml(u.field)} → ${escHtml(String(u.newValue))}</div>
+          <div class="sugg-card-meta">${escHtml(u.reason)}</div>
+          <div class="sugg-actions">
+            <button class="sugg-btn add">Apply</button>
+            <button class="sugg-btn">Skip</button>
+          </div>`;
+        const [applyBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
+        applyBtn.addEventListener('click', () => {
+          applyUpdate(u);
+          applyBtn.textContent = '✓ Applied'; applyBtn.disabled = true;
+          card.style.opacity = '0.45';
+        });
+        skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
+        area.appendChild(card);
+      });
+    }
+
+    if (parsed.keyMoment) {
+      const lbl = document.createElement('div');
+      lbl.className = 'sugg-section-label'; lbl.textContent = 'Key Moment';
+      area.appendChild(lbl);
+
+      const card = document.createElement('div');
+      card.className = 'key-moment-card';
+      card.innerHTML = `
+        <div class="key-moment-text">"${escHtml(parsed.keyMoment)}"</div>
+        <div class="sugg-actions" style="margin-top:0.65rem">
+          <button class="sugg-btn add">Add to log</button>
+          <button class="sugg-btn">Skip</button>
+        </div>`;
+      const [addBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
+      addBtn.addEventListener('click', () => {
+        addSessionToLog(parsed);
+        addBtn.textContent = '✓ Added'; addBtn.disabled = true;
+        card.style.opacity = '0.45';
+      });
+      skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
+      area.appendChild(card);
+    }
+
+    // Scroll to suggestions
+    const scroll = document.getElementById('input-scroll-area');
+    setTimeout(() => scroll.scrollTop = scroll.scrollHeight, 50);
+  }
+
+  function applyUpdate(u) {
+    if (!APP.mapData) return;
+    const part = APP.mapData.parts.find(p =>
+      p.name.toLowerCase() === u.partName.toLowerCase() ||
+      p.name.toLowerCase().includes(u.partName.toLowerCase())
+    );
+    if (!part) return;
+    if (u.field === 'status')      part.status = u.newValue;
+    else if (u.field === 'description') part.desc = u.newValue;
+    else if (u.field === 'color')  part.color = u.newValue;
+    renderMap();
+    scheduleSave();
+  }
+
+  function addSessionToLog(parsed) {
+    if (!APP.mapData) return;
+    APP.mapData.meta.sessionCount = (APP.mapData.meta.sessionCount || 0) + 1;
+    APP.mapData.meta.lastSession = todayStr();
+    APP.mapData.log.unshift({
+      id: genId(),
+      session: APP.mapData.meta.sessionCount,
+      date: todayStr(),
+      type: 'session',
+      practitionerNote: parsed.sessionSummary?.practitioner || '',
+      clientNote: parsed.sessionSummary?.client || '',
+      keyMoment: parsed.keyMoment || ''
+    });
+    renderLog();
+    scheduleSave();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // VOICE INPUT
+  // ════════════════════════════════════════════════════════════════════════
+  (function initVoice() {
+    const btn = document.getElementById('voice-btn');
+    const label = document.getElementById('voice-label');
+    const transcript = document.getElementById('voice-transcript');
+    const parseBtn = document.getElementById('voice-parse-btn');
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SR) {
+      btn.innerHTML = '<span class="voice-icon">🚫</span><span>Not supported in this browser</span>';
+      btn.disabled = true; return;
+    }
+
+    let rec = null, active = false;
+
+    btn.addEventListener('click', () => {
+      if (active) { rec.stop(); return; }
+      rec = new SR();
+      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
+      let final = '';
+      rec.onresult = e => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+          else interim += e.results[i][0].transcript;
+        }
+        transcript.value = final + interim;
+      };
+      rec.onstart = () => { active = true; btn.classList.add('recording'); label.textContent = 'Recording… tap to stop'; };
+      rec.onend = () => {
+        active = false; btn.classList.remove('recording'); label.textContent = 'Tap to speak';
+        if (transcript.value.trim()) parseBtn.classList.remove('hidden');
+      };
+      rec.start();
+    });
+
+    parseBtn.addEventListener('click', () => {
+      document.getElementById('session-textarea').value = transcript.value;
+      document.querySelector('.input-tab[data-mode="type"]').click();
+      parseSession();
+    });
+  })();
+
+  // ════════════════════════════════════════════════════════════════════════
+  // CLIENT REFLECTION
+  // ════════════════════════════════════════════════════════════════════════
+  document.getElementById('client-save-btn').addEventListener('click', () => {
+    const text = document.getElementById('client-textarea').value.trim();
+    if (!text || !APP.mapData) return;
+    APP.mapData.log.unshift({
+      id: genId(), session: null, date: todayStr(),
+      type: 'client-note', practitionerNote: '', clientNote: text, keyMoment: ''
+    });
+    document.getElementById('client-textarea').value = '';
+    renderLog();
+    scheduleSave();
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // PROGRESS LOG
+  // ════════════════════════════════════════════════════════════════════════
+  function renderLog() {
+    const list = document.getElementById('log-list');
+    list.innerHTML = '';
+    if (!APP.mapData?.log?.length) {
+      list.innerHTML = '<div class="empty-state">No sessions recorded yet.</div>';
+      return;
+    }
+    for (const entry of APP.mapData.log) {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      if (entry.type === 'client-note') {
+        div.classList.add('log-client-note');
+        div.innerHTML = `
+          <div class="log-entry-header">
+            <span class="log-session-num">Your Reflection</span>
+            <span class="log-date">${entry.date}</span>
+          </div>
+          <div class="log-note">${escHtml(entry.clientNote)}</div>`;
+      } else {
+        const note = APP.mode === 'practitioner' ? entry.practitionerNote : entry.clientNote;
+        div.innerHTML = `
+          <div class="log-entry-header">
+            <span class="log-session-num">Session ${entry.session}</span>
+            <span class="log-date">${entry.date}</span>
+          </div>
+          ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}
+          ${note ? `<div class="log-note">${escHtml(note)}</div>` : ''}`;
+      }
+      list.appendChild(div);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // DASHBOARD
+  // ════════════════════════════════════════════════════════════════════════
+  function showDashboard() {
+    showScreen('screen-dashboard');
+    renderDashboard();
+  }
+
+  function renderDashboard() {
+    const list = document.getElementById('map-list');
+    const maps = getLocalIndex();
+    if (!maps.length) {
+      list.innerHTML = '<div class="empty-state">No maps yet.<br>Create your first client map to get started.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    for (const m of maps) {
+      const a = document.createElement('a');
+      a.className = 'map-row';
+      a.href = `#${m.hash}`;
+      a.innerHTML = `
+        <div class="map-row-name">${escHtml(m.name)}</div>
+        <div class="map-row-meta">
+          ${m.lastSession || '—'}<br>
+          ${m.partCount !== undefined ? `${m.partCount} parts` : ''}
+        </div>`;
+      list.appendChild(a);
+    }
+  }
+
+  function getLocalIndex() {
+    try { return JSON.parse(localStorage.getItem('ypm-index') || '[]'); }
+    catch { return []; }
+  }
+
+  function updateLocalIndex(hash, name, partCount) {
+    const idx = getLocalIndex();
+    const i = idx.findIndex(m => m.hash === hash);
+    const entry = { hash, name, partCount, lastSession: todayStr() };
+    if (i >= 0) idx[i] = entry; else idx.unshift(entry);
+    localStorage.setItem('ypm-index', JSON.stringify(idx));
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // NEW MAP MODAL
+  // ════════════════════════════════════════════════════════════════════════
+  function openNewMapModal() {
+    const modal = document.getElementById('new-map-modal');
+    document.getElementById('modal-form-fields').classList.remove('hidden');
+    document.getElementById('created-info').classList.add('hidden');
+    document.getElementById('new-client-name').value = '';
+    document.getElementById('new-pract-pin').value = '';
+    document.getElementById('new-client-pin').value = '';
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('new-client-name').focus(), 100);
+  }
+
+  async function createNewMap() {
+    const name      = document.getElementById('new-client-name').value.trim();
+    const practPin  = document.getElementById('new-pract-pin').value.trim();
+    const clientPin = document.getElementById('new-client-pin').value.trim();
+    if (!name || !practPin || !clientPin) {
+      alert('Please fill in all three fields.'); return;
+    }
+
+    const btn = document.getElementById('modal-create-btn');
+    btn.disabled = true; btn.textContent = 'Creating…';
+
+    try {
+      const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+      const rand = Math.random().toString(36).slice(2, 6);
+      const hash = `${slug}-${rand}`;
+
+      const [practHash, clientHash] = await Promise.all([hashPIN(practPin), hashPIN(clientPin)]);
+      const mapData = emptyMapData(name);
+      const encrypted = await encryptData(mapData, hash);
+      await dbCreate(hash, encrypted, practHash, clientHash);
+      updateLocalIndex(hash, mapData.meta.title, 0);
+
+      const url = `${location.origin}${location.pathname}#${hash}`;
+      const info = document.getElementById('created-info');
+      info.innerHTML = `
+        <strong>Map created!</strong><br><br>
+        Client URL:<br>
+        <span class="url-line"><strong>${escHtml(url)}</strong></span><br><br>
+        Client PIN: <strong>${escHtml(clientPin)}</strong><br><br>
+        Share the URL and PIN with your client. Keep your practitioner PIN safe.`;
+
+      const openBtn = document.createElement('button');
+      openBtn.className = 'btn-primary';
+      openBtn.style.marginTop = '1rem';
+      openBtn.textContent = 'Open Map';
+      openBtn.addEventListener('click', () => {
+        document.getElementById('new-map-modal').classList.add('hidden');
+        window.location.hash = hash;
+      });
+      info.appendChild(openBtn);
+      info.classList.remove('hidden');
+      document.getElementById('modal-form-fields').classList.add('hidden');
+    } catch (e) {
+      alert('Error: ' + e.message); console.error(e);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Map';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // MOBILE TABS
+  // ════════════════════════════════════════════════════════════════════════
+  function initMobileTabs() {
+    document.querySelectorAll('.mobile-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const panel = tab.getAttribute('data-panel');
+        document.getElementById('panel-input').classList.toggle('mobile-hidden', panel !== 'input');
+        document.getElementById('panel-log').classList.toggle('mobile-hidden', panel !== 'log');
+      });
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // UTILITY
+  // ════════════════════════════════════════════════════════════════════════
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // EVENT BINDINGS
+  // ════════════════════════════════════════════════════════════════════════
+
+  // PIN
+  document.getElementById('pin-submit-btn').addEventListener('click', handlePINSubmit);
+  document.getElementById('pin-input').addEventListener('keydown', e => { if (e.key === 'Enter') handlePINSubmit(); });
+
+  // Detail panel
+  document.getElementById('detail-close').addEventListener('click', closeDetailPanel);
+  document.getElementById('detail-edit-btn').addEventListener('click', openEditForm);
+  document.getElementById('edit-cancel-btn').addEventListener('click', () => {
+    document.getElementById('edit-form').classList.add('hidden');
+    document.getElementById('detail-footer-pract').classList.remove('hidden');
+  });
+  document.getElementById('edit-save-btn').addEventListener('click', saveEditForm);
+  document.getElementById('detail-delete-btn').addEventListener('click', deletePart);
+
+  // Parse
+  document.getElementById('parse-btn').addEventListener('click', parseSession);
+
+  // Add part quick-add
+  document.getElementById('btn-add-part').addEventListener('click', () => {
+    const name = prompt('Part name (use their exact language):');
+    if (name?.trim()) addPartToMap({ name: name.trim(), suggestedColor: 'gray', suggestedTier: 'protector' });
+  });
+
+  // Share
+  document.getElementById('btn-share').addEventListener('click', () => {
+    const url = window.location.href;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        const b = document.getElementById('btn-share');
+        b.textContent = 'Copied!';
+        setTimeout(() => b.textContent = 'Share', 2000);
+      });
+    } else {
+      prompt('Client URL:', url);
+    }
+  });
+
+  // Dashboard nav
+  document.getElementById('btn-dashboard').addEventListener('click', () => {
+    history.pushState(null, '', window.location.pathname);
+    showDashboard();
+  });
+
+  // New client
+  document.getElementById('new-client-btn').addEventListener('click', openNewMapModal);
+  document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+    document.getElementById('new-map-modal').classList.add('hidden');
+  });
+  document.getElementById('modal-create-btn').addEventListener('click', createNewMap);
+
+  // Close modal on overlay click
+  document.getElementById('new-map-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('new-map-modal'))
+      document.getElementById('new-map-modal').classList.add('hidden');
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // BOOT
+  // ════════════════════════════════════════════════════════════════════════
+  route();
+  </script>
+</body>
+</html>
