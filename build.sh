@@ -12,8 +12,8 @@ if [ -f .env ]; then
   done < .env
 fi
 
-# Validate required vars are now set
-for var in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY ANTHROPIC_API_KEY; do
+# Validate required vars are now set (Anthropic key is a Cloudflare Worker secret — not needed here)
+for var in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
   if [ -z "${!var:-}" ]; then
     echo "Error: $var is not set. Add it to .env or set it as an environment variable."
     exit 1
@@ -25,7 +25,6 @@ mkdir -p dist
 sed \
   -e "s|__SUPABASE_URL__|${SUPABASE_URL}|g" \
   -e "s|__SUPABASE_KEY__|${SUPABASE_PUBLISHABLE_KEY}|g" \
-  -e "s|__ANTHROPIC_API_KEY__|${ANTHROPIC_API_KEY}|g" \
   index.html > dist/index.html
 
 echo "✓ Built dist/index.html"
