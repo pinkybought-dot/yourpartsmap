@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
-# build.sh — injects .env credentials into index.html → dist/index.html
+# build.sh — injects credentials into index.html → dist/index.html
+# Credentials come from either: (1) .env file (local dev) or (2) env vars already set (CI/GitHub Actions)
 set -euo pipefail
 
-if [ ! -f .env ]; then
-  echo "Error: .env not found. Copy .env.example and fill in your credentials."
-  exit 1
+# Load .env if present (local dev). In CI, secrets are already exported as env vars.
+if [ -f .env ]; then
+  while IFS='=' read -r key value; do
+    [[ "$key" =~ ^[[:space:]]*#.*$ || -z "$key" ]] && continue
+    # Only set if not already in environment
+    [ -z "${!key+x}" ] && export "$key"="$value"
+  done < .env
 fi
 
-# Load .env (skip comment lines and blanks)
-while IFS='=' read -r key value; do
-  [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
-  export "$key"="$value"
-done < .env
+# Validate required vars are now set
+for var in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY ANTHROPIC_API_KEY; do
+  if [ -z "${!var:-}" ]; then
+    echo "Error: $var is not set. Add it to .env or set it as an environment variable."
+    exit 1
+  fi
+done
 
 mkdir -p dist
 
