@@ -868,6 +868,14 @@
 
     /* ── UTILS ── */
     .hidden { display: none !important; }
+
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
   </style>
 </head>
 <body>
@@ -996,7 +1004,7 @@
           </div>
 
           <!-- Practitioner input -->
-          <div id="pract-input-area" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+          <div id="pract-input-area" class="input-area hidden">
             <div class="input-tabs">
               <button class="input-tab active" data-mode="type">Type / Paste</button>
               <button class="input-tab" data-mode="speak">Speak</button>
@@ -1025,7 +1033,7 @@
           </div>
 
           <!-- Client input -->
-          <div id="client-input-area" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+          <div id="client-input-area" class="input-area hidden">
             <div class="input-pane">
               <textarea class="session-textarea" id="client-textarea"
                 placeholder="Write a reflection about your inner work…" style="flex:1;min-height:120px;"></textarea>
@@ -1320,11 +1328,11 @@
     const practArea = document.getElementById('pract-input-area');
     const clientArea = document.getElementById('client-input-area');
     if (APP.mode === 'practitioner') {
-      practArea.style.display = 'flex';
-      clientArea.style.display = 'none';
+      practArea.classList.remove('hidden');
+      clientArea.classList.add('hidden');
     } else {
-      practArea.style.display = 'none';
-      clientArea.style.display = 'flex';
+      practArea.classList.add('hidden');
+      clientArea.classList.remove('hidden');
     }
 
     renderMap();
