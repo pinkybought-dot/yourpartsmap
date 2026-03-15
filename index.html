@@ -429,187 +429,162 @@
       flex-shrink: 0;
     }
 
-    .input-tab {
-      flex: 1;
-      padding: 0.55rem;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-faint);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.18s;
-      letter-spacing: 0.04em;
-    }
-    .input-tab.active { color: var(--text); border-bottom-color: var(--gold); }
-
-    .input-scroll {
+    /* ── CHAT (Parts Buddy) ── */
+    .chat-history {
       flex: 1;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .input-pane {
-      flex: 1;
       padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.75rem;
     }
 
-    .session-textarea {
+    .chat-empty {
       flex: 1;
-      min-height: 100px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      line-height: 1.6;
-      padding: 0.7rem 0.85rem;
-      resize: none;
-      outline: none;
-      transition: border-color 0.18s;
-    }
-    .session-textarea:focus { border-color: rgba(255,255,255,0.13); }
-    .session-textarea::placeholder { color: var(--text-faint); }
-
-    .parse-btn {
-      padding: 0.7rem;
-      background: var(--gold-dim);
-      border: 1px solid rgba(200,162,70,0.22);
-      border-radius: 6px;
-      color: var(--gold);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.18s;
-      letter-spacing: 0.04em;
-    }
-    .parse-btn:hover { background: rgba(200,162,70,0.22); border-color: rgba(200,162,70,0.38); }
-    .parse-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    .parse-status {
-      font-size: 0.8rem;
-      color: var(--text-faint);
-      text-align: center;
-      padding: 0.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .voice-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
+      color: var(--text-faint);
+      font-size: 0.83rem;
+      text-align: center;
+      line-height: 1.9;
+      padding: 2rem;
+      pointer-events: none;
+    }
+    .chat-empty-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      margin-bottom: 0.25rem;
+    }
+
+    .chat-msg { display: flex; flex-direction: column; gap: 0.2rem; max-width: 90%; }
+    .chat-msg.user  { align-self: flex-end;   align-items: flex-end; }
+    .chat-msg.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .chat-bubble {
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+    .chat-msg.user .chat-bubble {
+      background: rgba(200,162,70,0.1);
+      border: 1px solid rgba(200,162,70,0.2);
+      color: var(--text);
+      border-bottom-right-radius: 3px;
+    }
+    .chat-msg.assistant .chat-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-bottom-left-radius: 3px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+    }
+
+    .chat-actions-taken {
+      font-size: 0.68rem;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+      padding: 0 0.1rem;
+      opacity: 0.8;
+    }
+
+    .chat-typing {
+      display: flex;
+      gap: 4px;
+      padding: 0.6rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      border-bottom-left-radius: 3px;
+      align-self: flex-start;
+    }
+    .chat-typing span {
+      width: 5px; height: 5px;
+      background: var(--text-faint);
+      border-radius: 50%;
+      animation: typing-dot 1.2s ease-in-out infinite;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing-dot {
+      0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    .chat-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.45rem;
+      padding: 0.6rem 0.7rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input {
       flex: 1;
-      min-height: 120px;
-      padding: 1.5rem;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      color: var(--text-dim);
+      color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      padding: 0.58rem 0.8rem;
+      resize: none;
+      outline: none;
+      min-height: 38px;
+      max-height: 160px;
+      overflow-y: auto;
+      transition: border-color 0.18s;
     }
-    .voice-btn:hover { border-color: rgba(255,255,255,0.12); color: var(--text); }
-    .voice-btn.recording {
-      border-color: rgba(200,80,60,0.4);
+    .chat-input:focus { border-color: rgba(255,255,255,0.14); }
+    .chat-input::placeholder { color: var(--text-faint); }
+
+    .chat-send-btn {
+      background: var(--gold-dim);
+      border: 1px solid rgba(200,162,70,0.25);
+      border-radius: 8px;
+      color: var(--gold);
+      font-size: 1rem;
+      width: 38px; height: 38px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .chat-send-btn:hover { background: rgba(200,162,70,0.22); }
+    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .chat-mic-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-size: 1rem;
+      width: 38px; height: 38px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .chat-mic-btn:hover { background: var(--surface); color: var(--text); }
+    .chat-mic-btn.recording {
+      border-color: rgba(200,80,60,0.5);
+      background: rgba(200,80,60,0.1);
       color: #c89080;
-      background: rgba(200,80,60,0.07);
       animation: pulse-record 1.5s ease-in-out infinite;
     }
 
     @keyframes pulse-record {
       0%,100% { box-shadow: 0 0 0 0 rgba(200,80,60,0.15); }
-      50% { box-shadow: 0 0 0 10px rgba(200,80,60,0); }
-    }
-
-    .voice-icon { font-size: 1.9rem; }
-
-    /* ── SUGGESTION CARDS ── */
-    .suggestions-area {
-      padding: 0 0.75rem 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
-    .sugg-section-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      padding-top: 0.25rem;
-    }
-
-    .sugg-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      transition: opacity 0.2s;
-    }
-
-    .sugg-card-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.08rem;
-    }
-
-    .sugg-card-desc {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    .sugg-card-meta {
-      font-size: 0.7rem;
-      color: var(--text-faint);
-    }
-
-    .sugg-actions { display: flex; gap: 0.45rem; margin-top: 0.2rem; }
-
-    .sugg-btn {
-      padding: 0.35rem 0.75rem;
-      border-radius: 4px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.76rem;
-      cursor: pointer;
-      transition: all 0.18s;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text-dim);
-    }
-    .sugg-btn:hover { background: var(--surface-hover); color: var(--text); }
-    .sugg-btn.add { background: var(--gold-dim); border-color: rgba(200,162,70,0.22); color: var(--gold); }
-    .sugg-btn.add:hover { background: rgba(200,162,70,0.22); }
-    .sugg-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    .key-moment-card {
-      background: rgba(200,162,70,0.04);
-      border: 1px solid rgba(200,162,70,0.13);
-      border-radius: 8px;
-      padding: 0.75rem;
-    }
-
-    .key-moment-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      font-style: italic;
-      color: var(--text-dim);
-      line-height: 1.65;
+      50% { box-shadow: 0 0 0 8px rgba(200,80,60,0); }
     }
 
     /* ── PROGRESS LOG ── */
@@ -869,13 +844,6 @@
     /* ── UTILS ── */
     .hidden { display: none !important; }
 
-    .input-area {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-      min-height: 0;
-    }
   </style>
 </head>
 <body>
@@ -993,55 +961,21 @@
       <!-- Mobile tab area wrapper -->
       <div class="mobile-panel-area">
         <div class="mobile-tabs">
-          <button class="mobile-tab active" data-panel="input">Input</button>
+          <button class="mobile-tab active" data-panel="input">Chat</button>
           <button class="mobile-tab" data-panel="log">Log</button>
         </div>
 
-        <!-- Panel 2: Session Input -->
+        <!-- Panel 2: Parts Buddy chat -->
         <div class="panel" id="panel-input">
           <div class="panel-header">
-            <span class="panel-title">Session Input</span>
+            <span class="panel-title">Parts Buddy</span>
           </div>
-
-          <!-- Practitioner input -->
-          <div id="pract-input-area" class="input-area hidden">
-            <div class="input-tabs">
-              <button class="input-tab active" data-mode="type">Type / Paste</button>
-              <button class="input-tab" data-mode="speak">Speak</button>
-            </div>
-            <div class="input-scroll" id="input-scroll-area">
-              <!-- Type pane -->
-              <div class="input-pane" id="input-type-pane">
-                <textarea class="session-textarea" id="session-textarea"
-                  placeholder="Paste a transcript, type session notes, or describe what happened…"></textarea>
-                <button class="parse-btn" id="parse-btn">Parse with Claude →</button>
-                <div class="parse-status hidden" id="parse-status"></div>
-              </div>
-              <!-- Speak pane -->
-              <div class="input-pane hidden" id="input-speak-pane">
-                <button class="voice-btn" id="voice-btn">
-                  <span class="voice-icon">🎙</span>
-                  <span id="voice-label">Tap to speak</span>
-                </button>
-                <textarea class="session-textarea" id="voice-transcript"
-                  placeholder="Transcript will appear here…" style="min-height:72px;"></textarea>
-                <button class="parse-btn hidden" id="voice-parse-btn">Parse with Claude →</button>
-              </div>
-              <!-- Suggestions injected here -->
-              <div class="suggestions-area hidden" id="suggestions-area"></div>
-            </div>
-          </div>
-
-          <!-- Client input -->
-          <div id="client-input-area" class="input-area hidden">
-            <div class="input-pane">
-              <textarea class="session-textarea" id="client-textarea"
-                placeholder="Write a reflection about your inner work…" style="flex:1;min-height:120px;"></textarea>
-              <button class="parse-btn" id="client-save-btn"
-                style="background:none;border-color:rgba(255,255,255,0.1);color:var(--text-dim);">
-                Save Reflection
-              </button>
-            </div>
+          <div class="chat-history" id="chat-history"></div>
+          <div class="chat-bar">
+            <textarea class="chat-input" id="chat-input" rows="1"
+              placeholder="Ask about the map, paste a transcript, describe a session…"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn" title="Send (Enter)">↑</button>
+            <button class="chat-mic-btn" id="chat-mic-btn" title="Voice input">🎙</button>
           </div>
         </div>
 
@@ -1324,19 +1258,9 @@
       APP.mode === 'practitioner' ? 'Clinical' : 'Narrative';
     document.getElementById('btn-add-part').classList.toggle('hidden', APP.mode !== 'practitioner');
 
-    // Show correct input panel
-    const practArea = document.getElementById('pract-input-area');
-    const clientArea = document.getElementById('client-input-area');
-    if (APP.mode === 'practitioner') {
-      practArea.classList.remove('hidden');
-      clientArea.classList.add('hidden');
-    } else {
-      practArea.classList.add('hidden');
-      clientArea.classList.remove('hidden');
-    }
-
     renderMap();
     renderLog();
+    initChat();
     initMobileTabs();
 
     // Save this map to local dashboard index
@@ -1680,317 +1604,301 @@
   // ════════════════════════════════════════════════════════════════════════
   // SESSION INPUT TABS
   // ════════════════════════════════════════════════════════════════════════
-  document.querySelectorAll('.input-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const mode = tab.getAttribute('data-mode');
-      document.getElementById('input-type-pane').classList.toggle('hidden', mode !== 'type');
-      document.getElementById('input-speak-pane').classList.toggle('hidden', mode !== 'speak');
-      document.getElementById('suggestions-area').classList.add('hidden');
-    });
-  });
-
   // ════════════════════════════════════════════════════════════════════════
-  // CLAUDE PARSER
+  // PARTS BUDDY CHAT
   // ════════════════════════════════════════════════════════════════════════
-  const SYSTEM_PROMPT = `You are helping a somatic coach maintain a parts map for a client.
-Read this session input — it may be a raw transcript, a practitioner voice debrief, or freeform notes in any format.
 
-Extract and return JSON with this exact structure:
+  const BUDDY_PROMPT = `You are Parts Buddy — a warm, matter-of-fact assistant helping a somatic coach (or their client) maintain a living map of an inner world using Internal Family Systems. You have the current map state as context. You can add parts, update parts, and add to the progress log by including a JSON action block in your response. Use the client's exact language always. A dragon is a dragon. Ask clarifying questions when needed. Be brief. Don't over-explain IFS. When you take an action, say what you did in one sentence.
+
+Always respond with valid JSON in exactly this format:
 {
-  "newParts": [
-    {
-      "name": "exact name or phrase used",
-      "description": "brief description using their language",
-      "suggestedColor": "purple|blue|teal|amber|coral|green|gray|gold",
-      "suggestedTier": "archetypal|protector|integration|exile"
-    }
-  ],
-  "updates": [
-    {
-      "partName": "name of existing part",
-      "field": "status|description|color",
-      "newValue": "the new value",
-      "reason": "one sentence why"
-    }
-  ],
-  "keyMoment": "one sentence capturing the most significant thing that happened",
-  "sessionSummary": {
-    "practitioner": "2-3 clinical sentences about what happened",
-    "client": "2-3 warm narrative sentences in second person, using the client's own language and imagery"
-  }
+  "message": "your conversational response here",
+  "actions": []
 }
 
-Rules:
-- Use the client's exact language always. A dragon is a dragon. An Ape King is an Ape King.
-- Do not rename parts or translate them into IFS terminology unless that's what was used
-- Do not invent parts that weren't clearly present
-- If input is sparse, return fewer items rather than guessing
-- Return only valid JSON, no preamble`;
+Action types:
+- { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "suggestedTier": "archetypal|protector|integration|exile" } }
+- { "type": "update_part", "id": "part-id", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
+- { "type": "remove_part", "id": "part-id" }
+- { "type": "add_log", "practitionerNote": "clinical note", "clientNote": "warm note in second person", "keyMoment": "one sentence" }
 
-  async function parseSession() {
-    const text = document.getElementById('session-textarea').value.trim();
-    if (!text) return;
+Color guide: purple=archetypal, blue=protector, teal=integrated/merged, amber=active protector, coral=exile, green=resource, gray=hidden/unknown, gold=liberated
+If no map changes needed, return empty actions array.`;
 
-    const btn = document.getElementById('parse-btn');
-    const status = document.getElementById('parse-status');
-    btn.disabled = true;
-    status.classList.remove('hidden');
-    status.innerHTML = '<span class="spinner"></span> Parsing with Claude…';
+  function buildBuddySystem() {
+    const map = APP.mapData;
+    const partsDesc = (map?.parts || []).map(p =>
+      `  - "${p.name}" (id:${p.id}, color:${p.color}${p.status ? ', status:"' + p.status + '"' : ''}${p.desc ? ', desc:"' + p.desc.slice(0, 80) + '"' : ''})`
+    ).join('\n') || '  (no parts yet)';
+
+    return `${BUDDY_PROMPT}
+
+Current map: ${map?.meta?.title || 'Untitled'}
+Client: ${map?.meta?.clientName || 'Unknown'}
+Sessions: ${map?.meta?.sessionCount || 0}
+
+Parts on the map:
+${partsDesc}`;
+  }
+
+  function renderChat() {
+    const el = document.getElementById('chat-history');
+    if (!APP.chatHistory?.length) {
+      el.innerHTML = `<div class="chat-empty">
+        <div class="chat-empty-title">Parts Buddy</div>
+        Paste a session transcript, describe what happened,<br>
+        or ask about what's on the map.
+      </div>`;
+      return;
+    }
+    el.innerHTML = '';
+    for (const msg of APP.chatHistory) {
+      _appendBubble(msg.role, msg.content, msg.actionsSummary);
+    }
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function _appendBubble(role, content, actionsSummary, scroll) {
+    const el = document.getElementById('chat-history');
+    const empty = el.querySelector('.chat-empty');
+    if (empty) empty.remove();
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg ' + role;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = content;
+    wrap.appendChild(bubble);
+
+    if (actionsSummary) {
+      const acts = document.createElement('div');
+      acts.className = 'chat-actions-taken';
+      acts.textContent = actionsSummary;
+      wrap.appendChild(acts);
+    }
+
+    el.appendChild(wrap);
+    if (scroll !== false) el.scrollTop = el.scrollHeight;
+  }
+
+  function _showTyping() {
+    const el = document.getElementById('chat-history');
+    const d = document.createElement('div');
+    d.id = 'chat-typing'; d.className = 'chat-typing';
+    d.innerHTML = '<span></span><span></span><span></span>';
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function _hideTyping() { document.getElementById('chat-typing')?.remove(); }
+
+  async function sendChatMessage(text) {
+    text = text.trim();
+    if (!text || !APP.mapData) return;
+
+    const input    = document.getElementById('chat-input');
+    const sendBtn  = document.getElementById('chat-send-btn');
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    APP.chatHistory = APP.chatHistory || [];
+    APP.chatHistory.push({ role: 'user', content: text });
+    _appendBubble('user', text);
+    _showTyping();
+
+    // Build Anthropic messages array from history (text only, no metadata)
+    const messages = APP.chatHistory.map(m => ({ role: m.role, content: m.content }));
 
     try {
-      const existingNames = (APP.mapData?.parts || []).map(p => p.name).join(', ');
-      const userMsg = existingNames
-        ? `Existing parts on the map: ${existingNames}\n\n---\n\n${text}`
-        : text;
-
       const res = await fetch(CONFIG.PROXY_URL, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 1500,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: userMsg }]
+          max_tokens: 1024,
+          system: buildBuddySystem(),
+          messages
         })
       });
 
-      if (!res.ok) throw new Error(`API ${res.status}`);
+      if (!res.ok) throw new Error(`Proxy ${res.status}`);
       const data = await res.json();
-      const raw = data.content[0].text;
-      const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-      const parsed = JSON.parse(clean);
-      status.classList.add('hidden');
-      showSuggestions(parsed);
+      const raw  = data.content[0].text;
+      const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+
+      let parsed;
+      try { parsed = JSON.parse(clean); }
+      catch { parsed = { message: raw, actions: [] }; }
+
+      const message = parsed.message || raw;
+      const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
+      const summary = applyBuddyActions(actions);
+
+      _hideTyping();
+      APP.chatHistory.push({ role: 'assistant', content: message, actionsSummary: summary });
+      _appendBubble('assistant', message, summary);
+      if (actions.length) scheduleSave();
+
     } catch (e) {
-      status.innerHTML = `<span style="color:#c07060">Parse failed: ${e.message}</span>`;
+      _hideTyping();
+      const errMsg = 'Something went wrong: ' + e.message;
+      APP.chatHistory.push({ role: 'assistant', content: errMsg });
+      _appendBubble('assistant', errMsg);
       console.error(e);
     } finally {
-      btn.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
     }
   }
 
-  function showSuggestions(parsed) {
-    const area = document.getElementById('suggestions-area');
-    area.innerHTML = '';
-    area.classList.remove('hidden');
+  function applyBuddyActions(actions) {
+    if (!actions?.length) return null;
+    const done = [];
 
-    const newParts = parsed.newParts || [];
-    const updates  = parsed.updates  || [];
-
-    if (newParts.length) {
-      const lbl = document.createElement('div');
-      lbl.className = 'sugg-section-label'; lbl.textContent = 'New Parts';
-      area.appendChild(lbl);
-
-      newParts.forEach(p => {
-        const c = COLORS[p.suggestedColor] || COLORS.gray;
-        const card = document.createElement('div');
-        card.className = 'sugg-card';
-        card.innerHTML = `
-          <div class="sugg-card-name" style="color:${c.text}">${escHtml(p.name)}</div>
-          <div class="sugg-card-desc">${escHtml(p.description)}</div>
-          <div class="sugg-card-meta">${c.label} · ${p.suggestedTier}</div>
-          <div class="sugg-actions">
-            <button class="sugg-btn add">Add to map</button>
-            <button class="sugg-btn">Skip</button>
-          </div>`;
-        const [addBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
-        addBtn.addEventListener('click', () => {
-          addPartToMap(p);
-          addBtn.textContent = '✓ Added'; addBtn.disabled = true;
-          card.style.opacity = '0.45';
+    for (const action of actions) {
+      if (action.type === 'add_part' && action.part) {
+        const p = action.part;
+        const added = addPartToMap({
+          name: p.name,
+          description: p.desc || p.description || '',
+          suggestedColor: p.color,
+          suggestedTier: p.suggestedTier || p.tier || 'protector'
         });
-        skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
-        area.appendChild(card);
-      });
-    }
+        if (added) {
+          if (p.status) added.status = p.status;
+          if (p.shape)  added.shape  = p.shape;
+          if (typeof p.x === 'number') added.x = p.x;
+          if (typeof p.y === 'number') added.y = p.y;
+          renderMap();
+        }
+        done.push(`added "${p.name}"`);
+      }
 
-    if (updates.length) {
-      const lbl = document.createElement('div');
-      lbl.className = 'sugg-section-label'; lbl.textContent = 'Updates';
-      area.appendChild(lbl);
+      else if (action.type === 'update_part' && action.id) {
+        const part = APP.mapData.parts.find(p => p.id === action.id);
+        if (part && action.changes) {
+          Object.assign(part, action.changes);
+          if (action.changes.name) part.label = shortenLabel(action.changes.name);
+          renderMap();
+          done.push(`updated "${part.name}"`);
+        }
+      }
 
-      updates.forEach(u => {
-        const card = document.createElement('div');
-        card.className = 'sugg-card';
-        card.innerHTML = `
-          <div class="sugg-card-name">${escHtml(u.partName)}</div>
-          <div class="sugg-card-desc">${escHtml(u.field)} → ${escHtml(String(u.newValue))}</div>
-          <div class="sugg-card-meta">${escHtml(u.reason)}</div>
-          <div class="sugg-actions">
-            <button class="sugg-btn add">Apply</button>
-            <button class="sugg-btn">Skip</button>
-          </div>`;
-        const [applyBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
-        applyBtn.addEventListener('click', () => {
-          applyUpdate(u);
-          applyBtn.textContent = '✓ Applied'; applyBtn.disabled = true;
-          card.style.opacity = '0.45';
+      else if (action.type === 'remove_part' && action.id) {
+        const idx = APP.mapData.parts.findIndex(p => p.id === action.id);
+        if (idx >= 0) {
+          const name = APP.mapData.parts[idx].name;
+          APP.mapData.parts.splice(idx, 1);
+          APP.mapData.connections = APP.mapData.connections.filter(
+            c => c.from !== action.id && c.to !== action.id
+          );
+          renderMap();
+          done.push(`removed "${name}"`);
+        }
+      }
+
+      else if (action.type === 'add_log') {
+        APP.mapData.meta.sessionCount = (APP.mapData.meta.sessionCount || 0) + 1;
+        APP.mapData.meta.lastSession  = todayStr();
+        APP.mapData.log.unshift({
+          id: genId(),
+          session: APP.mapData.meta.sessionCount,
+          date: todayStr(),
+          type: 'session',
+          practitionerNote: action.practitionerNote || '',
+          clientNote:       action.clientNote       || '',
+          keyMoment:        action.keyMoment        || ''
         });
-        skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
-        area.appendChild(card);
-      });
+        renderLog();
+        done.push('added to log');
+      }
     }
 
-    if (parsed.keyMoment) {
-      const lbl = document.createElement('div');
-      lbl.className = 'sugg-section-label'; lbl.textContent = 'Key Moment';
-      area.appendChild(lbl);
-
-      const card = document.createElement('div');
-      card.className = 'key-moment-card';
-      card.innerHTML = `
-        <div class="key-moment-text">"${escHtml(parsed.keyMoment)}"</div>
-        <div class="sugg-actions" style="margin-top:0.65rem">
-          <button class="sugg-btn add">Add to log</button>
-          <button class="sugg-btn">Skip</button>
-        </div>`;
-      const [addBtn, skipBtn] = card.querySelectorAll('.sugg-btn');
-      addBtn.addEventListener('click', () => {
-        addSessionToLog(parsed);
-        addBtn.textContent = '✓ Added'; addBtn.disabled = true;
-        card.style.opacity = '0.45';
-      });
-      skipBtn.addEventListener('click', () => { card.style.opacity = '0.3'; });
-      area.appendChild(card);
-    }
-
-    // Scroll to suggestions
-    const scroll = document.getElementById('input-scroll-area');
-    setTimeout(() => scroll.scrollTop = scroll.scrollHeight, 50);
+    return done.length ? '↳ ' + done.join(', ') : null;
   }
 
-  function applyUpdate(u) {
-    if (!APP.mapData) return;
-    const part = APP.mapData.parts.find(p =>
-      p.name.toLowerCase() === u.partName.toLowerCase() ||
-      p.name.toLowerCase().includes(u.partName.toLowerCase())
-    );
-    if (!part) return;
-    if (u.field === 'status')      part.status = u.newValue;
-    else if (u.field === 'description') part.desc = u.newValue;
-    else if (u.field === 'color')  part.color = u.newValue;
-    renderMap();
-    scheduleSave();
-  }
-
-  function addSessionToLog(parsed) {
-    if (!APP.mapData) return;
-    APP.mapData.meta.sessionCount = (APP.mapData.meta.sessionCount || 0) + 1;
-    APP.mapData.meta.lastSession = todayStr();
-    APP.mapData.log.unshift({
-      id: genId(),
-      session: APP.mapData.meta.sessionCount,
-      date: todayStr(),
-      type: 'session',
-      practitionerNote: parsed.sessionSummary?.practitioner || '',
-      clientNote: parsed.sessionSummary?.client || '',
-      keyMoment: parsed.keyMoment || ''
-    });
-    renderLog();
-    scheduleSave();
-  }
-
-  // ════════════════════════════════════════════════════════════════════════
-  // VOICE INPUT
-  // ════════════════════════════════════════════════════════════════════════
-  (function initVoice() {
-    const btn = document.getElementById('voice-btn');
-    const label = document.getElementById('voice-label');
-    const transcript = document.getElementById('voice-transcript');
-    const parseBtn = document.getElementById('voice-parse-btn');
+  // ── Chat mic (right-side button, auto-sends on stop) ──
+  function initChatMic() {
+    const micBtn = document.getElementById('chat-mic-btn');
+    const input  = document.getElementById('chat-input');
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SR) {
-      btn.innerHTML = '<span class="voice-icon">🚫</span><span>Not supported in this browser</span>';
-      btn.disabled = true; return;
-    }
+    if (!SR) { micBtn.style.display = 'none'; return; }
 
     let rec = null, active = false, finalText = '';
 
     function startRec() {
       rec = new SR();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = 'en-US';
+      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
 
-      rec.onstart = () => {
-        btn.classList.add('recording');
-        label.textContent = 'Recording… tap to stop';
-      };
+      rec.onstart = () => micBtn.classList.add('recording');
 
       rec.onresult = e => {
         for (let i = e.resultIndex; i < e.results.length; i++) {
           if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
         }
-        // Show final text in textarea; interim shown live while speaking
         let interim = '';
         for (let i = e.resultIndex; i < e.results.length; i++) {
           if (!e.results[i].isFinal) interim += e.results[i][0].transcript;
         }
-        transcript.value = finalText + interim;
+        input.value = finalText + interim;
+        _autoResizeInput(input);
       };
 
       rec.onerror = e => {
-        // 'no-speech' is normal during pauses — restart silently
-        if (e.error === 'no-speech') { return; }
-        console.error('Speech recognition error:', e.error);
-        label.textContent = 'Error: ' + e.error + ' — tap to retry';
-        btn.classList.remove('recording');
+        if (e.error === 'no-speech') return;
+        console.error('Speech error:', e.error);
         active = false;
+        micBtn.classList.remove('recording');
       };
 
       rec.onend = () => {
-        // If still meant to be recording (e.g. browser stopped after silence),
-        // restart automatically rather than going dead
-        if (active) {
-          try { rec.start(); } catch { /* already starting */ }
-          return;
-        }
-        btn.classList.remove('recording');
-        label.textContent = 'Tap to speak';
-        if (finalText.trim()) parseBtn.classList.remove('hidden');
+        if (active) { try { rec.start(); } catch {} return; } // silence restart
+        micBtn.classList.remove('recording');
+        // Auto-send when user taps Stop
+        const text = input.value.trim();
+        if (text) sendChatMessage(text);
       };
 
       rec.start();
     }
 
-    btn.addEventListener('click', () => {
-      if (active) {
-        active = false;   // signal onend not to restart
-        rec.stop();
-        return;
-      }
+    micBtn.addEventListener('click', () => {
+      if (active) { active = false; rec.stop(); return; }
       active = true;
       finalText = '';
-      transcript.value = '';
-      parseBtn.classList.add('hidden');
+      input.value = '';
+      _autoResizeInput(input);
       startRec();
     });
+  }
 
-    parseBtn.addEventListener('click', () => {
-      document.getElementById('session-textarea').value = transcript.value;
-      document.querySelector('.input-tab[data-mode="type"]').click();
-      parseSession();
-    });
-  })();
+  function _autoResizeInput(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
 
-  // ════════════════════════════════════════════════════════════════════════
-  // CLIENT REFLECTION
-  // ════════════════════════════════════════════════════════════════════════
-  document.getElementById('client-save-btn').addEventListener('click', () => {
-    const text = document.getElementById('client-textarea').value.trim();
-    if (!text || !APP.mapData) return;
-    APP.mapData.log.unshift({
-      id: genId(), session: null, date: todayStr(),
-      type: 'client-note', practitionerNote: '', clientNote: text, keyMoment: ''
+  function initChat() {
+    APP.chatHistory = APP.chatHistory || [];
+    renderChat();
+    initChatMic();
+
+    const input   = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+
+    sendBtn.addEventListener('click', () => sendChatMessage(input.value));
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage(input.value);
+      }
     });
-    document.getElementById('client-textarea').value = '';
-    renderLog();
-    scheduleSave();
-  });
+
+    input.addEventListener('input', () => _autoResizeInput(input));
+  }
 
   // ════════════════════════════════════════════════════════════════════════
   // PROGRESS LOG
@@ -2176,9 +2084,6 @@ Rules:
   });
   document.getElementById('edit-save-btn').addEventListener('click', saveEditForm);
   document.getElementById('detail-delete-btn').addEventListener('click', deletePart);
-
-  // Parse
-  document.getElementById('parse-btn').addEventListener('click', parseSession);
 
   // Add part quick-add
   document.getElementById('btn-add-part').addEventListener('click', () => {
