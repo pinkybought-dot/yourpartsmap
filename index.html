@@ -1758,7 +1758,9 @@ Rules:
 
       if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      const parsed = JSON.parse(data.content[0].text);
+      const raw = data.content[0].text;
+      const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+      const parsed = JSON.parse(clean);
       status.classList.add('hidden');
       showSuggestions(parsed);
     } catch (e) {

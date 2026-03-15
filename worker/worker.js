@@ -54,7 +54,22 @@ export default {
     }
 
     const data = await upstream.text();
-    return new Response(data, {
+
+    // Strip markdown code fences Claude sometimes wraps responses in
+    let cleaned = data;
+    try {
+      const obj = JSON.parse(data);
+      if (obj.content?.[0]?.text) {
+        obj.content[0].text = obj.content[0].text
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+        cleaned = JSON.stringify(obj);
+      }
+    } catch { /* not JSON or no content field — pass through as-is */ }
+
+    return new Response(cleaned, {
       status: upstream.status,
       headers: {
         'Content-Type': 'application/json',
