@@ -260,6 +260,23 @@
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── FEEDBACK WIDGET ── */
+    #feedback-widget { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+    #feedback-trigger { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 20px; padding: 0.5rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-dim); cursor: pointer; box-shadow: 0 2px 12px rgba(60,40,20,0.1); transition: all 0.2s; letter-spacing: 0.02em; }
+    #feedback-trigger:hover { background: var(--bg2); color: var(--text); border-color: var(--border-strong); box-shadow: 0 4px 16px rgba(60,40,20,0.15); }
+    #feedback-panel { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1.25rem; width: 300px; box-shadow: 0 8px 32px rgba(60,40,20,0.12); display: flex; flex-direction: column; gap: 0.75rem; }
+    .feedback-header { display: flex; align-items: center; justify-content: space-between; }
+    .feedback-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text); font-weight: 400; }
+    .feedback-close { background: none; border: none; color: var(--text-faint); font-size: 1.2rem; cursor: pointer; line-height: 1; transition: color 0.15s; }
+    .feedback-close:hover { color: var(--text); }
+    .feedback-subtitle { font-size: 0.82rem; color: var(--text-dim); line-height: 1.6; }
+    .feedback-textarea { width: 100%; padding: 0.65rem 0.8rem; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; line-height: 1.5; resize: none; outline: none; transition: border-color 0.18s; }
+    .feedback-textarea:focus { border-color: var(--gold); }
+    .feedback-textarea::placeholder { color: var(--text-faint); }
+    .feedback-send-btn { padding: 0.55rem 1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 6px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; cursor: pointer; transition: all 0.18s; align-self: flex-end; }
+    .feedback-send-btn:hover { background: rgba(138,106,32,0.15); }
+    .feedback-confirm { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: var(--gold); text-align: center; font-style: italic; padding: 0.25rem 0; }
+
     /* ── MOBILE ── */
     @media (max-width: 768px) {
       .app-body { position: relative; }
@@ -483,21 +500,19 @@
     <!-- Empty state intro (hidden when populated) -->
     <div class="dashboard-intro hidden" id="dashboard-intro">
       <div class="dashboard-intro-title">Your Parts Map</div>
-      <div class="dashboard-intro-subtitle">A living map of your clients' inner worlds.</div>
+      <div class="dashboard-intro-subtitle">A living map of your client's inner work.</div>
       <button class="new-client-btn" id="new-client-btn-empty">+ New Client</button>
-      <button class="dashboard-how-toggle-link" id="dashboard-how-toggle-empty">How does this work? ▾</button>
-      <div class="dashboard-steps-numbered hidden" id="dashboard-steps-empty">
+      <hr class="dashboard-divider">
+      <p class="dashboard-how-heading">How it works</p>
+      <div class="dashboard-steps-numbered">
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">1.</span><span>Click + New Client. Enter the client's name, your practitioner password, and a client password.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">2.</span><span>You'll get a unique URL for that client. Share the URL and their password with them — that's all they need to access their map.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">3.</span><span>Your password opens the practitioner view: full clinical notes, session log, and export tools. Their password opens the client view: their personal journey, what shifted, and what their parts asked for.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">4.</span><span>Use Bob (the chat panel) to build and update the map. Paste a session transcript, jot notes after a session, or just tell him what came up — he'll add parts, update the map, and write the log.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">5.</span><span>Parts live on the map spatially — Zone 1 (bottom) holds burdened parts and exiles, Zone 2 (middle) is the present and Self, Zone 3 (top) is for guides and anything returned to source. Parts move between zones as the work progresses.</span></div>
       </div>
-      <hr class="dashboard-divider">
-      <div class="dashboard-feedback">Got feedback? <a href="mailto:ian@santacruzmedicine.com">ian@santacruzmedicine.com</a></div>
     </div>
     <div class="map-list" id="map-list"></div>
-    <div class="dashboard-list-feedback hidden" id="dashboard-list-feedback">Got feedback? <a href="mailto:ian@santacruzmedicine.com">ian@santacruzmedicine.com</a></div>
   </div>
 
   <!-- ═══════════════════════════════ NEW MAP MODAL ════════════════════════════ -->
@@ -1659,30 +1674,20 @@ If no map changes needed, return empty actions array.`;
     const header      = document.getElementById('dashboard-header');
     const intro       = document.getElementById('dashboard-intro');
     const howPanel    = document.getElementById('dashboard-how-panel');
-    const listFeedback = document.getElementById('dashboard-list-feedback');
     const maps = getLocalIndex();
 
     if (!maps.length) {
       header.classList.add('hidden');
       howPanel.classList.add('hidden');
-      listFeedback.classList.add('hidden');
       list.innerHTML = '';
       intro.classList.remove('hidden');
       document.getElementById('new-client-btn-empty').onclick = openNewMapModal;
-      const howToggleEmpty = document.getElementById('dashboard-how-toggle-empty');
-      howToggleEmpty.onclick = () => {
-        const steps = document.getElementById('dashboard-steps-empty');
-        const open = !steps.classList.contains('hidden');
-        steps.classList.toggle('hidden', open);
-        howToggleEmpty.textContent = open ? 'How does this work? ▾' : 'Hide ▴';
-      };
       return;
     }
 
     intro.classList.add('hidden');
     howPanel.classList.add('hidden'); // start collapsed
     header.classList.remove('hidden');
-    listFeedback.classList.remove('hidden');
 
     list.innerHTML = '';
     for (const m of maps) {
@@ -2208,10 +2213,47 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
     if (e.target === document.getElementById('new-map-modal')) document.getElementById('new-map-modal').classList.add('hidden');
   });
 
+  // Feedback widget
+  document.getElementById('feedback-trigger').addEventListener('click', () => {
+    document.getElementById('feedback-panel').classList.toggle('hidden');
+    document.getElementById('feedback-confirm').classList.add('hidden');
+    document.getElementById('feedback-text').value = '';
+  });
+  document.getElementById('feedback-close').addEventListener('click', () => {
+    document.getElementById('feedback-panel').classList.add('hidden');
+  });
+  document.getElementById('feedback-send').addEventListener('click', () => {
+    const text = document.getElementById('feedback-text').value.trim();
+    if (!text) return;
+    const subject = encodeURIComponent('YourPartsMap Feedback');
+    const body = encodeURIComponent(text);
+    window.location.href = `mailto:ian@santacruzmedicine.com?subject=${subject}&body=${body}`;
+    document.getElementById('feedback-text').value = '';
+    document.getElementById('feedback-confirm').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('feedback-panel').classList.add('hidden');
+      document.getElementById('feedback-confirm').classList.add('hidden');
+    }, 2500);
+  });
+
   // ════════════════════════════════════════════════════════════════════════
   // BOOT
   // ════════════════════════════════════════════════════════════════════════
   route();
   </script>
+
+<div id="feedback-widget">
+  <button id="feedback-trigger" title="Share feedback"><span>Feedback</span></button>
+  <div id="feedback-panel" class="hidden">
+    <div class="feedback-header">
+      <span class="feedback-title">Share feedback</span>
+      <button class="feedback-close" id="feedback-close">×</button>
+    </div>
+    <p class="feedback-subtitle">What's working? What's missing? What would make this better?</p>
+    <textarea id="feedback-text" class="feedback-textarea" placeholder="Your thoughts…" rows="4"></textarea>
+    <button id="feedback-send" class="feedback-send-btn">Send</button>
+    <div id="feedback-confirm" class="feedback-confirm hidden">Thank you — this helps a lot.</div>
+  </div>
+</div>
 </body>
 </html>
