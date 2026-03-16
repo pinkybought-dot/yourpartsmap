@@ -83,6 +83,13 @@
       @keyframes pulse2 { 0%,100% { transform: scale(1); } 50% { transform: scale(1.01); } }
     }
 
+    /* ── CONNECTING MODE ── */
+    #map-svg.connecting-mode { cursor: crosshair; }
+    @keyframes connect-pulse { 0%,100% { filter: drop-shadow(0 0 6px rgba(196,149,90,0.7)); } 50% { filter: drop-shadow(0 0 14px rgba(196,149,90,0.95)); } }
+    .connecting-source .node-shape { animation: connect-pulse 1.2s ease-in-out infinite !important; }
+    #connect-hint { position: absolute; top: 0.75rem; left: 50%; transform: translateX(-50%); background: rgba(255,253,250,0.93); border: 1px solid var(--border-strong); border-radius: 20px; padding: 0.3rem 1rem; font-size: 0.77rem; color: var(--text-faint); pointer-events: none; white-space: nowrap; z-index: 15; box-shadow: 0 2px 8px rgba(60,40,20,0.1); }
+    #connect-hint.hidden { display: none; }
+
     /* ── DETAIL PANEL (slides from left) ── */
     #detail-panel { position: absolute; top: 0; left: 0; width: 270px; height: 100%; background: rgba(255,253,250,0.97); border-right: 1px solid var(--border); backdrop-filter: blur(12px); transform: translateX(-100%); transition: transform 0.28s ease; display: flex; flex-direction: column; overflow: hidden; z-index: 10; }
     #detail-panel.open { transform: translateX(0); }
@@ -353,6 +360,7 @@
           <g id="map-connections"></g>
           <g id="map-parts"></g>
         </svg>
+        <div id="connect-hint" class="hidden">Click another part to connect — Esc to cancel</div>
 
         <!-- Detail slide-over (from left) -->
         <div id="detail-panel">
@@ -375,6 +383,7 @@
             </div>
           </div>
           <div class="detail-footer" id="detail-footer-pract">
+            <button class="detail-btn" id="detail-connect-btn">Connect</button>
             <button class="detail-btn" id="detail-edit-btn">Edit</button>
             <button class="detail-btn danger" id="detail-delete-btn">Delete</button>
           </div>
@@ -434,6 +443,7 @@
             <div class="zone-confirm-msg" id="zone-confirm-msg"></div>
             <div class="zone-confirm-actions">
               <button class="btn-secondary" id="zone-confirm-no">Keep here</button>
+              <button class="btn-secondary" id="zone-confirm-alt" style="display:none;">Polarized</button>
               <button class="btn-primary" id="zone-confirm-yes">Move</button>
             </div>
           </div>
@@ -835,6 +845,17 @@
     return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
   }
 
+  function organicMidpoint(x1, y1, x2, y2, offsetMult) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 0.001) return { x: x1, y: y1 };
+    const seed = ((x1 * 1000 + y1 * 100 + x2 * 10 + y2) % 1 + 1) % 1;
+    const offset = (seed - 0.5) * dist * (offsetMult || 0.45);
+    const cx = (x1 + x2) / 2 - (dy / dist) * offset;
+    const cy = (y1 + y2) / 2 + (dx / dist) * offset;
+    return { x: 0.25*x1 + 0.5*cx + 0.25*x2, y: 0.25*y1 + 0.5*cy + 0.25*y2 };
+  }
+
   function renderConnections() {
     const g = document.getElementById('map-connections');
     g.innerHTML = '';
@@ -859,6 +880,20 @@
         'stroke-dasharray': dashArray, 'pointer-events': 'stroke', cursor: 'pointer'
       });
       g.appendChild(path);
+
+      // Midpoint symbol: ~ for allied, × for polarized
+      if (conn.type === 'allied' || conn.type === 'polarized') {
+        const mid = organicMidpoint(x1, y1, x2, y2, offsetMult);
+        const sym = svgEl('text', {
+          x: mid.x, y: mid.y,
+          'text-anchor': 'middle', 'dominant-baseline': 'middle',
+          'font-size': '11', 'font-family': "'DM Sans', sans-serif",
+          fill: conn.type === 'allied' ? '#c4955a' : '#7a9ab8',
+          opacity: '0.8', 'pointer-events': 'none'
+        });
+        sym.textContent = conn.type === 'allied' ? '~' : '×';
+        g.appendChild(sym);
+      }
     }
   }
 
@@ -922,7 +957,15 @@
     }
 
     pos.appendChild(inner);
-    pos.addEventListener('click', e => { e.stopPropagation(); showPartDetail(part.id); });
+    pos.addEventListener('click', e => {
+      e.stopPropagation();
+      if (connectingFromId) {
+        if (part.id === connectingFromId) { exitConnectingMode(); }
+        else { handleConnectClick(part.id); }
+      } else {
+        showPartDetail(part.id);
+      }
+    });
     return pos;
   }
 
@@ -937,6 +980,43 @@
   let pendingZoneMove = null;
   let pendingConnection = null;
   let pendingPartUpdate = null;
+  let connectingFromId = null;
+
+  function enterConnectingMode(partId) {
+    connectingFromId = partId;
+    closeDetailPanel();
+    document.getElementById('map-svg').classList.add('connecting-mode');
+    document.getElementById('connect-hint').classList.remove('hidden');
+    const src = document.querySelector(`.part-pos[data-part-id="${partId}"]`);
+    if (src) src.classList.add('connecting-source');
+  }
+
+  function exitConnectingMode() {
+    connectingFromId = null;
+    document.getElementById('map-svg').classList.remove('connecting-mode');
+    document.getElementById('connect-hint').classList.add('hidden');
+    document.querySelectorAll('.connecting-source').forEach(el => el.classList.remove('connecting-source'));
+  }
+
+  function handleConnectClick(targetId) {
+    const fromId = connectingFromId;
+    exitConnectingMode();
+    const existing = APP.mapData.connections.findIndex(
+      c => (c.from === fromId && c.to === targetId) || (c.from === targetId && c.to === fromId)
+    );
+    if (existing >= 0) {
+      APP.mapData.connections.splice(existing, 1);
+      renderConnections();
+      scheduleSave();
+    } else {
+      const f = APP.mapData.parts.find(p => p.id === fromId);
+      const t = APP.mapData.parts.find(p => p.id === targetId);
+      if (f && t) {
+        pendingConnection = { from: fromId, to: targetId, type: 'allied' };
+        showConnectionConfirm(f.name, t.name, null);
+      }
+    }
+  }
 
   function initDrag() {
     const svg = document.getElementById('map-svg');
@@ -1022,25 +1102,52 @@
   }
 
   // ── CONNECTION CONFIRM ──────────────────────────────────────────────────
+  function _restoreZoneConfirmButtons() {
+    const altBtn = document.getElementById('zone-confirm-alt');
+    altBtn.style.display = 'none';
+    altBtn.onclick = null;
+    document.getElementById('zone-confirm-yes').textContent = 'Move';
+    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+    document.getElementById('zone-confirm-no').textContent = 'Keep here';
+    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+  }
+
   function showConnectionConfirm(name1, name2, type) {
-    const typeLabel = type === 'polarized' ? 'polarized (opposing)' : 'allied (same team)';
-    document.getElementById('zone-confirm-msg').textContent =
-      `Connect "${name1}" and "${name2}" as ${typeLabel}?`;
-    document.getElementById('zone-confirm-yes').onclick = confirmConnection;
-    document.getElementById('zone-confirm-no').onclick = rejectConnection;
+    const altBtn = document.getElementById('zone-confirm-alt');
+    if (type === null) {
+      // Manual connect: let user pick Allied or Polarized
+      document.getElementById('zone-confirm-msg').textContent =
+        `Connect "${name1}" and "${name2}" — choose type:`;
+      document.getElementById('zone-confirm-yes').textContent = 'Allied';
+      document.getElementById('zone-confirm-yes').onclick = () => confirmConnection('allied');
+      altBtn.textContent = 'Polarized';
+      altBtn.style.display = '';
+      altBtn.onclick = () => confirmConnection('polarized');
+      document.getElementById('zone-confirm-no').textContent = 'Cancel';
+      document.getElementById('zone-confirm-no').onclick = rejectConnection;
+    } else {
+      const typeLabel = type === 'polarized' ? 'polarized (opposing)' : 'allied (same team)';
+      document.getElementById('zone-confirm-msg').textContent =
+        `Connect "${name1}" and "${name2}" as ${typeLabel}?`;
+      document.getElementById('zone-confirm-yes').textContent = 'Connect';
+      document.getElementById('zone-confirm-yes').onclick = () => confirmConnection(type);
+      altBtn.style.display = 'none';
+      document.getElementById('zone-confirm-no').textContent = 'Cancel';
+      document.getElementById('zone-confirm-no').onclick = rejectConnection;
+    }
     document.getElementById('zone-confirm-overlay').classList.remove('hidden');
   }
 
-  function confirmConnection() {
+  function confirmConnection(type) {
     if (!pendingConnection) return;
+    if (type) pendingConnection.type = type;
     APP.mapData.connections.push({
       from: pendingConnection.from, to: pendingConnection.to,
       style: 'solid', type: pendingConnection.type
     });
     pendingConnection = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
-    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
-    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+    _restoreZoneConfirmButtons();
     renderConnections();
     scheduleSave();
   }
@@ -1048,8 +1155,7 @@
   function rejectConnection() {
     pendingConnection = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
-    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
-    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+    _restoreZoneConfirmButtons();
   }
 
   // ── PART UPDATE CONFIRM ───────────────────────────────────────────────────
@@ -1088,19 +1194,13 @@
     }
     pendingPartUpdate = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
-    document.getElementById('zone-confirm-yes').textContent = 'Move';
-    document.getElementById('zone-confirm-no').textContent = 'Keep here';
-    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
-    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+    _restoreZoneConfirmButtons();
   }
 
   function rejectPartUpdate() {
     pendingPartUpdate = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
-    document.getElementById('zone-confirm-yes').textContent = 'Move';
-    document.getElementById('zone-confirm-no').textContent = 'Keep here';
-    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
-    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+    _restoreZoneConfirmButtons();
   }
 
   // ── PART DETAIL ──────────────────────────────────────────────────────────
@@ -2394,6 +2494,9 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
 
   // Detail panel
   document.getElementById('detail-close').addEventListener('click', closeDetailPanel);
+  document.getElementById('detail-connect-btn').addEventListener('click', () => {
+    if (APP.selectedPartId) enterConnectingMode(APP.selectedPartId);
+  });
   document.getElementById('detail-edit-btn').addEventListener('click', openEditForm);
   document.getElementById('edit-cancel-btn').addEventListener('click', () => {
     document.getElementById('edit-form').classList.add('hidden');
@@ -2401,6 +2504,9 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
   });
   document.getElementById('edit-save-btn').addEventListener('click', saveEditForm);
   document.getElementById('detail-delete-btn').addEventListener('click', deletePart);
+
+  // Escape — cancel connecting mode
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && connectingFromId) exitConnectingMode(); });
 
   // Zone confirm (use .onclick so connection confirm can override without double-firing)
   document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
