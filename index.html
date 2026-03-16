@@ -11,839 +11,209 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #111009;
-      --bg-sky: #1a1530;
-      --surface: #1c1916;
-      --surface-hover: #252018;
-      --border: rgba(255,255,255,0.07);
-      --text: #e8e4dc;
-      --text-dim: #9a9488;
-      --text-faint: #5a5650;
-      --gold: #c8a246;
-      --gold-dim: rgba(200,162,70,0.15);
+      --bg:           #faf6f0;
+      --bg2:          #f4ede3;
+      --surface:      #ffffff;
+      --border:       rgba(60,40,20,0.10);
+      --border-strong:rgba(60,40,20,0.18);
+      --text:         #2a2520;
+      --text-dim:     #6a5e54;
+      --text-faint:   #a09488;
+      --gold:         #8a6a20;
+      --gold-bg:      rgba(138,106,32,0.09);
+      --gold-border:  rgba(138,106,32,0.22);
+      --red:          #b84030;
+      --red-bg:       rgba(184,64,48,0.07);
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 400;
-      overflow: hidden;
-    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 400; overflow: hidden; }
 
     /* ── SCREENS ── */
     .screen { display: none; width: 100%; height: 100vh; }
     .screen.active { display: flex; }
 
-    /* ── PIN SCREEN ── */
-    #screen-pin {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.75rem;
-      padding: 2rem;
-    }
-
-    .pin-wordmark {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.22em;
-      color: var(--text-faint);
-      text-transform: uppercase;
-    }
-
-    .pin-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
-      font-weight: 300;
-      color: var(--text);
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    .pin-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .pin-input {
-      width: 100%;
-      padding: 0.9rem 1.2rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1.1rem;
-      text-align: center;
-      letter-spacing: 0.3em;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .pin-input:focus { border-color: rgba(255,255,255,0.18); }
+    /* ── PIN ── */
+    #screen-pin { flex-direction: column; align-items: center; justify-content: center; gap: 1.75rem; padding: 2rem; background: var(--bg); }
+    .pin-wordmark { font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; letter-spacing: 0.22em; color: var(--text-faint); text-transform: uppercase; }
+    .pin-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: var(--text); text-align: center; line-height: 1.3; }
+    .pin-box { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%; max-width: 300px; }
+    .pin-input { width: 100%; padding: 0.9rem 1.2rem; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1.1rem; text-align: center; letter-spacing: 0.3em; outline: none; transition: border-color 0.2s; }
+    .pin-input:focus { border-color: var(--gold); }
     .pin-input.shake { animation: shake 0.4s ease; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+    .pin-btn { width: 100%; padding: 0.85rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 8px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; letter-spacing: 0.04em; }
+    .pin-btn:hover { background: rgba(138,106,32,0.15); }
+    .pin-hint { font-size: 0.8rem; color: var(--text-faint); min-height: 1.2em; text-align: center; }
 
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20% { transform: translateX(-8px); }
-      40% { transform: translateX(8px); }
-      60% { transform: translateX(-5px); }
-      80% { transform: translateX(5px); }
-    }
-
-    .pin-btn {
-      width: 100%;
-      padding: 0.85rem;
-      background: var(--gold-dim);
-      border: 1px solid rgba(200,162,70,0.25);
-      border-radius: 8px;
-      color: var(--gold);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      letter-spacing: 0.04em;
-    }
-    .pin-btn:hover { background: rgba(200,162,70,0.22); border-color: rgba(200,162,70,0.4); }
-
-    .pin-hint {
-      font-size: 0.8rem;
-      color: var(--text-faint);
-      min-height: 1.2em;
-      text-align: center;
-    }
-
-    /* ── APP HEADER ── */
+    /* ── APP ── */
     #screen-app { flex-direction: column; }
+    .app-header { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+    .app-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mode-badge { font-size: 0.63rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); padding: 0.18rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; white-space: nowrap; }
+    .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); padding: 0.33rem 0.58rem; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .icon-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--border-strong); }
 
-    .app-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.65rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    /* ── BODY LAYOUT ── */
+    .app-body { display: flex; flex: 1; overflow: hidden; }
 
-    .app-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem;
-      font-weight: 400;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    /* ── MAP PANEL ── */
+    #panel-map { flex: 0 0 65%; position: relative; overflow: hidden; }
+    #map-svg { width: 100%; height: 100%; display: block; }
 
-    .mode-badge {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      padding: 0.18rem 0.55rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-
-    .icon-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-dim);
-      padding: 0.38rem 0.65rem;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .icon-btn:hover { background: var(--surface); color: var(--text); border-color: rgba(255,255,255,0.12); }
-
-    /* ── THREE PANELS ── */
-    .panels {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .panel {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border-right: 1px solid var(--border);
-      min-width: 0;
-    }
-    .panel:last-child { border-right: none; }
-
-    #panel-map   { flex: 1.5; }
-    #panel-input { flex: 1; }
-    #panel-log   { flex: 0.85; }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.9rem;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .panel-title {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-    }
-
-    /* ── MAP CANVAS ── */
-    #map-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-    }
-
-    #map-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
+    /* ── PART NODES ── */
     .part-node { cursor: pointer; }
     .part-node .node-shape { transition: filter 0.15s; }
-    .part-node:hover .node-shape { filter: brightness(1.35) drop-shadow(0 0 6px currentColor); }
+    .part-node:hover .node-shape { filter: drop-shadow(0 2px 8px rgba(60,40,20,0.25)) brightness(0.93); }
 
+    /* Zone animations */
     @media (prefers-reduced-motion: no-preference) {
-      .part-archetypal { animation: float 6s ease-in-out infinite; }
-      .part-archetypal:nth-child(2n) { animation-duration: 7.5s; animation-delay: -2.5s; }
-      .part-archetypal:nth-child(3n) { animation-duration: 5.2s; animation-delay: -4s; }
-      .aura-ring { animation: pulse-aura 3s ease-in-out infinite; }
-      .assembly-glow { animation: fire-glow 4s ease-in-out infinite; }
-
-      @keyframes float {
-        0%,100% { transform: translateY(0); }
-        50% { transform: translateY(-4px); }
-      }
-      @keyframes pulse-aura {
-        0%,100% { opacity: 0.18; }
-        50% { opacity: 0.45; }
-      }
-      @keyframes fire-glow {
-        0%,100% { opacity: 0.5; }
-        50% { opacity: 0.85; }
-      }
+      .part-zone3-anim { animation: drift3 7s ease-in-out infinite; }
+      .part-zone3-anim:nth-child(2n) { animation-duration: 8.5s; animation-delay: -3s; }
+      .part-zone3-anim:nth-child(3n) { animation-duration: 6.2s; animation-delay: -5s; }
+      .part-zone2-anim { animation: pulse2 6s ease-in-out infinite; }
+      .part-zone2-anim:nth-child(2n) { animation-duration: 7.5s; animation-delay: -2.5s; }
+      @keyframes drift3 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+      @keyframes pulse2 { 0%,100% { transform: scale(1); } 50% { transform: scale(1.01); } }
     }
 
-    /* ── DETAIL PANEL ── */
-    #detail-panel {
-      position: absolute;
-      top: 0; right: 0;
-      width: 280px;
-      height: 100%;
-      background: rgba(15,14,8,0.97);
-      border-left: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      transform: translateX(100%);
-      transition: transform 0.28s ease;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 10;
-    }
+    /* ── DETAIL PANEL (slides from left) ── */
+    #detail-panel { position: absolute; top: 0; left: 0; width: 270px; height: 100%; background: rgba(255,253,250,0.97); border-right: 1px solid var(--border); backdrop-filter: blur(12px); transform: translateX(-100%); transition: transform 0.28s ease; display: flex; flex-direction: column; overflow: hidden; z-index: 10; }
     #detail-panel.open { transform: translateX(0); }
-
-    .detail-close {
-      position: absolute;
-      top: 0.7rem; right: 0.8rem;
-      background: none; border: none;
-      color: var(--text-faint);
-      font-size: 1.3rem;
-      cursor: pointer; line-height: 1;
-      transition: color 0.15s;
-    }
+    .detail-close { position: absolute; top: 0.7rem; right: 0.8rem; background: none; border: none; color: var(--text-faint); font-size: 1.3rem; cursor: pointer; line-height: 1; transition: color 0.15s; }
     .detail-close:hover { color: var(--text); }
-
-    .detail-header {
-      padding: 1.2rem 1.2rem 0.9rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .detail-part-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.55rem;
-      font-weight: 400;
-      line-height: 1.2;
-      margin-bottom: 0.35rem;
-      padding-right: 1.5rem;
-    }
-
-    .detail-tier-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .detail-tier {
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-    }
-
-    .status-badge {
-      font-size: 0.72rem;
-      padding: 0.15rem 0.45rem;
-      border-radius: 3px;
-      border: 1px solid transparent;
-    }
-
-    .detail-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-    }
-
-    .detail-section-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      margin-bottom: 0.35rem;
-    }
-
-    .detail-desc {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.05rem;
-      line-height: 1.75;
-      color: var(--text-dim);
-    }
-
-    .key-moment-item {
-      font-size: 0.83rem;
-      color: var(--text-dim);
-      padding: 0.45rem 0;
-      border-bottom: 1px solid var(--border);
-      line-height: 1.5;
-    }
+    .detail-header { padding: 1.2rem 1.2rem 0.9rem; border-bottom: 1px solid var(--border); }
+    .detail-part-name { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400; line-height: 1.2; margin-bottom: 0.35rem; padding-right: 1.5rem; }
+    .detail-tier-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .detail-tier { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+    .status-badge { font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 3px; border: 1px solid transparent; }
+    .detail-body { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+    .detail-section-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.35rem; }
+    .detail-desc { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.75; color: var(--text-dim); }
+    .key-moment-item { font-size: 0.83rem; color: var(--text-dim); padding: 0.45rem 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
     .key-moment-item:last-child { border-bottom: none; }
+    .detail-footer { padding: 0.9rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
+    .detail-btn { flex: 1; padding: 0.55rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; cursor: pointer; transition: all 0.18s; }
+    .detail-btn:hover { background: var(--bg2); color: var(--text); }
+    .detail-btn.danger { border-color: rgba(184,64,48,0.3); color: var(--red); }
+    .detail-btn.danger:hover { background: var(--red-bg); }
 
-    .detail-footer {
-      padding: 0.9rem;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .detail-btn {
-      flex: 1;
-      padding: 0.55rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-dim);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .detail-btn:hover { background: var(--surface-hover); color: var(--text); }
-    .detail-btn.danger { border-color: rgba(200,80,60,0.3); color: rgba(200,100,80,0.8); }
-    .detail-btn.danger:hover { background: rgba(200,80,60,0.1); color: #d09080; }
-
-    /* Edit form inside detail */
-    .edit-form {
-      padding: 0.9rem;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      overflow-y: auto;
-    }
-
+    /* Edit form */
+    .edit-form { padding: 0.9rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.7rem; overflow-y: auto; }
     .form-field { display: flex; flex-direction: column; gap: 0.3rem; }
-
-    .form-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-    }
-
-    .form-input {
-      padding: 0.55rem 0.75rem;
-      background: #141208;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus { border-color: rgba(255,255,255,0.16); }
-
+    .form-label { font-size: 0.65rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-faint); }
+    .form-input { padding: 0.55rem 0.75rem; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--gold); }
     textarea.form-input { resize: vertical; min-height: 72px; line-height: 1.5; }
-    select.form-input option { background: #141208; color: var(--text); }
-
+    select.form-input option { background: var(--surface); color: var(--text); }
     .form-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.2rem; }
-
-    .btn-secondary {
-      padding: 0.5rem 0.9rem;
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--text-dim);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.83rem;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .btn-secondary:hover { background: var(--surface); color: var(--text); }
-
-    .btn-primary {
-      padding: 0.5rem 1rem;
-      background: var(--gold-dim);
-      border: 1px solid rgba(200,162,70,0.25);
-      border-radius: 5px;
-      color: var(--gold);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.83rem;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .btn-primary:hover { background: rgba(200,162,70,0.22); }
+    .btn-secondary { padding: 0.5rem 0.9rem; background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; cursor: pointer; transition: all 0.18s; }
+    .btn-secondary:hover { background: var(--bg2); color: var(--text); }
+    .btn-primary { padding: 0.5rem 1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 5px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; cursor: pointer; transition: all 0.18s; }
+    .btn-primary:hover { background: rgba(138,106,32,0.15); }
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    /* ── SESSION INPUT ── */
-    .input-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    /* ── ZONE CONFIRM OVERLAY ── */
+    #zone-confirm-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; background: rgba(250,246,240,0.72); backdrop-filter: blur(4px); }
+    #zone-confirm-overlay.hidden { display: none; }
+    .zone-confirm-card { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1.5rem; max-width: 300px; width: 90%; box-shadow: 0 8px 32px rgba(60,40,20,0.12); }
+    .zone-confirm-msg { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; line-height: 1.65; color: var(--text); margin-bottom: 1.1rem; }
+    .zone-confirm-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-    /* ── CHAT (Parts Buddy) ── */
-    .chat-history {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
+    /* ── LOG DRAWER ── */
+    #log-drawer { position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: rgba(255,253,250,0.97); border-left: 1px solid var(--border); backdrop-filter: blur(12px); transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; overflow: hidden; z-index: 10; box-shadow: -4px 0 20px rgba(60,40,20,0.06); }
+    #log-drawer.open { transform: translateX(0); }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .panel-title { font-size: 0.63rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); }
+    .drawer-close { background: none; border: none; color: var(--text-faint); font-size: 1.2rem; cursor: pointer; transition: color 0.15s; padding: 0.1rem 0.2rem; }
+    .drawer-close:hover { color: var(--text); }
+    .log-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 1.1rem; }
+    .log-entry { border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+    .log-entry:last-child { border-bottom: none; padding-bottom: 0; }
+    .log-entry-header { display: flex; align-items: baseline; gap: 0.55rem; margin-bottom: 0.45rem; }
+    .log-session-num { font-size: 0.63rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
+    .log-date { font-size: 0.73rem; color: var(--text-faint); }
+    .log-key-moment { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; font-style: italic; color: var(--gold); line-height: 1.6; margin-bottom: 0.35rem; }
+    .log-note { font-size: 0.84rem; color: var(--text-dim); line-height: 1.65; }
 
-    .chat-empty {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      color: var(--text-faint);
-      font-size: 0.83rem;
-      text-align: center;
-      line-height: 1.9;
-      padding: 2rem;
-      pointer-events: none;
-    }
-    .chat-empty-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.05rem;
-      color: var(--text-dim);
-      margin-bottom: 0.25rem;
-    }
-
+    /* ── CHAT PANEL ── */
+    #panel-chat { flex: 1; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .chat-history { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--text-faint); font-size: 0.83rem; text-align: center; line-height: 1.9; padding: 2rem; pointer-events: none; }
+    .chat-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--text-dim); margin-bottom: 0.25rem; }
     .chat-msg { display: flex; flex-direction: column; gap: 0.2rem; max-width: 90%; }
-    .chat-msg.user  { align-self: flex-end;   align-items: flex-end; }
+    .chat-msg.user { align-self: flex-end; align-items: flex-end; }
     .chat-msg.assistant { align-self: flex-start; align-items: flex-start; }
-
-    .chat-bubble {
-      padding: 0.6rem 0.85rem;
-      border-radius: 10px;
-      font-size: 0.875rem;
-      line-height: 1.6;
-      word-break: break-word;
-    }
-    .chat-msg.user .chat-bubble {
-      background: rgba(200,162,70,0.1);
-      border: 1px solid rgba(200,162,70,0.2);
-      color: var(--text);
-      border-bottom-right-radius: 3px;
-    }
-    .chat-msg.assistant .chat-bubble {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      border-bottom-left-radius: 3px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem;
-    }
-
-    .chat-actions-taken {
-      font-size: 0.68rem;
-      color: var(--gold);
-      letter-spacing: 0.03em;
-      padding: 0 0.1rem;
-      opacity: 0.8;
-    }
-
-    .chat-typing {
-      display: flex;
-      gap: 4px;
-      padding: 0.6rem 0.85rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      border-bottom-left-radius: 3px;
-      align-self: flex-start;
-    }
-    .chat-typing span {
-      width: 5px; height: 5px;
-      background: var(--text-faint);
-      border-radius: 50%;
-      animation: typing-dot 1.2s ease-in-out infinite;
-    }
+    .chat-bubble { padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.875rem; line-height: 1.6; word-break: break-word; }
+    .chat-msg.user .chat-bubble { background: var(--gold-bg); border: 1px solid var(--gold-border); color: var(--text); border-bottom-right-radius: 3px; }
+    .chat-msg.assistant .chat-bubble { background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); border-bottom-left-radius: 3px; font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; }
+    .chat-actions-taken { font-size: 0.68rem; color: var(--gold); letter-spacing: 0.03em; padding: 0 0.1rem; opacity: 0.8; }
+    .chat-typing { display: flex; gap: 4px; padding: 0.6rem 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; border-bottom-left-radius: 3px; align-self: flex-start; }
+    .chat-typing span { width: 5px; height: 5px; background: var(--text-faint); border-radius: 50%; animation: typing-dot 1.2s ease-in-out infinite; }
     .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
     .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typing-dot {
-      0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-4px); opacity: 1; }
-    }
-
-    .chat-bar {
-      display: flex;
-      align-items: flex-end;
-      gap: 0.45rem;
-      padding: 0.6rem 0.7rem;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .chat-input {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      padding: 0.58rem 0.8rem;
-      resize: none;
-      outline: none;
-      min-height: 38px;
-      max-height: 160px;
-      overflow-y: auto;
-      transition: border-color 0.18s;
-    }
-    .chat-input:focus { border-color: rgba(255,255,255,0.14); }
+    @keyframes typing-dot { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .chat-bar { display: flex; align-items: flex-end; gap: 0.45rem; padding: 0.6rem 0.7rem; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+    .chat-input { flex: 1; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; line-height: 1.5; padding: 0.58rem 0.8rem; resize: none; outline: none; min-height: 38px; max-height: 160px; overflow-y: auto; transition: border-color 0.18s; }
+    .chat-input:focus { border-color: var(--gold); }
     .chat-input::placeholder { color: var(--text-faint); }
-
-    .chat-send-btn {
-      background: var(--gold-dim);
-      border: 1px solid rgba(200,162,70,0.25);
-      border-radius: 8px;
-      color: var(--gold);
-      font-size: 1rem;
-      width: 38px; height: 38px;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.18s;
-    }
-    .chat-send-btn:hover { background: rgba(200,162,70,0.22); }
+    .chat-send-btn { background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 8px; color: var(--gold); font-size: 1rem; width: 38px; height: 38px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; }
+    .chat-send-btn:hover { background: rgba(138,106,32,0.15); }
     .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .chat-mic-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-dim);
-      font-size: 1rem;
-      width: 38px; height: 38px;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.18s;
-    }
-    .chat-mic-btn:hover { background: var(--surface); color: var(--text); }
-    .chat-mic-btn.recording {
-      border-color: rgba(200,80,60,0.5);
-      background: rgba(200,80,60,0.1);
-      color: #c89080;
-      animation: pulse-record 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse-record {
-      0%,100% { box-shadow: 0 0 0 0 rgba(200,80,60,0.15); }
-      50% { box-shadow: 0 0 0 8px rgba(200,80,60,0); }
-    }
-
-    /* ── PROGRESS LOG ── */
-    .log-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-    }
-
-    .log-entry {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
-    }
-    .log-entry:last-child { border-bottom: none; padding-bottom: 0; }
-
-    .log-entry-header {
-      display: flex;
-      align-items: baseline;
-      gap: 0.55rem;
-      margin-bottom: 0.45rem;
-    }
-
-    .log-session-num {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-    }
-
-    .log-date { font-size: 0.73rem; color: var(--text-faint); }
-
-    .log-key-moment {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.98rem;
-      font-style: italic;
-      color: var(--gold);
-      line-height: 1.6;
-      margin-bottom: 0.35rem;
-    }
-
-    .log-note {
-      font-size: 0.84rem;
-      color: var(--text-dim);
-      line-height: 1.65;
-    }
-
-    .log-client-note {
-      margin-left: 0.9rem;
-      border-left: 2px solid rgba(200,162,70,0.18);
-      padding-left: 0.75rem;
-    }
-
-    .log-client-note .log-note {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem;
-      font-style: italic;
-    }
+    .chat-mic-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-dim); font-size: 1rem; width: 38px; height: 38px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; }
+    .chat-mic-btn:hover { background: var(--bg2); color: var(--text); }
+    .chat-mic-btn.recording { border-color: rgba(184,64,48,0.5); background: var(--red-bg); color: var(--red); animation: pulse-record 1.5s ease-in-out infinite; }
+    @keyframes pulse-record { 0%,100% { box-shadow: 0 0 0 0 rgba(184,64,48,0.15); } 50% { box-shadow: 0 0 0 8px rgba(184,64,48,0); } }
 
     /* ── DASHBOARD ── */
-    #screen-dashboard {
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1.5rem;
-      overflow-y: auto;
-    }
-
-    .dashboard-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 680px;
-      margin-bottom: 2rem;
-    }
-
-    .dashboard-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.9rem;
-      font-weight: 300;
-    }
-
-    .new-client-btn {
-      padding: 0.55rem 1.1rem;
-      background: var(--gold-dim);
-      border: 1px solid rgba(200,162,70,0.28);
-      border-radius: 6px;
-      color: var(--gold);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .new-client-btn:hover { background: rgba(200,162,70,0.22); }
-
-    .map-list {
-      width: 100%;
-      max-width: 680px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-
-    .map-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-      color: var(--text);
-      transition: all 0.18s;
-    }
-    .map-row:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.11); }
-
-    .map-row-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      flex: 1;
-    }
-
+    #screen-dashboard { flex-direction: column; align-items: center; padding: 3rem 1.5rem; overflow-y: auto; background: var(--bg); }
+    .dashboard-header { display: flex; align-items: baseline; justify-content: space-between; width: 100%; max-width: 680px; margin-bottom: 2rem; }
+    .dashboard-title { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; }
+    .new-client-btn { padding: 0.55rem 1.1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 6px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.18s; }
+    .new-client-btn:hover { background: rgba(138,106,32,0.15); }
+    .map-list { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.45rem; }
+    .map-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-decoration: none; color: var(--text); transition: all 0.18s; }
+    .map-row:hover { background: var(--bg2); border-color: var(--border-strong); }
+    .map-row-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; flex: 1; }
     .map-row-meta { font-size: 0.77rem; color: var(--text-faint); text-align: right; }
-
-    .empty-state {
-      color: var(--text-faint);
-      font-size: 0.88rem;
-      text-align: center;
-      padding: 3rem 1rem;
-      line-height: 1.8;
-    }
+    .empty-state { color: var(--text-faint); font-size: 0.88rem; text-align: center; padding: 3rem 1rem; line-height: 1.8; }
 
     /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.72);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      backdrop-filter: blur(6px);
-      padding: 1rem;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(60,40,20,0.35); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); padding: 1rem; }
     .modal-overlay.hidden { display: none; }
-
-    .modal {
-      background: #1a1914;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-    }
-
-    .modal-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.55rem;
-      font-weight: 300;
-    }
-
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 1.1rem; }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 300; }
     .modal .form-field { gap: 0.35rem; }
     .modal .form-input { padding: 0.65rem 0.9rem; font-size: 0.9rem; }
-
     .modal-actions { display: flex; gap: 0.65rem; justify-content: flex-end; }
-
-    .created-info {
-      background: rgba(200,162,70,0.07);
-      border: 1px solid rgba(200,162,70,0.18);
-      border-radius: 8px;
-      padding: 1.1rem;
-      font-size: 0.85rem;
-      line-height: 1.8;
-      color: var(--text-dim);
-    }
+    .created-info { background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 8px; padding: 1.1rem; font-size: 0.85rem; line-height: 1.8; color: var(--text-dim); }
     .created-info strong { color: var(--gold); }
     .created-info .url-line { word-break: break-all; }
 
     /* ── SPINNER ── */
-    .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,0.08);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
-      .panels { flex-direction: column; }
-
-      #panel-map {
-        flex: none;
-        height: 42vh;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .mobile-panel-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        min-height: 0;
-      }
-
-      .mobile-tabs {
-        display: flex;
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
-      }
-
-      .mobile-tab {
-        flex: 1;
-        padding: 0.65rem;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
-        color: var(--text-faint);
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.18s;
-      }
-      .mobile-tab.active { color: var(--text); border-bottom-color: var(--gold); }
-
-      #panel-input, #panel-log {
-        border-right: none;
-        flex: 1;
-      }
-
-      #panel-input.mobile-hidden,
-      #panel-log.mobile-hidden { display: none; }
-
-      #detail-panel { width: 100%; }
+      .app-body { position: relative; }
+      #panel-map { flex: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+      #panel-chat { position: fixed; bottom: 0; left: 0; right: 0; height: 50vh; border-left: none; border-top: 1px solid var(--border); transform: translateY(calc(100% - 48px)); transition: transform 0.3s ease; z-index: 20; box-shadow: 0 -4px 20px rgba(60,40,20,0.08); }
+      #panel-chat.sheet-open { transform: translateY(0); }
+      .chat-sheet-handle { display: flex; align-items: center; justify-content: center; height: 48px; flex-shrink: 0; cursor: pointer; border-bottom: 1px solid var(--border); gap: 0.5rem; background: var(--surface); }
+      .chat-sheet-pip { width: 32px; height: 4px; background: var(--text-faint); border-radius: 2px; opacity: 0.4; }
+      .chat-sheet-label { font-size: 0.72rem; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      #log-drawer { position: fixed; top: 0; right: 0; width: 100%; height: 100%; }
     }
-
-    @media (min-width: 769px) {
-      .mobile-tabs { display: none; }
-      .mobile-panel-area { display: contents; }
-    }
+    @media (min-width: 769px) { .chat-sheet-handle { display: none; } }
 
     /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: rgba(60,40,20,0.12); border-radius: 2px; }
 
     /* ── UTILS ── */
     .hidden { display: none !important; }
-
   </style>
 </head>
 <body>
@@ -867,125 +237,140 @@
       <span class="mode-badge" id="mode-badge">Practitioner</span>
       <button class="icon-btn" id="btn-add-part" title="Add a part">+ Part</button>
       <button class="icon-btn" id="btn-share" title="Copy client link">Share</button>
+      <button class="icon-btn" id="btn-log" title="Progress Log">Log</button>
       <button class="icon-btn" id="btn-dashboard" title="Dashboard">⌂</button>
     </header>
 
-    <div class="panels">
+    <div class="app-body">
 
-      <!-- Panel 1: Map -->
-      <div class="panel" id="panel-map">
-        <div class="panel-header">
-          <span class="panel-title">Map</span>
-        </div>
-        <div id="map-container">
-          <svg id="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <radialGradient id="glow-gold" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#c8a246" stop-opacity="0.5"/>
-                <stop offset="100%" stop-color="#c8a246" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-            <g id="map-zones"></g>
-            <g id="map-connections"></g>
-            <g id="map-parts"></g>
-          </svg>
+      <!-- ── MAP PANEL ── -->
+      <div id="panel-map">
+        <svg id="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter id="organic" x="-8%" y="-8%" width="116%" height="116%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="noise"/>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+          <g id="map-zones"></g>
+          <g id="map-connections"></g>
+          <g id="map-parts"></g>
+        </svg>
 
-          <!-- Detail slide-over -->
-          <div id="detail-panel">
-            <button class="detail-close" id="detail-close">×</button>
-            <div class="detail-header">
-              <div class="detail-part-name" id="detail-name"></div>
-              <div class="detail-tier-row">
-                <span class="detail-tier" id="detail-tier"></span>
-                <span class="status-badge hidden" id="detail-status"></span>
-              </div>
-            </div>
-            <div class="detail-body" id="detail-body">
-              <div>
-                <div class="detail-section-label">Description</div>
-                <div class="detail-desc" id="detail-desc"></div>
-              </div>
-              <div id="detail-moments-section" class="hidden">
-                <div class="detail-section-label">Key Moments</div>
-                <div id="detail-moments"></div>
-              </div>
-            </div>
-            <div class="detail-footer" id="detail-footer-pract">
-              <button class="detail-btn" id="detail-edit-btn">Edit</button>
-              <button class="detail-btn danger" id="detail-delete-btn">Delete</button>
-            </div>
-            <div class="edit-form hidden" id="edit-form">
-              <div class="form-field">
-                <label class="form-label">Name</label>
-                <input class="form-input" id="edit-name" type="text">
-              </div>
-              <div class="form-field">
-                <label class="form-label">Description</label>
-                <textarea class="form-input" id="edit-desc"></textarea>
-              </div>
-              <div class="form-field">
-                <label class="form-label">Color</label>
-                <select class="form-input" id="edit-color">
-                  <option value="purple">Purple — Archetypal</option>
-                  <option value="blue">Blue — Protector</option>
-                  <option value="teal">Teal — Merged / Integrated</option>
-                  <option value="amber">Amber — Active Protector</option>
-                  <option value="coral">Coral — Exile</option>
-                  <option value="green">Green — Resource</option>
-                  <option value="gray">Gray — Hidden / Unknown</option>
-                  <option value="gold">Gold — Liberated</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label class="form-label">Status</label>
-                <input class="form-input" id="edit-status" type="text" placeholder="e.g. ◎ Merged">
-              </div>
-              <div class="form-field">
-                <label class="form-label">Shape</label>
-                <select class="form-input" id="edit-shape">
-                  <option value="circle">Circle</option>
-                  <option value="ellipse">Ellipse — Vast / Expansive</option>
-                  <option value="diamond">Diamond — Resource</option>
-                  <option value="dashed">Dashed — Ambiguous</option>
-                </select>
-              </div>
-              <div class="form-actions">
-                <button class="btn-secondary" id="edit-cancel-btn">Cancel</button>
-                <button class="btn-primary" id="edit-save-btn">Save</button>
-              </div>
+        <!-- Detail slide-over (from left) -->
+        <div id="detail-panel">
+          <button class="detail-close" id="detail-close">×</button>
+          <div class="detail-header">
+            <div class="detail-part-name" id="detail-name"></div>
+            <div class="detail-tier-row">
+              <span class="detail-tier" id="detail-tier"></span>
+              <span class="status-badge hidden" id="detail-status"></span>
             </div>
           </div>
+          <div class="detail-body" id="detail-body">
+            <div>
+              <div class="detail-section-label">Description</div>
+              <div class="detail-desc" id="detail-desc"></div>
+            </div>
+            <div id="detail-moments-section" class="hidden">
+              <div class="detail-section-label">Key Moments</div>
+              <div id="detail-moments"></div>
+            </div>
+          </div>
+          <div class="detail-footer" id="detail-footer-pract">
+            <button class="detail-btn" id="detail-edit-btn">Edit</button>
+            <button class="detail-btn danger" id="detail-delete-btn">Delete</button>
+          </div>
+          <div class="edit-form hidden" id="edit-form">
+            <div class="form-field">
+              <label class="form-label">Name</label>
+              <input class="form-input" id="edit-name" type="text">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Description</label>
+              <textarea class="form-input" id="edit-desc"></textarea>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Color</label>
+              <select class="form-input" id="edit-color">
+                <option value="purple">Purple — Archetypal</option>
+                <option value="blue">Blue — Protector</option>
+                <option value="teal">Teal — Merged / Integrated</option>
+                <option value="amber">Amber — Active Protector</option>
+                <option value="coral">Coral — Exile</option>
+                <option value="green">Green — Resource</option>
+                <option value="gray">Gray — Hidden / Unknown</option>
+                <option value="gold">Gold — Liberated</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Zone</label>
+              <select class="form-input" id="edit-zone">
+                <option value="3">Zone 3 — Source / Luminous</option>
+                <option value="2">Zone 2 — Present</option>
+                <option value="1">Zone 1 — Deep / Past</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Status</label>
+              <input class="form-input" id="edit-status" type="text" placeholder="e.g. ◎ Merged">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Shape</label>
+              <select class="form-input" id="edit-shape">
+                <option value="circle">Circle</option>
+                <option value="ellipse">Ellipse — Vast / Expansive</option>
+                <option value="diamond">Diamond — Resource</option>
+                <option value="dashed">Dashed — Ambiguous</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button class="btn-secondary" id="edit-cancel-btn">Cancel</button>
+              <button class="btn-primary" id="edit-save-btn">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone confirm overlay -->
+        <div id="zone-confirm-overlay" class="hidden">
+          <div class="zone-confirm-card">
+            <div class="zone-confirm-msg" id="zone-confirm-msg"></div>
+            <div class="zone-confirm-actions">
+              <button class="btn-secondary" id="zone-confirm-no">Keep here</button>
+              <button class="btn-primary" id="zone-confirm-yes">Move</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Log drawer (slides from right over map) -->
+        <div id="log-drawer">
+          <div class="drawer-header">
+            <span class="panel-title">Progress Log</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="mode-badge" id="log-view-badge">Clinical</span>
+              <button class="drawer-close" id="log-drawer-close">×</button>
+            </div>
+          </div>
+          <div class="log-list" id="log-list"></div>
         </div>
       </div>
 
-      <!-- Mobile tab area wrapper -->
-      <div class="mobile-panel-area">
-        <div class="mobile-tabs">
-          <button class="mobile-tab active" data-panel="input">Chat</button>
-          <button class="mobile-tab" data-panel="log">Log</button>
+      <!-- ── CHAT PANEL ── -->
+      <div id="panel-chat">
+        <!-- Mobile handle bar (visible on small screens only) -->
+        <div class="chat-sheet-handle" id="chat-sheet-handle">
+          <div class="chat-sheet-pip"></div>
+          <span class="chat-sheet-label">Parts Buddy</span>
         </div>
-
-        <!-- Panel 2: Parts Buddy chat -->
-        <div class="panel" id="panel-input">
-          <div class="panel-header">
-            <span class="panel-title">Parts Buddy</span>
-          </div>
-          <div class="chat-history" id="chat-history"></div>
-          <div class="chat-bar">
-            <textarea class="chat-input" id="chat-input" rows="1"
-              placeholder="Ask about the map, paste a transcript, describe a session…"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn" title="Send (Enter)">↑</button>
-            <button class="chat-mic-btn" id="chat-mic-btn" title="Voice input">🎙</button>
-          </div>
+        <div class="panel-header">
+          <span class="panel-title">Parts Buddy</span>
         </div>
-
-        <!-- Panel 3: Progress Log -->
-        <div class="panel" id="panel-log">
-          <div class="panel-header">
-            <span class="panel-title">Progress Log</span>
-            <span class="mode-badge" id="log-view-badge">Clinical</span>
-          </div>
-          <div class="log-list" id="log-list"></div>
+        <div class="chat-history" id="chat-history"></div>
+        <div class="chat-bar">
+          <textarea class="chat-input" id="chat-input" rows="1"
+            placeholder="Ask about the map, paste a transcript, describe a session…"></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" title="Send (Enter)">↑</button>
+          <button class="chat-mic-btn" id="chat-mic-btn" title="Voice input">🎙</button>
         </div>
       </div>
 
@@ -1045,22 +430,11 @@
     const km = await crypto.subtle.importKey('raw', enc.encode(hash), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey(
       { name: 'PBKDF2', salt: enc.encode('yourpartsmap'), iterations: 100000, hash: 'SHA-256' },
-      km,
-      { name: 'AES-GCM', length: 256 },
-      false, ['encrypt', 'decrypt']
+      km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
     );
   }
-
-  function u8ToB64(bytes) {
-    let s = '';
-    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-    return btoa(s);
-  }
-
-  function b64ToU8(str) {
-    return Uint8Array.from(atob(str), c => c.charCodeAt(0));
-  }
-
+  function u8ToB64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
+  function b64ToU8(str) { return Uint8Array.from(atob(str), c => c.charCodeAt(0)); }
   async function encryptData(data, hash) {
     const key = await deriveKey(hash);
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -1068,16 +442,12 @@
     const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
     return u8ToB64(iv) + '.' + u8ToB64(new Uint8Array(enc));
   }
-
   async function decryptData(str, hash) {
     const key = await deriveKey(hash);
     const [ivB64, dataB64] = str.split('.');
-    const iv = b64ToU8(ivB64);
-    const data = b64ToU8(dataB64);
-    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToU8(ivB64) }, key, b64ToU8(dataB64));
     return JSON.parse(new TextDecoder().decode(dec));
   }
-
   async function hashPIN(pin) {
     const encoded = new TextEncoder().encode(pin + 'yourpartsmap-salt');
     const h = await crypto.subtle.digest('SHA-256', encoded);
@@ -1102,28 +472,19 @@
     const t = await res.text();
     return t ? JSON.parse(t) : null;
   }
-
   async function dbLoad(hash) {
     const rows = await dbFetch(`maps?hash=eq.${encodeURIComponent(hash)}&select=*`);
     return rows?.length ? rows[0] : null;
   }
-
   async function dbCreate(hash, encData, practHash, clientHash) {
     return dbFetch('maps', {
       method: 'POST',
-      body: JSON.stringify({
-        hash, data: encData,
-        practitioner_pin_hash: practHash,
-        client_pin_hash: clientHash,
-        updated_at: new Date().toISOString()
-      })
+      body: JSON.stringify({ hash, data: encData, practitioner_pin_hash: practHash, client_pin_hash: clientHash, updated_at: new Date().toISOString() })
     });
   }
-
   async function dbUpdate(hash, encData) {
     return dbFetch(`maps?hash=eq.${encodeURIComponent(hash)}`, {
-      method: 'PATCH',
-      prefer: 'return=minimal',
+      method: 'PATCH', prefer: 'return=minimal',
       body: JSON.stringify({ data: encData, updated_at: new Date().toISOString() })
     });
   }
@@ -1131,30 +492,11 @@
   // ════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ════════════════════════════════════════════════════════════════════════
-  const APP = {
-    hash: null,
-    mode: null,       // 'practitioner' | 'client'
-    mapData: null,
-    dbRow: null,
-    saveTimer: null,
-    selectedPartId: null
-  };
+  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [] };
 
   function emptyMapData(name) {
-    return {
-      meta: {
-        title: `${name}'s Map`,
-        clientName: name,
-        sessionCount: 0,
-        createdAt: todayStr(),
-        lastSession: null
-      },
-      parts: [],
-      connections: [],
-      log: []
-    };
+    return { meta: { title: `${name}'s Map`, clientName: name, sessionCount: 0, createdAt: todayStr(), lastSession: null }, parts: [], connections: [], log: [] };
   }
-
   function todayStr() { return new Date().toISOString().slice(0, 10); }
   function genId() { return Math.random().toString(36).slice(2, 11); }
 
@@ -1165,31 +507,23 @@
     if (APP.saveTimer) clearTimeout(APP.saveTimer);
     APP.saveTimer = setTimeout(saveNow, 1000);
   }
-
   async function saveNow() {
     if (!APP.hash || !APP.mapData) return;
-    try {
-      const enc = await encryptData(APP.mapData, APP.hash);
-      await dbUpdate(APP.hash, enc);
-    } catch (e) { console.error('Save failed:', e); }
+    try { const enc = await encryptData(APP.mapData, APP.hash); await dbUpdate(APP.hash, enc); }
+    catch (e) { console.error('Save failed:', e); }
   }
 
   // ════════════════════════════════════════════════════════════════════════
   // ROUTER
   // ════════════════════════════════════════════════════════════════════════
   function getURLHash() { return window.location.hash.slice(1) || ''; }
-
   async function route() {
     const h = getURLHash();
     if (!h) { showDashboard(); return; }
     showPINScreen(h);
   }
-
   window.addEventListener('hashchange', route);
 
-  // ════════════════════════════════════════════════════════════════════════
-  // SCREEN SWITCHER
-  // ════════════════════════════════════════════════════════════════════════
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -1214,35 +548,21 @@
     hint.textContent = 'Checking…';
     try {
       const row = await dbLoad(APP.hash);
-      if (!row) {
-        hint.textContent = '';
-        history.replaceState(null, '', window.location.pathname);
-        openNewMapModal();
-        return;
-      }
+      if (!row) { hint.textContent = ''; history.replaceState(null, '', window.location.pathname); openNewMapModal(); return; }
       APP.dbRow = row;
       const ph = await hashPIN(pin);
-      if (ph === row.practitioner_pin_hash) {
-        APP.mode = 'practitioner';
-      } else if (ph === row.client_pin_hash) {
-        APP.mode = 'client';
-      } else {
+      if (ph === row.practitioner_pin_hash) { APP.mode = 'practitioner'; }
+      else if (ph === row.client_pin_hash) { APP.mode = 'client'; }
+      else {
         hint.textContent = 'Incorrect PIN. Try again.';
         const inp = document.getElementById('pin-input');
-        inp.classList.remove('shake');
-        void inp.offsetWidth;
-        inp.classList.add('shake');
-        inp.value = '';
-        inp.focus();
-        return;
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        inp.value = ''; inp.focus(); return;
       }
       APP.mapData = await decryptData(row.data, APP.hash);
       hint.textContent = '';
       showMainApp();
-    } catch (e) {
-      hint.textContent = 'Connection error. Please try again.';
-      console.error(e);
-    }
+    } catch (e) { hint.textContent = 'Connection error. Please try again.'; console.error(e); }
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -1252,36 +572,36 @@
     showScreen('screen-app');
     const title = APP.mapData?.meta?.title || 'Map';
     document.getElementById('app-map-title').textContent = title;
-    document.getElementById('mode-badge').textContent =
-      APP.mode === 'practitioner' ? 'Practitioner' : 'Client';
-    document.getElementById('log-view-badge').textContent =
-      APP.mode === 'practitioner' ? 'Clinical' : 'Narrative';
+    document.getElementById('mode-badge').textContent = APP.mode === 'practitioner' ? 'Practitioner' : 'Client';
+    document.getElementById('log-view-badge').textContent = APP.mode === 'practitioner' ? 'Clinical' : 'Narrative';
     document.getElementById('btn-add-part').classList.toggle('hidden', APP.mode !== 'practitioner');
-
     renderMap();
     renderLog();
     initChat();
-    initMobileTabs();
-
-    // Save this map to local dashboard index
-    if (APP.mode === 'practitioner') {
-      updateLocalIndex(APP.hash, title, (APP.mapData?.parts || []).length);
-    }
+    if (APP.mode === 'practitioner') updateLocalIndex(APP.hash, title, (APP.mapData?.parts || []).length);
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // COLOR DEFINITIONS
+  // COLORS
   // ════════════════════════════════════════════════════════════════════════
   const COLORS = {
-    purple: { fill:'#1c1830', stroke:'#8a82d0', text:'#c0baf0', label:'Archetypal' },
-    blue:   { fill:'#0e1a28', stroke:'#4e96cc', text:'#a0c8ee', label:'Protector' },
-    teal:   { fill:'#0a1e18', stroke:'#38b088', text:'#88d8bf', label:'Integrated' },
-    amber:  { fill:'#1e1608', stroke:'#d8a038', text:'#f0d090', label:'Active Protector' },
-    coral:  { fill:'#180e08', stroke:'#c86040', text:'#f0b8a0', label:'Exile' },
-    green:  { fill:'#101a08', stroke:'#70b030', text:'#c0e090', label:'Resource' },
-    gray:   { fill:'#181818', stroke:'#808070', text:'#c8c8b8', label:'Hidden' },
-    gold:   { fill:'#201608', stroke:'#c8a246', text:'#e8c870', label:'Liberated' }
+    purple: { fill:'#ece9f5', stroke:'#9b8fc4', text:'#4e437a', label:'Archetypal' },
+    blue:   { fill:'#e6eff8', stroke:'#5888bc', text:'#2e5880', label:'Protector' },
+    teal:   { fill:'#e3f2ed', stroke:'#469c7c', text:'#255e4a', label:'Integrated' },
+    amber:  { fill:'#f5ede0', stroke:'#c07c38', text:'#7a4c18', label:'Active Protector' },
+    coral:  { fill:'#f5e8e4', stroke:'#bc6858', text:'#7a3828', label:'Exile' },
+    green:  { fill:'#e6f0e0', stroke:'#629448', text:'#386220', label:'Resource' },
+    gray:   { fill:'#eeece8', stroke:'#948e84', text:'#524e48', label:'Hidden' },
+    gold:   { fill:'#f5ecd6', stroke:'#c8a246', text:'#6e4e0c', label:'Liberated' }
   };
+
+  const ZONE_NAMES = { 1: 'Deep', 2: 'Present', 3: 'Source' };
+
+  function getZoneFromY(y) {
+    if (y < 0.33) return 3;
+    if (y > 0.67) return 1;
+    return 2;
+  }
 
   // ════════════════════════════════════════════════════════════════════════
   // MAP RENDER
@@ -1306,56 +626,32 @@
     const W = 800, H = 600;
     const defs = document.querySelector('#map-svg defs');
 
-    // Build gradients once
-    if (!defs.querySelector('#grad-sky')) {
-      const make = (id, stops) => {
+    if (!defs.querySelector('#grad-z3')) {
+      const mkLin = (id, stops) => {
         const gr = svgEl('linearGradient', { id, x1:'0', y1:'0', x2:'0', y2:'1' });
         gr.innerHTML = stops; defs.appendChild(gr);
       };
-      make('grad-sky',
-        '<stop offset="0%" stop-color="#1a1530"/><stop offset="100%" stop-color="#111009"/>');
-      make('grad-mid',
-        '<stop offset="0%" stop-color="#111009"/><stop offset="100%" stop-color="#120f06"/>');
-      make('grad-exile',
-        '<stop offset="0%" stop-color="#120f06"/><stop offset="100%" stop-color="#180a04"/>');
+      mkLin('grad-z3', '<stop offset="0%" stop-color="#fdf6e3"/><stop offset="100%" stop-color="#f8edbe"/>');
+      mkLin('grad-z2', '<stop offset="0%" stop-color="#faf6f0"/><stop offset="100%" stop-color="#f2ebe0"/>');
+      mkLin('grad-z1', '<stop offset="0%" stop-color="#e8dcc8"/><stop offset="100%" stop-color="#c8b898"/>');
+      // blend strips: top of each zone blends into zone above
+      mkLin('grad-blend32', '<stop offset="0%" stop-color="#f8edbe" stop-opacity="0"/><stop offset="100%" stop-color="#faf6f0" stop-opacity="0"/>');
     }
 
-    g.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H*0.25, fill:'url(#grad-sky)' }));
-    g.appendChild(svgEl('rect', { x:0, y:H*0.25, width:W, height:H*0.45, fill:'url(#grad-mid)' }));
-    g.appendChild(svgEl('rect', { x:0, y:H*0.70, width:W, height:H*0.30, fill:'url(#grad-exile)' }));
+    g.appendChild(svgEl('rect', { x:0, y:0,       width:W, height:H*0.34, fill:'url(#grad-z3)' }));
+    g.appendChild(svgEl('rect', { x:0, y:H*0.34,  width:W, height:H*0.33, fill:'url(#grad-z2)' }));
+    g.appendChild(svgEl('rect', { x:0, y:H*0.67,  width:W, height:H*0.33, fill:'url(#grad-z1)' }));
 
-    // Mountain silhouette
-    g.appendChild(svgEl('path', {
-      d: `M0,${H*0.70} Q80,${H*0.63} 180,${H*0.68} Q280,${H*0.60} 400,${H*0.655}
-          Q520,${H*0.59} 620,${H*0.64} Q720,${H*0.57} 800,${H*0.62}
-          L800,${H*0.70} Z`,
-      fill: '#1a1208', opacity: '0.65'
-    }));
-
-    // Assembly Place
-    const apX = W/2, apY = H*0.675;
-    const glow = svgEl('circle', { cx:apX, cy:apY, r:22, fill:'url(#glow-gold)', class:'assembly-glow' });
-    g.appendChild(glow);
-    const glyph = svgEl('text', {
-      x: apX, y: apY+6, 'text-anchor':'middle',
-      'font-size':'16', fill:'#c8a246', opacity:'0.65', 'font-family':'serif',
-      'pointer-events':'none'
-    });
-    glyph.textContent = '⌬';
-    g.appendChild(glyph);
-
-    // Zone labels
-    const zl = (txt, x, y) => {
-      const t = svgEl('text', {
-        x, y, 'text-anchor':'middle', 'font-size':'9',
-        'font-family':"'Cormorant Garamond', serif", 'font-style':'italic',
-        'letter-spacing':'3', fill:'rgba(255,255,255,0.09)', 'pointer-events':'none'
-      });
-      t.textContent = txt; g.appendChild(t);
+    // Soft blur transition at boundaries
+    const blend = (y, c1, c2) => {
+      const id = 'blend-' + Math.random().toString(36).slice(2);
+      const gr = svgEl('linearGradient', { id, x1:'0', y1:'0', x2:'0', y2:'1' });
+      gr.innerHTML = `<stop offset="0%" stop-color="${c1}" stop-opacity="0.9"/><stop offset="100%" stop-color="${c2}" stop-opacity="0"/>`;
+      defs.appendChild(gr);
+      return svgEl('rect', { x:0, y:y, width:W, height:H*0.08, fill:`url(#${id})`, opacity:'0.55' });
     };
-    zl('ARCHETYPAL', W/2, H*0.08);
-    zl('PROTECTORS',  W/2, H*0.44);
-    zl('EXILES',      W/2, H*0.88);
+    g.appendChild(blend(H*0.30, '#f8edbe', '#faf6f0'));
+    g.appendChild(blend(H*0.63, '#f2ebe0', '#e8dcc8'));
   }
 
   function renderConnections() {
@@ -1363,12 +659,12 @@
     if (!APP.mapData) return;
     const parts = APP.mapData.parts || [];
     for (const conn of (APP.mapData.connections || [])) {
-      const f = parts.find(p => p.id === conn.from || p.name.toLowerCase().includes(conn.from.toLowerCase()));
-      const t = parts.find(p => p.id === conn.to   || p.name.toLowerCase().includes(conn.to.toLowerCase()));
+      const f = parts.find(p => p.id === conn.from || p.name.toLowerCase().includes((conn.from||'').toLowerCase()));
+      const t = parts.find(p => p.id === conn.to   || p.name.toLowerCase().includes((conn.to||'').toLowerCase()));
       if (!f || !t) continue;
       g.appendChild(svgEl('line', {
         x1: f.x*800, y1: f.y*600, x2: t.x*800, y2: t.y*600,
-        stroke: 'rgba(255,255,255,0.1)', 'stroke-width':'1',
+        stroke: 'rgba(100,70,40,0.15)', 'stroke-width':'1.5',
         'stroke-dasharray': conn.style === 'dashed' ? '4,4' : 'none'
       }));
     }
@@ -1386,43 +682,42 @@
     const x = (part.x || 0.5) * 800;
     const y = (part.y || 0.5) * 600;
     const r = part.size || 32;
+    const zone = part.zone || getZoneFromY(part.y || 0.5);
 
-    const g = svgEl('g', {
-      class: `part-node part-${part.color||'gray'}${part.color==='purple'?' part-archetypal':''}`,
-      'data-part-id': part.id,
-      transform: `translate(${x},${y})`
-    });
+    // Outer g: handles position (drag updates this)
+    const pos = svgEl('g', { class: 'part-pos', 'data-part-id': part.id, transform: `translate(${x},${y})` });
+
+    // Inner g: handles CSS animation (no transform attr so CSS can work cleanly)
+    const animCls = zone === 3 ? ' part-zone3-anim' : zone === 2 ? ' part-zone2-anim' : '';
+    const inner = svgEl('g', { class: 'part-node' + animCls });
 
     // Liberated aura ring
     if (part.color === 'gold') {
-      g.appendChild(svgEl('circle', {
-        class:'aura-ring', cx:0, cy:0, r:r+8,
-        fill:'none', stroke:c.stroke, 'stroke-width':'1', opacity:'0.3'
-      }));
+      inner.appendChild(svgEl('circle', { cx:0, cy:0, r:r+8, fill:'none', stroke:c.stroke, 'stroke-width':'1', opacity:'0.4' }));
     }
 
     // Shape
+    const sAttrs = { class:'node-shape', fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5', filter:'url(#organic)' };
     let shape;
     if (part.shape === 'ellipse') {
-      shape = svgEl('ellipse', { class:'node-shape', cx:0, cy:0, rx:r*1.4, ry:r*0.75, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+      shape = svgEl('ellipse', { ...sAttrs, cx:0, cy:0, rx:r*1.4, ry:r*0.75 });
     } else if (part.shape === 'diamond') {
-      shape = svgEl('polygon', { class:'node-shape', points:`0,${-r} ${r},0 0,${r} ${-r},0`, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+      shape = svgEl('polygon', { ...sAttrs, points:`0,${-r} ${r},0 0,${r} ${-r},0` });
     } else if (part.shape === 'dashed') {
-      shape = svgEl('circle', { class:'node-shape', cx:0, cy:0, r, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5', 'stroke-dasharray':'4,3' });
+      shape = svgEl('circle', { ...sAttrs, cx:0, cy:0, r, 'stroke-dasharray':'4,3' });
     } else {
-      shape = svgEl('circle', { class:'node-shape', cx:0, cy:0, r, fill:c.fill, stroke:c.stroke, 'stroke-width':'1.5' });
+      shape = svgEl('circle', { ...sAttrs, cx:0, cy:0, r });
     }
-    g.appendChild(shape);
+    inner.appendChild(shape);
 
     // Label
     const lbl = svgEl('text', {
-      x:0, y: part.sublabel ? -4 : 1,
-      'text-anchor':'middle', 'dominant-baseline':'middle',
+      x:0, y: part.sublabel ? -4 : 1, 'text-anchor':'middle', 'dominant-baseline':'middle',
       'font-size':'10', 'font-family':"'Cormorant Garamond', serif", 'font-weight':'500',
       fill: c.text, 'pointer-events':'none'
     });
     lbl.textContent = part.label || shortenLabel(part.name);
-    g.appendChild(lbl);
+    inner.appendChild(lbl);
 
     if (part.sublabel) {
       const sub = svgEl('text', {
@@ -1431,11 +726,12 @@
         fill: c.text, opacity:'0.55', 'pointer-events':'none'
       });
       sub.textContent = part.sublabel;
-      g.appendChild(sub);
+      inner.appendChild(sub);
     }
 
-    g.addEventListener('click', e => { e.stopPropagation(); showPartDetail(part.id); });
-    return g;
+    pos.appendChild(inner);
+    pos.addEventListener('click', e => { e.stopPropagation(); showPartDetail(part.id); });
+    return pos;
   }
 
   function shortenLabel(name) {
@@ -1445,17 +741,21 @@
     return words.length >= 2 ? words.slice(0, 2).join(' ') : name.slice(0, 12);
   }
 
-  // ─── DRAG & DROP ───────────────────────────────────────────
+  // ── DRAG & DROP ─────────────────────────────────────────────────────────
+  let pendingZoneMove = null;
+
   function initDrag() {
     const svg = document.getElementById('map-svg');
-    let dragging = null, partId = null;
+    let dragging = null, partId = null, origX = null, origY = null;
 
     svg.addEventListener('mousedown', e => {
-      const node = e.target.closest('.part-node');
-      if (!node) return;
+      const pos = e.target.closest('.part-pos');
+      if (!pos) return;
       e.preventDefault();
-      dragging = node;
-      partId = node.getAttribute('data-part-id');
+      dragging = pos;
+      partId = pos.getAttribute('data-part-id');
+      const part = APP.mapData?.parts?.find(pt => pt.id === partId);
+      if (part) { origX = part.x; origY = part.y; }
     });
 
     svg.addEventListener('mousemove', e => {
@@ -1469,14 +769,23 @@
       const p = svgCoord(svg, e);
       const part = APP.mapData?.parts?.find(pt => pt.id === partId);
       if (part) {
-        part.x = Math.max(0.02, Math.min(0.98, p.x / 800));
-        part.y = Math.max(0.02, Math.min(0.98, p.y / 600));
-        scheduleSave();
-        renderConnections();
+        const newX = Math.max(0.02, Math.min(0.98, p.x / 800));
+        const newY = Math.max(0.02, Math.min(0.98, p.y / 600));
+        const oldZone = part.zone || getZoneFromY(origY);
+        const newZone = getZoneFromY(newY);
+
+        if (newZone !== oldZone) {
+          part.x = newX; part.y = newY; // hold position visually
+          pendingZoneMove = { partId, newZone, oldZone, oldX: origX, oldY: origY };
+          showZoneConfirm(part.name, newZone);
+        } else {
+          part.x = newX; part.y = newY;
+          scheduleSave();
+          renderConnections();
+        }
       }
       dragging = null; partId = null;
     };
-
     svg.addEventListener('mouseup', endDrag);
     svg.addEventListener('mouseleave', endDrag);
   }
@@ -1487,41 +796,55 @@
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   }
 
-  // ─── PART DETAIL ───────────────────────────────────────────
+  // ── ZONE CONFIRM ─────────────────────────────────────────────────────────
+  function showZoneConfirm(partName, newZone) {
+    document.getElementById('zone-confirm-msg').textContent =
+      `Move "${partName}" to the ${ZONE_NAMES[newZone]} zone?`;
+    document.getElementById('zone-confirm-overlay').classList.remove('hidden');
+  }
+
+  function confirmZoneMove() {
+    if (!pendingZoneMove) return;
+    const part = APP.mapData?.parts?.find(p => p.id === pendingZoneMove.partId);
+    if (part) { part.zone = pendingZoneMove.newZone; scheduleSave(); }
+    pendingZoneMove = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    renderConnections();
+  }
+
+  function rejectZoneMove() {
+    if (!pendingZoneMove) return;
+    const part = APP.mapData?.parts?.find(p => p.id === pendingZoneMove.partId);
+    if (part) { part.x = pendingZoneMove.oldX; part.y = pendingZoneMove.oldY; }
+    pendingZoneMove = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    renderMap();
+  }
+
+  // ── PART DETAIL ──────────────────────────────────────────────────────────
   function showPartDetail(partId) {
     const part = APP.mapData?.parts?.find(p => p.id === partId);
     if (!part) return;
     APP.selectedPartId = partId;
     const c = COLORS[part.color] || COLORS.gray;
-
     document.getElementById('detail-name').textContent = part.name;
     document.getElementById('detail-name').style.color = c.text;
     document.getElementById('detail-tier').textContent = c.label;
     document.getElementById('detail-desc').textContent = part.desc || '—';
-
     const sb = document.getElementById('detail-status');
     if (part.status) {
       sb.textContent = part.status;
       sb.style.cssText = `background:${c.fill};color:${c.text};border-color:${c.stroke}`;
       sb.classList.remove('hidden');
-    } else {
-      sb.classList.add('hidden');
-    }
-
+    } else { sb.classList.add('hidden'); }
     const ms = document.getElementById('detail-moments-section');
     const md = document.getElementById('detail-moments');
     if (part.keyMoments?.length) {
-      md.innerHTML = part.keyMoments.map(m => `<div class="key-moment-item">${m}</div>`).join('');
+      md.innerHTML = part.keyMoments.map(m => `<div class="key-moment-item">${escHtml(m)}</div>`).join('');
       ms.classList.remove('hidden');
-    } else {
-      ms.classList.add('hidden');
-    }
-
-    const fp = document.getElementById('detail-footer-pract');
-    const ef = document.getElementById('edit-form');
-    ef.classList.add('hidden');
-    fp.classList.toggle('hidden', APP.mode !== 'practitioner');
-
+    } else { ms.classList.add('hidden'); }
+    document.getElementById('edit-form').classList.add('hidden');
+    document.getElementById('detail-footer-pract').classList.toggle('hidden', APP.mode !== 'practitioner');
     document.getElementById('detail-panel').classList.add('open');
   }
 
@@ -1538,6 +861,7 @@
     document.getElementById('edit-name').value = part.name || '';
     document.getElementById('edit-desc').value = part.desc || '';
     document.getElementById('edit-color').value = part.color || 'gray';
+    document.getElementById('edit-zone').value = String(part.zone || getZoneFromY(part.y || 0.5));
     document.getElementById('edit-status').value = part.status || '';
     document.getElementById('edit-shape').value = part.shape || 'circle';
     document.getElementById('detail-footer-pract').classList.add('hidden');
@@ -1553,6 +877,13 @@
     part.color  = document.getElementById('edit-color').value;
     part.status = document.getElementById('edit-status').value.trim();
     part.shape  = document.getElementById('edit-shape').value;
+    const newZone = parseInt(document.getElementById('edit-zone').value, 10);
+    if (newZone !== part.zone) {
+      part.zone = newZone;
+      if (newZone === 3) part.y = 0.05 + Math.random() * 0.24;
+      else if (newZone === 1) part.y = 0.70 + Math.random() * 0.22;
+      else part.y = 0.36 + Math.random() * 0.28;
+    }
     renderMap();
     showPartDetail(APP.selectedPartId);
     scheduleSave();
@@ -1561,9 +892,7 @@
   function deletePart() {
     if (!APP.selectedPartId || !confirm('Remove this part from the map?')) return;
     APP.mapData.parts = APP.mapData.parts.filter(p => p.id !== APP.selectedPartId);
-    APP.mapData.connections = APP.mapData.connections.filter(
-      c => c.from !== APP.selectedPartId && c.to !== APP.selectedPartId
-    );
+    APP.mapData.connections = APP.mapData.connections.filter(c => c.from !== APP.selectedPartId && c.to !== APP.selectedPartId);
     closeDetailPanel();
     renderMap();
     scheduleSave();
@@ -1571,74 +900,74 @@
 
   function addPartToMap(partData) {
     if (!APP.mapData) return;
+    let zone = partData.zone ? parseInt(partData.zone, 10) : null;
+    if (!zone) {
+      const tier = partData.suggestedTier;
+      if (tier === 'archetypal') zone = 3;
+      else if (tier === 'exile') zone = 1;
+      else zone = 2;
+    }
+    let y;
+    if (zone === 3) y = 0.05 + Math.random() * 0.24;
+    else if (zone === 1) y = 0.70 + Math.random() * 0.22;
+    else y = 0.36 + Math.random() * 0.28;
     const part = {
-      id: genId(),
-      name: partData.name,
-      label: shortenLabel(partData.name),
-      color: partData.suggestedColor || 'gray',
-      shape: 'circle',
-      size: 32,
-      x: 0.18 + Math.random() * 0.64,
-      y: 0.25 + Math.random() * 0.5,
-      desc: partData.description || '',
-      status: '',
-      firstSession: (APP.mapData.meta.sessionCount || 0) + 1,
-      keyMoments: []
+      id: genId(), name: partData.name, label: shortenLabel(partData.name),
+      color: partData.suggestedColor || 'gray', shape: 'circle', size: 32, zone,
+      x: 0.12 + Math.random() * 0.76, y,
+      desc: partData.description || '', status: '',
+      firstSession: (APP.mapData.meta.sessionCount || 0) + 1, keyMoments: []
     };
-    const tier = partData.suggestedTier;
-    if (tier === 'archetypal') part.y = 0.06 + Math.random() * 0.16;
-    else if (tier === 'exile')  part.y = 0.73 + Math.random() * 0.20;
-    else if (tier === 'protector') part.y = 0.28 + Math.random() * 0.32;
     APP.mapData.parts.push(part);
     renderMap();
     scheduleSave();
     return part;
   }
 
-  // Click map background → close detail
   document.getElementById('map-svg').addEventListener('click', e => {
-    const node = e.target.closest('.part-node');
-    if (!node) closeDetailPanel();
+    if (!e.target.closest('.part-pos')) closeDetailPanel();
   });
 
   // ════════════════════════════════════════════════════════════════════════
-  // SESSION INPUT TABS
+  // PARTS BUDDY
   // ════════════════════════════════════════════════════════════════════════
-  // ════════════════════════════════════════════════════════════════════════
-  // PARTS BUDDY CHAT
-  // ════════════════════════════════════════════════════════════════════════
+  const BUDDY_PROMPT = `You are Parts Buddy — a warm, matter-of-fact assistant helping a somatic coach (or their client) maintain a living map of an inner world using Internal Family Systems. You have the current map state as context. Use the client's exact language always. A dragon is a dragon. Ask clarifying questions when needed. Be brief. Don't over-explain IFS. When you take an action, say what you did in one sentence.
 
-  const BUDDY_PROMPT = `You are Parts Buddy — a warm, matter-of-fact assistant helping a somatic coach (or their client) maintain a living map of an inner world using Internal Family Systems. You have the current map state as context. You can add parts, update parts, and add to the progress log by including a JSON action block in your response. Use the client's exact language always. A dragon is a dragon. Ask clarifying questions when needed. Be brief. Don't over-explain IFS. When you take an action, say what you did in one sentence.
+Zones: Zone 3 (top) = Source / Luminous — archetypal, spiritual, Self energy. Zone 2 (middle) = Present — protectors, daily-life parts. Zone 1 (bottom) = Deep / Past — exiles, wounded or young parts.
 
 Always respond with valid JSON in exactly this format:
-{
-  "message": "your conversational response here",
-  "actions": []
-}
+{ "message": "your conversational response here", "actions": [] }
 
 Action types:
-- { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "suggestedTier": "archetypal|protector|integration|exile" } }
-- { "type": "update_part", "id": "part-id", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
-- { "type": "remove_part", "id": "part-id" }
+- { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3 } }
+- { "type": "update_part", "id": "part-id-or-name", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
+- { "type": "remove_part", "id": "part-id-or-name" }
+- { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
 - { "type": "add_log", "practitionerNote": "clinical note", "clientNote": "warm note in second person", "keyMoment": "one sentence" }
 
 Color guide: purple=archetypal, blue=protector, teal=integrated/merged, amber=active protector, coral=exile, green=resource, gray=hidden/unknown, gold=liberated
+Zone guide: zone 3=Source (archetypal/spiritual), zone 2=Present (protectors/daily), zone 1=Deep (exiles/wounded)
+For zone moves suggested by you, always set confirm:true so the practitioner can confirm.
 If no map changes needed, return empty actions array.`;
 
   function buildBuddySystem() {
     const map = APP.mapData;
     const partsDesc = (map?.parts || []).map(p =>
-      `  - "${p.name}" (id:${p.id}, color:${p.color}${p.status ? ', status:"' + p.status + '"' : ''}${p.desc ? ', desc:"' + p.desc.slice(0, 80) + '"' : ''})`
+      `  - "${p.name}" (id:${p.id}, color:${p.color}, zone:${p.zone || getZoneFromY(p.y || 0.5)}${p.status ? ', status:"' + p.status + '"' : ''}${p.desc ? ', desc:"' + p.desc.slice(0, 80) + '"' : ''})`
     ).join('\n') || '  (no parts yet)';
+    return `${BUDDY_PROMPT}\n\nCurrent map: ${map?.meta?.title || 'Untitled'}\nClient: ${map?.meta?.clientName || 'Unknown'}\nSessions: ${map?.meta?.sessionCount || 0}\n\nParts on the map:\n${partsDesc}`;
+  }
 
-    return `${BUDDY_PROMPT}
-
-Current map: ${map?.meta?.title || 'Untitled'}
-Client: ${map?.meta?.clientName || 'Unknown'}
-Sessions: ${map?.meta?.sessionCount || 0}
-
-Parts on the map:
-${partsDesc}`;
+  // Fuzzy part lookup: tries id, then exact name, then partial name
+  function findPartFuzzy(idOrName) {
+    if (!APP.mapData?.parts || !idOrName) return null;
+    let p = APP.mapData.parts.find(pt => pt.id === idOrName);
+    if (p) return p;
+    const lower = idOrName.toLowerCase();
+    p = APP.mapData.parts.find(pt => pt.name.toLowerCase() === lower);
+    if (p) return p;
+    p = APP.mapData.parts.find(pt => pt.name.toLowerCase().includes(lower) || lower.includes(pt.name.toLowerCase()));
+    return p || null;
   }
 
   function renderChat() {
@@ -1646,40 +975,32 @@ ${partsDesc}`;
     if (!APP.chatHistory?.length) {
       el.innerHTML = `<div class="chat-empty">
         <div class="chat-empty-title">Parts Buddy</div>
-        Paste a session transcript, describe what happened,<br>
-        or ask about what's on the map.
+        Paste a session transcript, describe what happened,<br>or ask about what's on the map.
       </div>`;
       return;
     }
     el.innerHTML = '';
-    for (const msg of APP.chatHistory) {
-      _appendBubble(msg.role, msg.content, msg.actionsSummary);
-    }
+    for (const msg of APP.chatHistory) _appendBubble(msg.role, msg.content, msg.actionsSummary, false);
     el.scrollTop = el.scrollHeight;
   }
 
-  function _appendBubble(role, content, actionsSummary, scroll) {
+  function _appendBubble(role, content, actionsSummary, scroll = true) {
     const el = document.getElementById('chat-history');
-    const empty = el.querySelector('.chat-empty');
-    if (empty) empty.remove();
-
+    el.querySelector('.chat-empty')?.remove();
     const wrap = document.createElement('div');
     wrap.className = 'chat-msg ' + role;
-
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
     bubble.textContent = content;
     wrap.appendChild(bubble);
-
     if (actionsSummary) {
       const acts = document.createElement('div');
       acts.className = 'chat-actions-taken';
       acts.textContent = actionsSummary;
       wrap.appendChild(acts);
     }
-
     el.appendChild(wrap);
-    if (scroll !== false) el.scrollTop = el.scrollHeight;
+    if (scroll) el.scrollTop = el.scrollHeight;
   }
 
   function _showTyping() {
@@ -1687,60 +1008,61 @@ ${partsDesc}`;
     const d = document.createElement('div');
     d.id = 'chat-typing'; d.className = 'chat-typing';
     d.innerHTML = '<span></span><span></span><span></span>';
-    el.appendChild(d);
-    el.scrollTop = el.scrollHeight;
+    el.appendChild(d); el.scrollTop = el.scrollHeight;
   }
-
   function _hideTyping() { document.getElementById('chat-typing')?.remove(); }
 
   async function sendChatMessage(text) {
     text = text.trim();
     if (!text || !APP.mapData) return;
-
-    const input    = document.getElementById('chat-input');
-    const sendBtn  = document.getElementById('chat-send-btn');
-    input.value = '';
-    input.style.height = 'auto';
-    sendBtn.disabled = true;
-
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+    input.value = ''; input.style.height = 'auto'; sendBtn.disabled = true;
     APP.chatHistory = APP.chatHistory || [];
     APP.chatHistory.push({ role: 'user', content: text });
     _appendBubble('user', text);
     _showTyping();
-
-    // Build Anthropic messages array from history (text only, no metadata)
     const messages = APP.chatHistory.map(m => ({ role: m.role, content: m.content }));
-
     try {
       const res = await fetch(CONFIG.PROXY_URL, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1024,
-          system: buildBuddySystem(),
-          messages
-        })
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1024, system: buildBuddySystem(), messages })
       });
-
       if (!res.ok) throw new Error(`Proxy ${res.status}`);
       const data = await res.json();
       const raw  = data.content[0].text;
       const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
 
       let parsed;
-      try { parsed = JSON.parse(clean); }
-      catch { parsed = { message: raw, actions: [] }; }
+      try {
+        parsed = JSON.parse(clean);
+      } catch {
+        // Auto-retry: ask Claude to reformat
+        try {
+          const retryMsgs = [
+            ...messages,
+            { role: 'assistant', content: raw },
+            { role: 'user', content: 'Please reformat your previous response as valid JSON only, no prose outside JSON: {"message":"...","actions":[]}' }
+          ];
+          const r2 = await fetch(CONFIG.PROXY_URL, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 512, system: buildBuddySystem(), messages: retryMsgs })
+          });
+          if (r2.ok) {
+            const d2 = await r2.json();
+            const raw2 = d2.content[0].text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+            parsed = JSON.parse(raw2);
+          } else { parsed = { message: raw, actions: [] }; }
+        } catch { parsed = { message: raw, actions: [] }; }
+      }
 
       const message = parsed.message || raw;
       const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
       const summary = applyBuddyActions(actions);
-
       _hideTyping();
       APP.chatHistory.push({ role: 'assistant', content: message, actionsSummary: summary });
       _appendBubble('assistant', message, summary);
       if (actions.length) scheduleSave();
-
     } catch (e) {
       _hideTyping();
       const errMsg = 'Something went wrong: ' + e.message;
@@ -1748,22 +1070,20 @@ ${partsDesc}`;
       _appendBubble('assistant', errMsg);
       console.error(e);
     } finally {
-      sendBtn.disabled = false;
-      input.focus();
+      sendBtn.disabled = false; input.focus();
     }
   }
 
   function applyBuddyActions(actions) {
     if (!actions?.length) return null;
     const done = [];
-
     for (const action of actions) {
       if (action.type === 'add_part' && action.part) {
         const p = action.part;
         const added = addPartToMap({
-          name: p.name,
-          description: p.desc || p.description || '',
+          name: p.name, description: p.desc || p.description || '',
           suggestedColor: p.color,
+          zone: p.zone || null,
           suggestedTier: p.suggestedTier || p.tier || 'protector'
         });
         if (added) {
@@ -1774,129 +1094,105 @@ ${partsDesc}`;
           renderMap();
         }
         done.push(`added "${p.name}"`);
-      }
 
-      else if (action.type === 'update_part' && action.id) {
-        const part = APP.mapData.parts.find(p => p.id === action.id);
+      } else if (action.type === 'update_part') {
+        const part = findPartFuzzy(action.id || action.name || '');
         if (part && action.changes) {
           Object.assign(part, action.changes);
           if (action.changes.name) part.label = shortenLabel(action.changes.name);
-          renderMap();
-          done.push(`updated "${part.name}"`);
+          renderMap(); done.push(`updated "${part.name}"`);
         }
-      }
 
-      else if (action.type === 'remove_part' && action.id) {
-        const idx = APP.mapData.parts.findIndex(p => p.id === action.id);
-        if (idx >= 0) {
-          const name = APP.mapData.parts[idx].name;
-          APP.mapData.parts.splice(idx, 1);
-          APP.mapData.connections = APP.mapData.connections.filter(
-            c => c.from !== action.id && c.to !== action.id
-          );
-          renderMap();
-          done.push(`removed "${name}"`);
+      } else if (action.type === 'remove_part') {
+        const part = findPartFuzzy(action.id || action.name || '');
+        if (part) {
+          const name = part.name;
+          APP.mapData.parts = APP.mapData.parts.filter(p => p.id !== part.id);
+          APP.mapData.connections = APP.mapData.connections.filter(c => c.from !== part.id && c.to !== part.id);
+          renderMap(); done.push(`removed "${name}"`);
         }
-      }
 
-      else if (action.type === 'add_log') {
+      } else if (action.type === 'move_zone') {
+        const part = findPartFuzzy(action.id || action.name || '');
+        if (part && action.zone) {
+          if (action.confirm) {
+            pendingZoneMove = { partId: part.id, newZone: action.zone, oldZone: part.zone, oldX: part.x, oldY: part.y };
+            showZoneConfirm(part.name, action.zone);
+          } else {
+            part.zone = action.zone;
+            if (action.zone === 3) part.y = 0.05 + Math.random() * 0.24;
+            else if (action.zone === 1) part.y = 0.70 + Math.random() * 0.22;
+            else part.y = 0.36 + Math.random() * 0.28;
+            renderMap(); done.push(`moved "${part.name}" to ${ZONE_NAMES[action.zone]}`);
+          }
+        }
+
+      } else if (action.type === 'add_log') {
         APP.mapData.meta.sessionCount = (APP.mapData.meta.sessionCount || 0) + 1;
         APP.mapData.meta.lastSession  = todayStr();
         APP.mapData.log.unshift({
-          id: genId(),
-          session: APP.mapData.meta.sessionCount,
-          date: todayStr(),
-          type: 'session',
+          id: genId(), session: APP.mapData.meta.sessionCount, date: todayStr(), type: 'session',
           practitionerNote: action.practitionerNote || '',
-          clientNote:       action.clientNote       || '',
-          keyMoment:        action.keyMoment        || ''
+          clientNote: action.clientNote || '',
+          keyMoment: action.keyMoment || ''
         });
-        renderLog();
-        done.push('added to log');
+        renderLog(); done.push('added to log');
       }
     }
-
     return done.length ? '↳ ' + done.join(', ') : null;
   }
 
-  // ── Chat mic (right-side button, auto-sends on stop) ──
+  // ── Chat mic ─────────────────────────────────────────────────────────────
   function initChatMic() {
     const micBtn = document.getElementById('chat-mic-btn');
     const input  = document.getElementById('chat-input');
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SR) { micBtn.style.display = 'none'; return; }
-
     let rec = null, active = false, finalText = '';
 
     function startRec() {
-      rec = new SR();
-      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
-
+      rec = new SR(); rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
       rec.onstart = () => micBtn.classList.add('recording');
-
       rec.onresult = e => {
-        for (let i = e.resultIndex; i < e.results.length; i++) {
+        for (let i = e.resultIndex; i < e.results.length; i++)
           if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
-        }
         let interim = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
+        for (let i = e.resultIndex; i < e.results.length; i++)
           if (!e.results[i].isFinal) interim += e.results[i][0].transcript;
-        }
         input.value = finalText + interim;
         _autoResizeInput(input);
       };
-
       rec.onerror = e => {
         if (e.error === 'no-speech') return;
         console.error('Speech error:', e.error);
-        active = false;
-        micBtn.classList.remove('recording');
+        active = false; micBtn.classList.remove('recording');
       };
-
       rec.onend = () => {
-        if (active) { try { rec.start(); } catch {} return; } // silence restart
+        if (active) { try { rec.start(); } catch {} return; }
         micBtn.classList.remove('recording');
-        // Auto-send when user taps Stop
         const text = input.value.trim();
         if (text) sendChatMessage(text);
       };
-
       rec.start();
     }
 
     micBtn.addEventListener('click', () => {
       if (active) { active = false; rec.stop(); return; }
-      active = true;
-      finalText = '';
-      input.value = '';
-      _autoResizeInput(input);
-      startRec();
+      active = true; finalText = ''; input.value = '';
+      _autoResizeInput(input); startRec();
     });
   }
 
-  function _autoResizeInput(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
-  }
+  function _autoResizeInput(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 160) + 'px'; }
 
   function initChat() {
     APP.chatHistory = APP.chatHistory || [];
     renderChat();
     initChatMic();
-
-    const input   = document.getElementById('chat-input');
+    const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
-
     sendBtn.addEventListener('click', () => sendChatMessage(input.value));
-
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendChatMessage(input.value);
-      }
-    });
-
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(input.value); } });
     input.addEventListener('input', () => _autoResizeInput(input));
   }
 
@@ -1907,30 +1203,19 @@ ${partsDesc}`;
     const list = document.getElementById('log-list');
     list.innerHTML = '';
     if (!APP.mapData?.log?.length) {
-      list.innerHTML = '<div class="empty-state">No sessions recorded yet.</div>';
-      return;
+      list.innerHTML = '<div class="empty-state">No sessions recorded yet.</div>'; return;
     }
     for (const entry of APP.mapData.log) {
       const div = document.createElement('div');
       div.className = 'log-entry';
-      if (entry.type === 'client-note') {
-        div.classList.add('log-client-note');
-        div.innerHTML = `
-          <div class="log-entry-header">
-            <span class="log-session-num">Your Reflection</span>
-            <span class="log-date">${entry.date}</span>
-          </div>
-          <div class="log-note">${escHtml(entry.clientNote)}</div>`;
-      } else {
-        const note = APP.mode === 'practitioner' ? entry.practitionerNote : entry.clientNote;
-        div.innerHTML = `
-          <div class="log-entry-header">
-            <span class="log-session-num">Session ${entry.session}</span>
-            <span class="log-date">${entry.date}</span>
-          </div>
-          ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}
-          ${note ? `<div class="log-note">${escHtml(note)}</div>` : ''}`;
-      }
+      const note = APP.mode === 'practitioner' ? entry.practitionerNote : entry.clientNote;
+      div.innerHTML = `
+        <div class="log-entry-header">
+          <span class="log-session-num">Session ${entry.session}</span>
+          <span class="log-date">${entry.date}</span>
+        </div>
+        ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}
+        ${note ? `<div class="log-note">${escHtml(note)}</div>` : ''}`;
       list.appendChild(div);
     }
   }
@@ -1938,37 +1223,22 @@ ${partsDesc}`;
   // ════════════════════════════════════════════════════════════════════════
   // DASHBOARD
   // ════════════════════════════════════════════════════════════════════════
-  function showDashboard() {
-    showScreen('screen-dashboard');
-    renderDashboard();
-  }
+  function showDashboard() { showScreen('screen-dashboard'); renderDashboard(); }
 
   function renderDashboard() {
     const list = document.getElementById('map-list');
     const maps = getLocalIndex();
-    if (!maps.length) {
-      list.innerHTML = '<div class="empty-state">No maps yet.<br>Create your first client map to get started.</div>';
-      return;
-    }
+    if (!maps.length) { list.innerHTML = '<div class="empty-state">No maps yet.<br>Create your first client map to get started.</div>'; return; }
     list.innerHTML = '';
     for (const m of maps) {
       const a = document.createElement('a');
-      a.className = 'map-row';
-      a.href = `#${m.hash}`;
-      a.innerHTML = `
-        <div class="map-row-name">${escHtml(m.name)}</div>
-        <div class="map-row-meta">
-          ${m.lastSession || '—'}<br>
-          ${m.partCount !== undefined ? `${m.partCount} parts` : ''}
-        </div>`;
+      a.className = 'map-row'; a.href = `#${m.hash}`;
+      a.innerHTML = `<div class="map-row-name">${escHtml(m.name)}</div><div class="map-row-meta">${m.lastSession || '—'}<br>${m.partCount !== undefined ? `${m.partCount} parts` : ''}</div>`;
       list.appendChild(a);
     }
   }
 
-  function getLocalIndex() {
-    try { return JSON.parse(localStorage.getItem('ypm-index') || '[]'); }
-    catch { return []; }
-  }
+  function getLocalIndex() { try { return JSON.parse(localStorage.getItem('ypm-index') || '[]'); } catch { return []; } }
 
   function updateLocalIndex(hash, name, partCount) {
     const idx = getLocalIndex();
@@ -1982,13 +1252,12 @@ ${partsDesc}`;
   // NEW MAP MODAL
   // ════════════════════════════════════════════════════════════════════════
   function openNewMapModal() {
-    const modal = document.getElementById('new-map-modal');
     document.getElementById('modal-form-fields').classList.remove('hidden');
     document.getElementById('created-info').classList.add('hidden');
     document.getElementById('new-client-name').value = '';
     document.getElementById('new-pract-pin').value = '';
     document.getElementById('new-client-pin').value = '';
-    modal.classList.remove('hidden');
+    document.getElementById('new-map-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('new-client-name').focus(), 100);
   }
 
@@ -1996,75 +1265,36 @@ ${partsDesc}`;
     const name      = document.getElementById('new-client-name').value.trim();
     const practPin  = document.getElementById('new-pract-pin').value.trim();
     const clientPin = document.getElementById('new-client-pin').value.trim();
-    if (!name || !practPin || !clientPin) {
-      alert('Please fill in all three fields.'); return;
-    }
-
+    if (!name || !practPin || !clientPin) { alert('Please fill in all three fields.'); return; }
     const btn = document.getElementById('modal-create-btn');
     btn.disabled = true; btn.textContent = 'Creating…';
-
     try {
       const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
       const rand = Math.random().toString(36).slice(2, 6);
       const hash = `${slug}-${rand}`;
-
       const [practHash, clientHash] = await Promise.all([hashPIN(practPin), hashPIN(clientPin)]);
       const mapData = emptyMapData(name);
       const encrypted = await encryptData(mapData, hash);
       await dbCreate(hash, encrypted, practHash, clientHash);
       updateLocalIndex(hash, mapData.meta.title, 0);
-
       const url = `${location.origin}${location.pathname}#${hash}`;
       const info = document.getElementById('created-info');
-      info.innerHTML = `
-        <strong>Map created!</strong><br><br>
-        Client URL:<br>
-        <span class="url-line"><strong>${escHtml(url)}</strong></span><br><br>
-        Client PIN: <strong>${escHtml(clientPin)}</strong><br><br>
-        Share the URL and PIN with your client. Keep your practitioner PIN safe.`;
-
+      info.innerHTML = `<strong>Map created!</strong><br><br>Client URL:<br><span class="url-line"><strong>${escHtml(url)}</strong></span><br><br>Client PIN: <strong>${escHtml(clientPin)}</strong><br><br>Share the URL and PIN with your client. Keep your practitioner PIN safe.`;
       const openBtn = document.createElement('button');
-      openBtn.className = 'btn-primary';
-      openBtn.style.marginTop = '1rem';
-      openBtn.textContent = 'Open Map';
-      openBtn.addEventListener('click', () => {
-        document.getElementById('new-map-modal').classList.add('hidden');
-        window.location.hash = hash;
-      });
+      openBtn.className = 'btn-primary'; openBtn.style.marginTop = '1rem'; openBtn.textContent = 'Open Map';
+      openBtn.addEventListener('click', () => { document.getElementById('new-map-modal').classList.add('hidden'); window.location.hash = hash; });
       info.appendChild(openBtn);
       info.classList.remove('hidden');
       document.getElementById('modal-form-fields').classList.add('hidden');
-    } catch (e) {
-      alert('Error: ' + e.message); console.error(e);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Create Map';
-    }
-  }
-
-  // ════════════════════════════════════════════════════════════════════════
-  // MOBILE TABS
-  // ════════════════════════════════════════════════════════════════════════
-  function initMobileTabs() {
-    document.querySelectorAll('.mobile-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const panel = tab.getAttribute('data-panel');
-        document.getElementById('panel-input').classList.toggle('mobile-hidden', panel !== 'input');
-        document.getElementById('panel-log').classList.toggle('mobile-hidden', panel !== 'log');
-      });
-    });
+    } catch (e) { alert('Error: ' + e.message); console.error(e); }
+    finally { btn.disabled = false; btn.textContent = 'Create Map'; }
   }
 
   // ════════════════════════════════════════════════════════════════════════
   // UTILITY
   // ════════════════════════════════════════════════════════════════════════
   function escHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -2085,10 +1315,14 @@ ${partsDesc}`;
   document.getElementById('edit-save-btn').addEventListener('click', saveEditForm);
   document.getElementById('detail-delete-btn').addEventListener('click', deletePart);
 
-  // Add part quick-add
+  // Zone confirm
+  document.getElementById('zone-confirm-yes').addEventListener('click', confirmZoneMove);
+  document.getElementById('zone-confirm-no').addEventListener('click', rejectZoneMove);
+
+  // Add part
   document.getElementById('btn-add-part').addEventListener('click', () => {
     const name = prompt('Part name (use their exact language):');
-    if (name?.trim()) addPartToMap({ name: name.trim(), suggestedColor: 'gray', suggestedTier: 'protector' });
+    if (name?.trim()) addPartToMap({ name: name.trim(), suggestedColor: 'gray', zone: 2 });
   });
 
   // Share
@@ -2097,31 +1331,35 @@ ${partsDesc}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url).then(() => {
         const b = document.getElementById('btn-share');
-        b.textContent = 'Copied!';
-        setTimeout(() => b.textContent = 'Share', 2000);
+        b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Share', 2000);
       });
-    } else {
-      prompt('Client URL:', url);
-    }
+    } else { prompt('Client URL:', url); }
+  });
+
+  // Log drawer
+  document.getElementById('btn-log').addEventListener('click', () => {
+    document.getElementById('log-drawer').classList.toggle('open');
+  });
+  document.getElementById('log-drawer-close').addEventListener('click', () => {
+    document.getElementById('log-drawer').classList.remove('open');
+  });
+
+  // Mobile bottom sheet
+  document.getElementById('chat-sheet-handle').addEventListener('click', () => {
+    document.getElementById('panel-chat').classList.toggle('sheet-open');
   });
 
   // Dashboard nav
   document.getElementById('btn-dashboard').addEventListener('click', () => {
-    history.pushState(null, '', window.location.pathname);
-    showDashboard();
+    history.pushState(null, '', window.location.pathname); showDashboard();
   });
 
   // New client
   document.getElementById('new-client-btn').addEventListener('click', openNewMapModal);
-  document.getElementById('modal-cancel-btn').addEventListener('click', () => {
-    document.getElementById('new-map-modal').classList.add('hidden');
-  });
+  document.getElementById('modal-cancel-btn').addEventListener('click', () => { document.getElementById('new-map-modal').classList.add('hidden'); });
   document.getElementById('modal-create-btn').addEventListener('click', createNewMap);
-
-  // Close modal on overlay click
   document.getElementById('new-map-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('new-map-modal'))
-      document.getElementById('new-map-modal').classList.add('hidden');
+    if (e.target === document.getElementById('new-map-modal')) document.getElementById('new-map-modal').classList.add('hidden');
   });
 
   // ════════════════════════════════════════════════════════════════════════
