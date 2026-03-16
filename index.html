@@ -208,6 +208,9 @@
     .map-row:hover { background: var(--bg2); border-color: var(--border-strong); }
     .map-row-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; flex: 1; }
     .map-row-meta { font-size: 0.77rem; color: var(--text-faint); text-align: right; }
+    .map-delete-btn { background: none; border: none; color: var(--text-faint); font-size: 1.1rem; cursor: pointer; padding: 0.2rem 0.4rem; opacity: 0; transition: opacity 0.15s, color 0.15s; }
+    .map-row:hover .map-delete-btn { opacity: 1; }
+    .map-delete-btn:hover { color: var(--red); }
     .empty-state { color: var(--text-faint); font-size: 0.88rem; text-align: center; padding: 3rem 1rem; line-height: 1.8; }
     .dashboard-intro { width: 100%; max-width: 560px; text-align: center; }
     .dashboard-intro-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; color: var(--text); margin-bottom: 0.65rem; }
@@ -423,7 +426,7 @@
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-bar">
           <textarea class="chat-input" id="chat-input" rows="1"
-            placeholder="Tell Bob what happened…"></textarea>
+            placeholder="What's up?"></textarea>
           <button class="chat-send-btn" id="chat-send-btn" title="Send (Enter)">↑</button>
           <button class="chat-mic-btn" id="chat-mic-btn" title="Voice input">🎙</button>
         </div>
@@ -686,6 +689,36 @@
 
   const ZONE_NAMES = { 1: 'Deep', 2: 'Present', 3: 'Source' };
 
+  const SELF_CENTER = { x: 0.5, y: 0.5 }; // normalized
+
+  const BOB_PLACEHOLDERS = [
+    "What's up?",
+    "What do you want to share?",
+    "Talk to Bob…",
+    "What came up today?",
+    "How'd the session go?",
+    "What are you noticing?",
+    "Tell me what happened…",
+    "What's on your mind?",
+    "Bob is listening…",
+    "What do you want to work with?",
+    "What's alive right now?",
+    "Anything you want to log?",
+    "What did you see today?",
+    "How are your parts doing?",
+    "What came up for them?",
+    "Drop some notes, or just talk…",
+    "What's worth capturing?",
+    "What shifted today?",
+    "What do you want Bob to know?",
+    "Start anywhere…",
+  ];
+
+  function rotateBobPlaceholder() {
+    const input = document.getElementById('chat-input');
+    if (input) input.placeholder = BOB_PLACEHOLDERS[Math.floor(Math.random() * BOB_PLACEHOLDERS.length)];
+  }
+
   function getZoneFromY(y) {
     if (y < 0.33) return 3;
     if (y > 0.67) return 1;
@@ -731,21 +764,57 @@
 
     g.appendChild(svgEl('rect', { x:0, y:0, width:800, height:600, fill:'url(#grad-field)' }));
     g.appendChild(svgEl('rect', { x:0, y:0, width:800, height:600, fill:'url(#grad-self)' }));
+
+    // Self center marker
+    if (!defs.querySelector('#grad-self-glow')) {
+      const glow = svgEl('radialGradient', { id:'grad-self-glow', cx:'50%', cy:'50%', r:'50%' });
+      glow.innerHTML = '<stop offset="0%" stop-color="rgba(255,248,230,0.6)"/><stop offset="100%" stop-color="rgba(255,248,230,0)"/>';
+      defs.appendChild(glow);
+    }
+    const cx = SELF_CENTER.x * 800, cy = SELF_CENTER.y * 600;
+    const glowCircle = svgEl('circle', { cx, cy, r:28, fill:'url(#grad-self-glow)', 'pointer-events':'none' });
+    const ring = svgEl('circle', { cx, cy, r:18, fill:'none', stroke:'rgba(180,150,100,0.2)', 'stroke-width':'1', 'stroke-dasharray':'3,4', 'pointer-events':'none' });
+    const dot  = svgEl('circle', { cx, cy, r:3,  fill:'rgba(180,150,100,0.35)', 'pointer-events':'none' });
+    g.appendChild(glowCircle);
+    g.appendChild(ring);
+    g.appendChild(dot);
+  }
+
+  function organicPath(x1, y1, x2, y2, offsetMult) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 0.001) return `M ${x1} ${y1}`;
+    const seed = ((x1 * 1000 + y1 * 100 + x2 * 10 + y2) % 1 + 1) % 1;
+    const offset = (seed - 0.5) * dist * (offsetMult || 0.45);
+    const mx = (x1 + x2) / 2 - (dy / dist) * offset;
+    const my = (y1 + y2) / 2 + (dx / dist) * offset;
+    return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
   }
 
   function renderConnections() {
     const g = document.getElementById('map-connections');
+    g.innerHTML = '';
     if (!APP.mapData) return;
     const parts = APP.mapData.parts || [];
     for (const conn of (APP.mapData.connections || [])) {
       const f = parts.find(p => p.id === conn.from || p.name.toLowerCase().includes((conn.from||'').toLowerCase()));
       const t = parts.find(p => p.id === conn.to   || p.name.toLowerCase().includes((conn.to||'').toLowerCase()));
       if (!f || !t) continue;
-      g.appendChild(svgEl('line', {
-        x1: f.x*800, y1: f.y*600, x2: t.x*800, y2: t.y*600,
-        stroke: 'rgba(100,70,40,0.15)', 'stroke-width':'1.5',
-        'stroke-dasharray': conn.style === 'dashed' ? '4,4' : 'none'
-      }));
+      const x1 = f.x * 800, y1 = f.y * 600, x2 = t.x * 800, y2 = t.y * 600;
+      let stroke, strokeWidth, opacity, dashArray, offsetMult;
+      if (conn.type === 'allied') {
+        stroke = '#c4955a'; strokeWidth = '1.8'; opacity = '0.55'; dashArray = 'none'; offsetMult = 0.45;
+      } else if (conn.type === 'polarized') {
+        stroke = '#7a9ab8'; strokeWidth = '1.8'; opacity = '0.55'; dashArray = '5,3'; offsetMult = 0.6;
+      } else {
+        stroke = 'rgba(100,70,40,0.2)'; strokeWidth = '1.2'; opacity = '1'; dashArray = 'none'; offsetMult = 0.45;
+      }
+      const path = svgEl('path', {
+        d: organicPath(x1, y1, x2, y2, offsetMult),
+        fill: 'none', stroke, 'stroke-width': strokeWidth, opacity,
+        'stroke-dasharray': dashArray, 'pointer-events': 'stroke', cursor: 'pointer'
+      });
+      g.appendChild(path);
     }
   }
 
@@ -822,6 +891,7 @@
 
   // ── DRAG & DROP ─────────────────────────────────────────────────────────
   let pendingZoneMove = null;
+  let pendingConnection = null;
 
   function initDrag() {
     const svg = document.getElementById('map-svg');
@@ -898,6 +968,37 @@
     pendingZoneMove = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
     renderMap();
+  }
+
+  // ── CONNECTION CONFIRM ──────────────────────────────────────────────────
+  function showConnectionConfirm(name1, name2, type) {
+    const typeLabel = type === 'polarized' ? 'polarized (opposing)' : 'allied (same team)';
+    document.getElementById('zone-confirm-msg').textContent =
+      `Connect "${name1}" and "${name2}" as ${typeLabel}?`;
+    document.getElementById('zone-confirm-yes').onclick = confirmConnection;
+    document.getElementById('zone-confirm-no').onclick = rejectConnection;
+    document.getElementById('zone-confirm-overlay').classList.remove('hidden');
+  }
+
+  function confirmConnection() {
+    if (!pendingConnection) return;
+    APP.mapData.connections.push({
+      from: pendingConnection.from, to: pendingConnection.to,
+      style: 'solid', type: pendingConnection.type
+    });
+    pendingConnection = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+    renderConnections();
+    scheduleSave();
+  }
+
+  function rejectConnection() {
+    pendingConnection = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
   }
 
   // ── PART DETAIL ──────────────────────────────────────────────────────────
@@ -984,26 +1085,41 @@
       const tier = partData.suggestedTier;
       if (tier === 'guide' || tier === 'archetypal') zone = 3;
       else if (tier === 'integrated' || tier === 'liberated') zone = 2;
-      else zone = 1; // protectors, exiles, ancestral, unattached — all start in zone 1
+      else zone = 1;
     }
-    let y;
+    let x, y;
     if (zone === 3) {
       const isAncestral = (partData.suggestedTier === 'ancestral' || partData.suggestedTier === 'unattached');
+      x = 0.12 + Math.random() * 0.76;
       y = isAncestral ? 0.01 + Math.random() * 0.03 : 0.12 + Math.random() * 0.12;
     } else if (zone === 1) {
       const isAncestralBurden = (partData.suggestedTier === 'ancestral' || partData.suggestedTier === 'unattached');
       const isExile = partData.suggestedTier === 'exile';
+      x = 0.12 + Math.random() * 0.76;
       if (isAncestralBurden) y = 0.93 + Math.random() * 0.05;
       else if (isExile) y = 0.78 + Math.random() * 0.14;
       else y = 0.70 + Math.random() * 0.12;
     } else {
-      const isLiberated = partData.suggestedColor === 'gold';
-      y = isLiberated ? 0.42 + Math.random() * 0.16 : 0.36 + Math.random() * 0.28;
+      // Zone 2 — bias toward or away from Self center
+      const isIntegrated = partData.suggestedTier === 'integrated'
+        || partData.suggestedTier === 'liberated'
+        || partData.suggestedColor === 'gold';
+      if (isIntegrated) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.06 + Math.random() * 0.08;
+        x = 0.5 + Math.cos(angle) * radius;
+        y = 0.35 + Math.sin(angle) * radius * 0.6;
+      } else {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.18 + Math.random() * 0.18;
+        x = Math.max(0.05, Math.min(0.95, 0.5 + Math.cos(angle) * radius));
+        y = Math.max(0.34, Math.min(0.66, 0.42 + Math.sin(angle) * radius * 0.5));
+      }
     }
     const part = {
       id: genId(), name: partData.name, label: shortenLabel(partData.name),
       color: partData.suggestedColor || 'gray', shape: 'circle', size: 32, zone,
-      x: 0.12 + Math.random() * 0.76, y,
+      x, y,
       desc: partData.description || '', status: '',
       firstSession: (APP.mapData.meta.sessionCount || 0) + 1, keyMoments: []
     };
@@ -1048,6 +1164,8 @@ Zone placement defaults:
 - Liberated part → zone 2, near center
 - Ancestral burden returned to source → zone 3, near/off top edge
 
+The map has a Self center-point at the middle (x=0.5, y=0.5). In Zone 2, integrated and liberated parts should be placed near the center. Burdened or fragmented parts should be placed further from center. When suggesting zone moves toward Zone 2, describe the movement toward center as increased integration with Self.
+
 When suggesting a zone move, describe it in terms of the present-moment meter: e.g. "This part sounds like it's moved closer to the present — want to move it up?"
 
 Always respond with valid JSON in exactly this format:
@@ -1058,6 +1176,7 @@ Action types:
 - { "type": "update_part", "id": "part-id-or-name", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
+- { "type": "add_connection", "from": "part-id-or-name", "to": "part-id-or-name", "connectionType": "allied|polarized", "confirm": true }
 - { "type": "clear_log" }
 - { "type": "remove_log", "session": 1 }
 - { "type": "add_log",
@@ -1074,6 +1193,7 @@ Use clear_log when asked to erase everything or start fresh. Use remove_log with
 
 Color guide: purple=archetypal/guide, blue=protector, teal=integrated/merged, amber=active protector, coral=exile, green=resource, gray=hidden/unknown, gold=liberated
 For zone moves suggested by you, always set confirm:true so the practitioner can confirm.
+When you detect a clear relationship between parts — allied (same team, complementary strategies) or polarized (opposing strategies, in conflict) — suggest a connection with confirm:true. Only suggest when confident. Use "add_connection" with connectionType "allied" or "polarized". Do not connect every part — only meaningful relationships.
 If no map changes needed, return empty actions array.`;
 
   function buildBuddySystem() {
@@ -1144,6 +1264,7 @@ If no map changes needed, return empty actions array.`;
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
     input.value = ''; input.style.height = 'auto'; sendBtn.disabled = true;
+    rotateBobPlaceholder();
     APP.chatHistory = APP.chatHistory || [];
     APP.chatHistory.push({ role: 'user', content: text });
     _appendBubble('user', text);
@@ -1277,6 +1398,19 @@ If no map changes needed, return empty actions array.`;
       } else if (action.type === 'remove_log' && action.session) {
         APP.mapData.log = APP.mapData.log.filter(e => e.session !== action.session);
         renderLog(); done.push(`removed session ${action.session}`);
+
+      } else if (action.type === 'add_connection') {
+        const f = findPartFuzzy(action.from || '');
+        const t = findPartFuzzy(action.to || '');
+        const connType = action.connectionType || 'allied';
+        if (f && t && action.confirm) {
+          pendingConnection = { from: f.id, to: t.id, type: connType };
+          showConnectionConfirm(f.name, t.name, connType);
+        } else if (f && t) {
+          APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: connType });
+          renderConnections();
+          done.push(`connected "${f.name}" and "${t.name}"`);
+        }
       }
     }
     return done.length ? '↳ ' + done.join(', ') : null;
@@ -1329,6 +1463,7 @@ If no map changes needed, return empty actions array.`;
     APP.chatHistory = APP.chatHistory || [];
     renderChat();
     initChatMic();
+    rotateBobPlaceholder();
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
     sendBtn.addEventListener('click', () => sendChatMessage(input.value));
@@ -1421,8 +1556,11 @@ If no map changes needed, return empty actions array.`;
     for (const m of maps) {
       const a = document.createElement('a');
       a.className = 'map-row'; a.href = `#${m.hash}`;
-      a.innerHTML = `<div class="map-row-name">${escHtml(m.name)}</div><div class="map-row-meta">${m.lastSession || '—'}<br>${m.partCount !== undefined ? `${m.partCount} parts` : ''}</div>`;
+      a.innerHTML = `<div class="map-row-name">${escHtml(m.name)}</div><div class="map-row-meta">${m.lastSession || '—'}<br>${m.partCount !== undefined ? `${m.partCount} parts` : ''}</div><button class="map-delete-btn" title="Remove from dashboard">×</button>`;
       list.appendChild(a);
+      a.querySelector('.map-delete-btn').addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation(); deleteMap(m.hash);
+      });
     }
 
     // "How it works" toggle
@@ -1432,6 +1570,13 @@ If no map changes needed, return empty actions array.`;
       howPanel.classList.toggle('hidden', open);
       toggle.textContent = open ? 'How it works' : 'Hide';
     };
+  }
+
+  function deleteMap(hash) {
+    if (!confirm('Remove this map from your dashboard? The map data will remain accessible via its URL.')) return;
+    const idx = getLocalIndex().filter(m => m.hash !== hash);
+    localStorage.setItem('ypm-index', JSON.stringify(idx));
+    renderDashboard();
   }
 
   function getLocalIndex() { try { return JSON.parse(localStorage.getItem('ypm-index') || '[]'); } catch { return []; } }
@@ -1695,9 +1840,9 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
   document.getElementById('edit-save-btn').addEventListener('click', saveEditForm);
   document.getElementById('detail-delete-btn').addEventListener('click', deletePart);
 
-  // Zone confirm
-  document.getElementById('zone-confirm-yes').addEventListener('click', confirmZoneMove);
-  document.getElementById('zone-confirm-no').addEventListener('click', rejectZoneMove);
+  // Zone confirm (use .onclick so connection confirm can override without double-firing)
+  document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+  document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
 
   // Add part
   document.getElementById('btn-add-part').addEventListener('click', () => {
