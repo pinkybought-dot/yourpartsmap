@@ -261,10 +261,10 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── FEEDBACK WIDGET ── */
-    #feedback-widget { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
-    #feedback-trigger { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 20px; padding: 0.5rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-dim); cursor: pointer; box-shadow: 0 2px 12px rgba(60,40,20,0.1); transition: all 0.2s; letter-spacing: 0.02em; }
-    #feedback-trigger:hover { background: var(--bg2); color: var(--text); border-color: var(--border-strong); box-shadow: 0 4px 16px rgba(60,40,20,0.15); }
-    #feedback-panel { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1.25rem; width: 300px; box-shadow: 0 8px 32px rgba(60,40,20,0.12); display: flex; flex-direction: column; gap: 0.75rem; }
+    #feedback-widget { display: inline-flex; align-items: center; }
+    #feedback-trigger { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 0.33rem 0.58rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-faint); cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; box-shadow: none; white-space: nowrap; }
+    #feedback-trigger:hover { background: var(--bg2); color: var(--text); border-color: var(--border-strong); }
+    #feedback-panel { position: fixed; bottom: 1.5rem; left: 1rem; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1.25rem; width: 300px; box-shadow: 0 8px 32px rgba(60,40,20,0.12); display: flex; flex-direction: column; gap: 0.75rem; z-index: 200; }
     .feedback-header { display: flex; align-items: center; justify-content: space-between; }
     .feedback-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text); font-weight: 400; }
     .feedback-close { background: none; border: none; color: var(--text-faint); font-size: 1.2rem; cursor: pointer; line-height: 1; transition: color 0.15s; }
@@ -317,6 +317,19 @@
   <!-- ═══════════════════════════════ MAIN APP ════════════════════════════════ -->
   <div id="screen-app" class="screen">
     <header class="app-header">
+      <div id="feedback-widget">
+        <button id="feedback-trigger" title="Share feedback"><span>Feedback</span></button>
+        <div id="feedback-panel" class="hidden">
+          <div class="feedback-header">
+            <span class="feedback-title">Share feedback</span>
+            <button class="feedback-close" id="feedback-close">×</button>
+          </div>
+          <p class="feedback-subtitle">What's working? What's missing? What would make this better?</p>
+          <textarea id="feedback-text" class="feedback-textarea" placeholder="Your thoughts…" rows="4"></textarea>
+          <button id="feedback-send" class="feedback-send-btn">Send</button>
+          <div id="feedback-confirm" class="feedback-confirm hidden">Thank you — this helps a lot.</div>
+        </div>
+      </div>
       <div class="app-title" id="app-map-title">Map</div>
       <span class="mode-badge" id="mode-badge">Practitioner</span>
       <button class="icon-btn" id="btn-add-part" title="Add a part">+ Part</button>
@@ -502,9 +515,8 @@
       <div class="dashboard-intro-title">Your Parts Map</div>
       <div class="dashboard-intro-subtitle">A living map of your client's inner work.</div>
       <button class="new-client-btn" id="new-client-btn-empty">+ New Client</button>
-      <hr class="dashboard-divider">
-      <p class="dashboard-how-heading">How it works</p>
-      <div class="dashboard-steps-numbered">
+      <button class="dashboard-how-toggle-link" id="dashboard-how-toggle-empty">How does this work? ▾</button>
+      <div class="dashboard-steps-numbered hidden" id="dashboard-steps-empty">
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">1.</span><span>Click + New Client. Enter the client's name, your practitioner password, and a client password.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">2.</span><span>You'll get a unique URL for that client. Share the URL and their password with them — that's all they need to access their map.</span></div>
         <div class="dashboard-step-numbered"><span class="dashboard-step-num">3.</span><span>Your password opens the practitioner view: full clinical notes, session log, and export tools. Their password opens the client view: their personal journey, what shifted, and what their parts asked for.</span></div>
@@ -538,20 +550,6 @@
         </div>
       </div>
       <div class="created-info hidden" id="created-info"></div>
-    </div>
-  </div>
-
-  <div id="feedback-widget">
-    <button id="feedback-trigger" title="Share feedback"><span>Feedback</span></button>
-    <div id="feedback-panel" class="hidden">
-      <div class="feedback-header">
-        <span class="feedback-title">Share feedback</span>
-        <button class="feedback-close" id="feedback-close">×</button>
-      </div>
-      <p class="feedback-subtitle">What's working? What's missing? What would make this better?</p>
-      <textarea id="feedback-text" class="feedback-textarea" placeholder="Your thoughts…" rows="4"></textarea>
-      <button id="feedback-send" class="feedback-send-btn">Send</button>
-      <div id="feedback-confirm" class="feedback-confirm hidden">Thank you — this helps a lot.</div>
     </div>
   </div>
 
@@ -635,7 +633,7 @@
   // ════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ════════════════════════════════════════════════════════════════════════
-  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null };
+  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null, pendingOpeningProposal: null };
 
   function emptyMapData(name) {
     return { meta: { title: `${name}'s Map`, clientName: name, sessionCount: 0, createdAt: todayStr(), lastSession: null }, parts: [], connections: [], log: [] };
@@ -746,26 +744,18 @@
   const SELF_CENTER = { x: 0.5, y: 0.5 }; // normalized
 
   const BOB_PLACEHOLDERS = [
-    "What's up?",
-    "What do you want to share?",
-    "Talk to Bob…",
-    "What came up today?",
-    "How'd the session go?",
-    "What are you noticing?",
-    "Tell me what happened…",
-    "What's on your mind?",
-    "Bob is listening…",
-    "What do you want to work with?",
-    "What's alive right now?",
-    "Anything you want to log?",
-    "What did you see today?",
-    "How are your parts doing?",
-    "What came up for them?",
-    "Drop some notes, or just talk…",
-    "What's worth capturing?",
-    "What shifted today?",
-    "What do you want Bob to know?",
-    "Start anywhere…",
+    "I'm here...",
+    "Take your time...",
+    "What's alive?",
+    "Start wherever...",
+    "Here with you...",
+    "What's present?",
+    "What came up?",
+    "I'm listening...",
+    "What's moving?",
+    "What's here today?",
+    "What are you carrying?",
+    "What came through today?",
   ];
 
   function rotateBobPlaceholder() {
@@ -1434,13 +1424,49 @@ If no map changes needed, return empty actions array.`;
         APP.guideContext = APP.guideContext || 'the session';
         let displayText = null;
         if (parsed.contact) {
-          // Opening turn
-          displayText = [parsed.contact, parsed.summary, parsed.lead].filter(Boolean).join('\n\n');
+          // Opening turn — show contact + summary, then "Let's go" beat
+          displayText = [parsed.contact, parsed.summary].filter(Boolean).join('\n\n');
+          APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
+          _appendBubble('assistant', displayText, null);
+
+          setTimeout(() => {
+            const readyWrap = document.createElement('div');
+            readyWrap.className = 'chat-msg assistant';
+            readyWrap.id = 'guide-ready-wrap';
+            readyWrap.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:0.5rem;';
+
+            const leadBubble = document.createElement('div');
+            leadBubble.className = 'chat-bubble';
+            leadBubble.style.cssText = "font-family:'Cormorant Garamond',serif;font-size:0.98rem;";
+            leadBubble.textContent = parsed.lead || "Let's build the map together.";
+
+            const readyBtn = document.createElement('button');
+            readyBtn.className = 'proposal-btn-primary';
+            readyBtn.textContent = "Let's go →";
+            readyBtn.onclick = () => {
+              readyWrap.remove();
+              if (APP.pendingOpeningProposal) {
+                renderProposalCard(APP.pendingOpeningProposal.proposal, APP.pendingOpeningProposal.remaining);
+                APP.pendingOpeningProposal = null;
+              }
+            };
+
+            readyWrap.appendChild(leadBubble);
+            readyWrap.appendChild(readyBtn);
+            const hist = document.getElementById('chat-history');
+            hist.appendChild(readyWrap);
+            hist.scrollTop = hist.scrollHeight;
+          }, 400);
+
+          APP.pendingOpeningProposal = { proposal: parsed.proposal, remaining: parsed.remaining };
+          const actionSummary = applyBuddyActions(parsed.actions || []);
+          if (actionSummary) scheduleSave();
+          sendBtn.disabled = false;
+          return;
+
         } else if (parsed.narrative) {
           // Subsequent or closing turn
           displayText = parsed.narrative;
-        }
-        if (displayText) {
           APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
           _appendBubble('assistant', displayText, null);
         }
@@ -1696,6 +1722,13 @@ If no map changes needed, return empty actions array.`;
       list.innerHTML = '';
       intro.classList.remove('hidden');
       document.getElementById('new-client-btn-empty').onclick = openNewMapModal;
+      const howToggleEmpty = document.getElementById('dashboard-how-toggle-empty');
+      const stepsEmpty = document.getElementById('dashboard-steps-empty');
+      howToggleEmpty.onclick = () => {
+        const open = !stepsEmpty.classList.contains('hidden');
+        stepsEmpty.classList.toggle('hidden', open);
+        howToggleEmpty.textContent = open ? 'How does this work? ▾' : 'Hide ▴';
+      };
       return;
     }
 
