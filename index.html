@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Parts Map</title>
+  <meta property="og:title" content="Your Parts Map">
+  <meta property="og:description" content="A living map of your inner world.">
+  <meta property="og:url" content="https://yourpartsmap.com">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Your Parts Map">
+  <meta name="twitter:description" content="A living map of your inner world.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -164,6 +171,20 @@
     .chat-mic-btn:hover { background: var(--bg2); color: var(--text); }
     .chat-mic-btn.recording { border-color: rgba(184,64,48,0.5); background: var(--red-bg); color: var(--red); animation: pulse-record 1.5s ease-in-out infinite; }
     @keyframes pulse-record { 0%,100% { box-shadow: 0 0 0 0 rgba(184,64,48,0.15); } 50% { box-shadow: 0 0 0 8px rgba(184,64,48,0); } }
+
+    /* ── LOG STRUCTURED SECTIONS ── */
+    .log-section-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin: 0.85rem 0 0.3rem; }
+    .log-parts-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+    .log-parts-list li { font-size: 0.84rem; color: var(--text-dim); padding-left: 0.75rem; position: relative; }
+    .log-parts-list li::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
+    .log-shift { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; line-height: 1.65; color: var(--text-dim); }
+    .log-return { font-size: 0.84rem; color: var(--text-dim); line-height: 1.6; }
+    .log-pattern { font-size: 0.84rem; color: var(--text-dim); line-height: 1.6; font-style: italic; }
+    .log-practitioner-prose { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--border); }
+    .log-client-body { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.75; color: var(--text-dim); }
+    .log-client-asks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+    .log-client-asks li { font-size: 0.84rem; color: var(--text-dim); padding-left: 0.75rem; position: relative; }
+    .log-client-asks li::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
 
     /* ── DASHBOARD ── */
     #screen-dashboard { flex-direction: column; align-items: center; padding: 3rem 1.5rem; overflow-y: auto; background: var(--bg); }
@@ -360,15 +381,15 @@
         <!-- Mobile handle bar (visible on small screens only) -->
         <div class="chat-sheet-handle" id="chat-sheet-handle">
           <div class="chat-sheet-pip"></div>
-          <span class="chat-sheet-label">Parts Buddy</span>
+          <span class="chat-sheet-label">Bob</span>
         </div>
         <div class="panel-header">
-          <span class="panel-title">Parts Buddy</span>
+          <span class="panel-title">Bob</span>
         </div>
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-bar">
           <textarea class="chat-input" id="chat-input" rows="1"
-            placeholder="Ask about the map, paste a transcript, describe a session…"></textarea>
+            placeholder="Tell Bob what happened…"></textarea>
           <button class="chat-send-btn" id="chat-send-btn" title="Send (Enter)">↑</button>
           <button class="chat-mic-btn" id="chat-mic-btn" title="Voice input">🎙</button>
         </div>
@@ -931,7 +952,7 @@
   // ════════════════════════════════════════════════════════════════════════
   // PARTS BUDDY
   // ════════════════════════════════════════════════════════════════════════
-  const BUDDY_PROMPT = `You are Parts Buddy — a warm, matter-of-fact assistant helping a somatic coach (or their client) maintain a living map of an inner world using Internal Family Systems. You have the current map state as context. Use the client's exact language always. A dragon is a dragon. Ask clarifying questions when needed. Be brief. Don't over-explain IFS. When you take an action, say what you did in one sentence.
+  const BUDDY_PROMPT = `You are Bob — a warm, matter-of-fact assistant helping a somatic coach (or their client) maintain a living map of an inner world using Internal Family Systems. You have the current map state as context. Use the client's exact language always. A dragon is a dragon. Ask clarifying questions when needed. Be brief. Don't over-explain IFS. When you take an action, say what you did in one sentence.
 
 Zones are not hard categories — they are a "how close to the present moment" meter. Parts drift toward wherever they belong on a continuum.
 
@@ -969,7 +990,16 @@ Action types:
 - { "type": "update_part", "id": "part-id-or-name", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
-- { "type": "add_log", "practitionerNote": "clinical note", "clientNote": "warm note in second person", "keyMoment": "one sentence" }
+- { "type": "add_log",
+    "keyMoment": "one vivid sentence — the most alive moment of the session",
+    "partsAppeared": ["part name", "part name"],
+    "whatShifted": "one sentence — what's actually different now",
+    "unresolved": "what to return to next session",
+    "patternsNoted": "any system-level pattern worth tracking (optional, omit if none)",
+    "clientNote": "2-3 warm sentences in second person, their language, what happened for them",
+    "clientAskedFor": ["only real homework/requests/promises to parts — nothing invented, omit array if none"],
+    "practitionerNote": "in-depth clinical note — parts activated, somatic markers, protective strategies observed, what opened, what's still defended, therapeutic arc" }
+Add or update the log whenever you receive a transcript, a debrief, or a meaningful exchange that changes the map state.
 
 Color guide: purple=archetypal/guide, blue=protector, teal=integrated/merged, amber=active protector, coral=exile, green=resource, gray=hidden/unknown, gold=liberated
 For zone moves suggested by you, always set confirm:true so the practitioner can confirm.
@@ -999,7 +1029,7 @@ If no map changes needed, return empty actions array.`;
     const el = document.getElementById('chat-history');
     if (!APP.chatHistory?.length) {
       el.innerHTML = `<div class="chat-empty">
-        <div class="chat-empty-title">Parts Buddy</div>
+        <div class="chat-empty-title">Bob</div>
         Paste a session transcript, describe what happened,<br>or ask about what's on the map.
       </div>`;
       return;
@@ -1157,9 +1187,14 @@ If no map changes needed, return empty actions array.`;
         APP.mapData.meta.lastSession  = todayStr();
         APP.mapData.log.unshift({
           id: genId(), session: APP.mapData.meta.sessionCount, date: todayStr(), type: 'session',
-          practitionerNote: action.practitionerNote || '',
-          clientNote: action.clientNote || '',
-          keyMoment: action.keyMoment || ''
+          keyMoment:       action.keyMoment        || '',
+          partsAppeared:   Array.isArray(action.partsAppeared) ? action.partsAppeared : [],
+          whatShifted:     action.whatShifted       || '',
+          unresolved:      action.unresolved        || '',
+          patternsNoted:   action.patternsNoted     || '',
+          clientNote:      action.clientNote        || '',
+          clientAskedFor:  Array.isArray(action.clientAskedFor) ? action.clientAskedFor : [],
+          practitionerNote:action.practitionerNote  || ''
         });
         renderLog(); done.push('added to log');
       }
@@ -1233,14 +1268,30 @@ If no map changes needed, return empty actions array.`;
     for (const entry of APP.mapData.log) {
       const div = document.createElement('div');
       div.className = 'log-entry';
-      const note = APP.mode === 'practitioner' ? entry.practitionerNote : entry.clientNote;
-      div.innerHTML = `
+
+      const header = `
         <div class="log-entry-header">
           <span class="log-session-num">Session ${entry.session}</span>
           <span class="log-date">${entry.date}</span>
         </div>
-        ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}
-        ${note ? `<div class="log-note">${escHtml(note)}</div>` : ''}`;
+        ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}`;
+
+      if (APP.mode === 'practitioner') {
+        const parts = (entry.partsAppeared || []).filter(Boolean);
+        div.innerHTML = header + `
+          ${parts.length ? `<div class="log-section-label">Parts Appeared</div><ul class="log-parts-list">${parts.map(p => `<li>${escHtml(p)}</li>`).join('')}</ul>` : ''}
+          ${entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : ''}
+          ${entry.unresolved ? `<div class="log-section-label">Return To</div><div class="log-return">${escHtml(entry.unresolved)}</div>` : ''}
+          ${entry.patternsNoted ? `<div class="log-section-label">Patterns</div><div class="log-pattern">${escHtml(entry.patternsNoted)}</div>` : ''}
+          ${entry.practitionerNote ? `<div class="log-practitioner-prose">${escHtml(entry.practitionerNote)}</div>` : ''}`;
+      } else {
+        const asks = (entry.clientAskedFor || []).filter(Boolean);
+        div.innerHTML = header + `
+          ${entry.clientNote ? `<div class="log-section-label">What Happened</div><div class="log-client-body">${escHtml(entry.clientNote)}</div>` : ''}
+          ${asks.length ? `<div class="log-section-label">What Your Parts Asked For</div><ul class="log-client-asks">${asks.map(a => `<li>${escHtml(a)}</li>`).join('')}</ul>` : ''}
+          ${entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : ''}`;
+      }
+
       list.appendChild(div);
     }
   }
