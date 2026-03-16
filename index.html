@@ -1277,6 +1277,8 @@ Stay in normal mode only for: questions, clarifications, and text-only descripti
 
 In guide mode, a single new part still gets a full proposal card — label, narrative, the part chip, primary/alternate buttons. Keep it concise for simple additions.
 
+BEFORE proposing any part in guide mode, check the current map state. If a part with the same name (or very close — "Foggy" and "The Foggy" are the same) already exists, NEVER use add_part. Use update_part with confirm:true instead, with the relevant changes. Duplicate parts are a critical error. When in doubt, update — never add.
+
 In guide mode, respond with this JSON structure:
 
 Opening turn (first response to new material):
@@ -1349,6 +1351,7 @@ Action types:
   IMPORTANT: use update_part (not add_part) whenever a part already exists on the map and needs any change — name, color, description, status, or zone. update_part finds by name fuzzy match. Never add a duplicate.
   Including zone in changes will automatically reposition the part on the map — use this when session notes show a part has clearly shifted (no confirmation needed). Use move_zone with confirm:true only when you want the practitioner to make an explicit decision about a zone change.
   Add "confirm": true to update_part when the change is significant — zone shift, major desc rewrite, liberation/unburdening, or status change reflecting deep psyche movement. Omit confirm for minor tweaks (color, small status label).
+  In guide mode proposals, if the part already exists on the map, put it in the proposal's actions array as update_part (with confirm:true) rather than in proposal.parts as a new part.
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
 - { "type": "add_connection", "from": "part-id-or-name", "to": "part-id-or-name", "connectionType": "allied|polarized", "confirm": true }
