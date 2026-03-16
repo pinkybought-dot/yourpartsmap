@@ -541,6 +541,20 @@
     </div>
   </div>
 
+  <div id="feedback-widget">
+    <button id="feedback-trigger" title="Share feedback"><span>Feedback</span></button>
+    <div id="feedback-panel" class="hidden">
+      <div class="feedback-header">
+        <span class="feedback-title">Share feedback</span>
+        <button class="feedback-close" id="feedback-close">×</button>
+      </div>
+      <p class="feedback-subtitle">What's working? What's missing? What would make this better?</p>
+      <textarea id="feedback-text" class="feedback-textarea" placeholder="Your thoughts…" rows="4"></textarea>
+      <button id="feedback-send" class="feedback-send-btn">Send</button>
+      <div id="feedback-confirm" class="feedback-confirm hidden">Thank you — this helps a lot.</div>
+    </div>
+  </div>
+
   <script>
   // ════════════════════════════════════════════════════════════════════════
   // CONFIG  (placeholders replaced by build.sh)
@@ -2241,19 +2255,5 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
   // ════════════════════════════════════════════════════════════════════════
   route();
   </script>
-
-<div id="feedback-widget">
-  <button id="feedback-trigger" title="Share feedback"><span>Feedback</span></button>
-  <div id="feedback-panel" class="hidden">
-    <div class="feedback-header">
-      <span class="feedback-title">Share feedback</span>
-      <button class="feedback-close" id="feedback-close">×</button>
-    </div>
-    <p class="feedback-subtitle">What's working? What's missing? What would make this better?</p>
-    <textarea id="feedback-text" class="feedback-textarea" placeholder="Your thoughts…" rows="4"></textarea>
-    <button id="feedback-send" class="feedback-send-btn">Send</button>
-    <div id="feedback-confirm" class="feedback-confirm hidden">Thank you — this helps a lot.</div>
-  </div>
-</div>
 </body>
 </html>
