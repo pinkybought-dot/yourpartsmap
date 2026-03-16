@@ -127,20 +127,24 @@
     .zone-confirm-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
     /* ── LOG DRAWER ── */
-    #log-drawer { position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: rgba(255,253,250,0.97); border-left: 1px solid var(--border); backdrop-filter: blur(12px); transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; overflow: hidden; z-index: 10; box-shadow: -4px 0 20px rgba(60,40,20,0.06); }
+    #log-drawer { position: absolute; top: 0; right: 0; width: 380px; height: 100%; background: rgba(255,253,250,0.97); border-left: 1px solid var(--border); backdrop-filter: blur(12px); transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; overflow: hidden; z-index: 10; box-shadow: -4px 0 20px rgba(60,40,20,0.06); }
     #log-drawer.open { transform: translateX(0); }
-    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .panel-title { font-size: 0.63rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); }
     .drawer-close { background: none; border: none; color: var(--text-faint); font-size: 1.2rem; cursor: pointer; transition: color 0.15s; padding: 0.1rem 0.2rem; }
     .drawer-close:hover { color: var(--text); }
-    .log-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 1.1rem; }
-    .log-entry { border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-    .log-entry:last-child { border-bottom: none; padding-bottom: 0; }
-    .log-entry-header { display: flex; align-items: baseline; gap: 0.55rem; margin-bottom: 0.45rem; }
-    .log-session-num { font-size: 0.63rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); }
-    .log-date { font-size: 0.73rem; color: var(--text-faint); }
-    .log-key-moment { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; font-style: italic; color: var(--gold); line-height: 1.6; margin-bottom: 0.35rem; }
+    .log-view-toggle { display: flex; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .log-view-toggle button { background: none; border: none; padding: 0.2rem 0.65rem; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); cursor: pointer; transition: all 0.18s; }
+    .log-view-toggle button.active { background: var(--gold-bg); color: var(--gold); }
+    .log-list { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .log-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(60,40,20,0.05); }
+    .log-entry-header { display: flex; align-items: baseline; gap: 0.55rem; margin-bottom: 0.65rem; }
+    .log-session-num { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); }
+    .log-date { font-size: 0.7rem; color: var(--text-faint); }
+    .log-key-moment { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-style: italic; color: var(--gold); line-height: 1.7; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
     .log-note { font-size: 0.84rem; color: var(--text-dim); line-height: 1.65; }
+    .log-export-footer { flex-shrink: 0; border-top: 1px solid var(--border); padding: 0.75rem 1rem; background: var(--bg); }
+    .log-export-footer .btn-secondary { width: 100%; text-align: center; }
 
     /* ── CHAT PANEL ── */
     #panel-chat { flex: 1; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--surface); overflow: hidden; }
@@ -173,17 +177,18 @@
     @keyframes pulse-record { 0%,100% { box-shadow: 0 0 0 0 rgba(184,64,48,0.15); } 50% { box-shadow: 0 0 0 8px rgba(184,64,48,0); } }
 
     /* ── LOG STRUCTURED SECTIONS ── */
-    .log-section-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin: 0.85rem 0 0.3rem; }
-    .log-parts-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
-    .log-parts-list li { font-size: 0.84rem; color: var(--text-dim); padding-left: 0.75rem; position: relative; }
+    .log-section-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin: 1rem 0 0.4rem; }
+    .log-section-label:first-of-type { margin-top: 0; }
+    .log-parts-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+    .log-parts-list li { font-size: 0.85rem; color: var(--text-dim); padding-left: 1rem; position: relative; line-height: 1.6; }
     .log-parts-list li::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
-    .log-shift { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; line-height: 1.65; color: var(--text-dim); }
-    .log-return { font-size: 0.84rem; color: var(--text-dim); line-height: 1.6; }
-    .log-pattern { font-size: 0.84rem; color: var(--text-dim); line-height: 1.6; font-style: italic; }
-    .log-practitioner-prose { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--border); }
-    .log-client-body { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.75; color: var(--text-dim); }
-    .log-client-asks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.2rem; }
-    .log-client-asks li { font-size: 0.84rem; color: var(--text-dim); padding-left: 0.75rem; position: relative; }
+    .log-shift { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.75; color: var(--text-dim); }
+    .log-return { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+    .log-pattern { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; font-style: italic; }
+    .log-practitioner-prose { font-size: 0.85rem; color: var(--text-dim); line-height: 1.75; margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px solid var(--border); }
+    .log-client-body { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.8; color: var(--text-dim); }
+    .log-client-asks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .log-client-asks li { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; color: var(--text-dim); padding-left: 1rem; position: relative; line-height: 1.6; }
     .log-client-asks li::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
 
     /* ── DASHBOARD ── */
@@ -367,12 +372,18 @@
         <div id="log-drawer">
           <div class="drawer-header">
             <span class="panel-title">Progress Log</span>
-            <div style="display:flex;align-items:center;gap:0.5rem;">
-              <span class="mode-badge" id="log-view-badge">Clinical</span>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <div class="log-view-toggle" id="log-view-toggle">
+                <button class="active" data-view="clinical">Clinical</button>
+                <button data-view="narrative">Narrative</button>
+              </div>
               <button class="drawer-close" id="log-drawer-close">×</button>
             </div>
           </div>
           <div class="log-list" id="log-list"></div>
+          <div class="log-export-footer hidden" id="log-export-footer">
+            <button class="btn-secondary" id="btn-export-log"></button>
+          </div>
         </div>
       </div>
 
@@ -594,8 +605,11 @@
     const title = APP.mapData?.meta?.title || 'Map';
     document.getElementById('app-map-title').textContent = title;
     document.getElementById('mode-badge').textContent = APP.mode === 'practitioner' ? 'Practitioner' : 'Client';
-    document.getElementById('log-view-badge').textContent = APP.mode === 'practitioner' ? 'Clinical' : 'Narrative';
     document.getElementById('btn-add-part').classList.toggle('hidden', APP.mode !== 'practitioner');
+    // Log view toggle: practitioners can switch; clients are locked to narrative
+    APP.logView = APP.mode === 'practitioner' ? 'clinical' : 'narrative';
+    const toggle = document.getElementById('log-view-toggle');
+    toggle.classList.toggle('hidden', APP.mode !== 'practitioner');
     renderMap();
     renderLog();
     initChat();
@@ -990,6 +1004,8 @@ Action types:
 - { "type": "update_part", "id": "part-id-or-name", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
+- { "type": "clear_log" }
+- { "type": "remove_log", "session": 1 }
 - { "type": "add_log",
     "keyMoment": "one vivid sentence — the most alive moment of the session",
     "partsAppeared": ["part name", "part name"],
@@ -1000,6 +1016,7 @@ Action types:
     "clientAskedFor": ["only real homework/requests/promises to parts — nothing invented, omit array if none"],
     "practitionerNote": "in-depth clinical note — parts activated, somatic markers, protective strategies observed, what opened, what's still defended, therapeutic arc" }
 Add or update the log whenever you receive a transcript, a debrief, or a meaningful exchange that changes the map state.
+Use clear_log when asked to erase everything or start fresh. Use remove_log with a session number to remove a specific entry.
 
 Color guide: purple=archetypal/guide, blue=protector, teal=integrated/merged, amber=active protector, coral=exile, green=resource, gray=hidden/unknown, gold=liberated
 For zone moves suggested by you, always set confirm:true so the practitioner can confirm.
@@ -1197,6 +1214,15 @@ If no map changes needed, return empty actions array.`;
           practitionerNote:action.practitionerNote  || ''
         });
         renderLog(); done.push('added to log');
+
+      } else if (action.type === 'clear_log') {
+        APP.mapData.log = [];
+        APP.mapData.meta.sessionCount = 0;
+        renderLog(); done.push('cleared log');
+
+      } else if (action.type === 'remove_log' && action.session) {
+        APP.mapData.log = APP.mapData.log.filter(e => e.session !== action.session);
+        renderLog(); done.push(`removed session ${action.session}`);
       }
     }
     return done.length ? '↳ ' + done.join(', ') : null;
@@ -1261,10 +1287,18 @@ If no map changes needed, return empty actions array.`;
   // ════════════════════════════════════════════════════════════════════════
   function renderLog() {
     const list = document.getElementById('log-list');
+    const footer = document.getElementById('log-export-footer');
+    const exportBtn = document.getElementById('btn-export-log');
     list.innerHTML = '';
+
     if (!APP.mapData?.log?.length) {
-      list.innerHTML = '<div class="empty-state">No sessions recorded yet.</div>'; return;
+      list.innerHTML = '<div class="empty-state" style="font-family:\'Cormorant Garamond\',serif;font-size:1rem;">Your sessions will appear here.</div>';
+      footer.classList.add('hidden');
+      return;
     }
+
+    const view = APP.logView || (APP.mode === 'practitioner' ? 'clinical' : 'narrative');
+
     for (const entry of APP.mapData.log) {
       const div = document.createElement('div');
       div.className = 'log-entry';
@@ -1276,24 +1310,29 @@ If no map changes needed, return empty actions array.`;
         </div>
         ${entry.keyMoment ? `<div class="log-key-moment">"${escHtml(entry.keyMoment)}"</div>` : ''}`;
 
-      if (APP.mode === 'practitioner') {
+      if (view === 'clinical') {
         const parts = (entry.partsAppeared || []).filter(Boolean);
-        div.innerHTML = header + `
-          ${parts.length ? `<div class="log-section-label">Parts Appeared</div><ul class="log-parts-list">${parts.map(p => `<li>${escHtml(p)}</li>`).join('')}</ul>` : ''}
-          ${entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : ''}
-          ${entry.unresolved ? `<div class="log-section-label">Return To</div><div class="log-return">${escHtml(entry.unresolved)}</div>` : ''}
-          ${entry.patternsNoted ? `<div class="log-section-label">Patterns</div><div class="log-pattern">${escHtml(entry.patternsNoted)}</div>` : ''}
-          ${entry.practitionerNote ? `<div class="log-practitioner-prose">${escHtml(entry.practitionerNote)}</div>` : ''}`;
+        div.innerHTML = header +
+          (parts.length ? `<div class="log-section-label">Parts Appeared</div><ul class="log-parts-list">${parts.map(p => `<li>${escHtml(p)}</li>`).join('')}</ul>` : '') +
+          (entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : '') +
+          (entry.unresolved ? `<div class="log-section-label">Return To</div><div class="log-return">${escHtml(entry.unresolved)}</div>` : '') +
+          (entry.patternsNoted ? `<div class="log-section-label">Patterns</div><div class="log-pattern">${escHtml(entry.patternsNoted)}</div>` : '') +
+          (entry.practitionerNote ? `<div class="log-practitioner-prose">${escHtml(entry.practitionerNote)}</div>` : '');
       } else {
         const asks = (entry.clientAskedFor || []).filter(Boolean);
-        div.innerHTML = header + `
-          ${entry.clientNote ? `<div class="log-section-label">What Happened</div><div class="log-client-body">${escHtml(entry.clientNote)}</div>` : ''}
-          ${asks.length ? `<div class="log-section-label">What Your Parts Asked For</div><ul class="log-client-asks">${asks.map(a => `<li>${escHtml(a)}</li>`).join('')}</ul>` : ''}
-          ${entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : ''}`;
+        div.innerHTML = header +
+          (entry.clientNote ? `<div class="log-section-label">What Happened</div><div class="log-client-body">${escHtml(entry.clientNote)}</div>` : '') +
+          (asks.length ? `<div class="log-section-label">What Your Parts Asked For</div><ul class="log-client-asks">${asks.map(a => `<li>${escHtml(a)}</li>`).join('')}</ul>` : '') +
+          (entry.whatShifted ? `<div class="log-section-label">What Shifted</div><div class="log-shift">${escHtml(entry.whatShifted)}</div>` : '');
       }
 
       list.appendChild(div);
     }
+
+    // Export footer
+    footer.classList.remove('hidden');
+    exportBtn.textContent = view === 'clinical' ? 'Export Clinical Notes' : 'Export Your Journey';
+    exportBtn.onclick = view === 'clinical' ? exportClinicalNotes : exportClientJourney;
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -1373,6 +1412,25 @@ If no map changes needed, return empty actions array.`;
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function warmZoneDescription(part) {
+    const zone = part.zone || 2;
+    const status = (part.status || '').toLowerCase();
+    if (zone === 3) return 'returned to source';
+    if (zone === 2) {
+      if (status.includes('liberat') || part.color === 'gold') return 'fully present with you';
+      if (status.includes('integrat') || status.includes('merged')) return 'mostly integrated';
+      return 'present with you now';
+    }
+    if (zone === 1) {
+      if (part.color === 'coral') return 'needs to be unburdened';
+      return 'still carrying old burdens';
+    }
+    return 'present with you now';
+  }
+
+  function exportClinicalNotes() { console.log('export clinical notes'); }
+  function exportClientJourney() { console.log('export client journey'); }
+
   // ════════════════════════════════════════════════════════════════════════
   // EVENT BINDINGS
   // ════════════════════════════════════════════════════════════════════════
@@ -1418,6 +1476,15 @@ If no map changes needed, return empty actions array.`;
   });
   document.getElementById('log-drawer-close').addEventListener('click', () => {
     document.getElementById('log-drawer').classList.remove('open');
+  });
+
+  // Log view toggle (practitioner only)
+  document.getElementById('log-view-toggle').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-view]');
+    if (!btn) return;
+    APP.logView = btn.dataset.view;
+    document.querySelectorAll('#log-view-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+    renderLog();
   });
 
   // Mobile bottom sheet
