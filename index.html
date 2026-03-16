@@ -633,7 +633,7 @@
   // ════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ════════════════════════════════════════════════════════════════════════
-  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null, pendingOpeningProposal: null, pendingClusters: [], guideClosingNarrative: null, guideClosingActions: null };
+  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null, pendingOpeningProposal: null, pendingClusters: [], guideClosingNarrative: null, guideClosingActions: null, guideCooldown: false };
 
   function emptyMapData(name) {
     return { meta: { title: `${name}'s Map`, clientName: name, sessionCount: 0, createdAt: todayStr(), lastSession: null }, parts: [], connections: [], log: [] };
@@ -1365,7 +1365,10 @@ If no map changes needed, return empty actions array.`;
     const partsDesc = (map?.parts || []).map(p =>
       `  - "${p.name}" (id:${p.id}, color:${p.color}, zone:${p.zone || getZoneFromY(p.y || 0.5)}${p.status ? ', status:"' + p.status + '"' : ''}${p.desc ? ', desc:"' + p.desc.slice(0, 80) + '"' : ''})`
     ).join('\n') || '  (no parts yet)';
-    return `${BUDDY_PROMPT}\n\nCurrent map: ${map?.meta?.title || 'Untitled'}\nClient: ${map?.meta?.clientName || 'Unknown'}\nSessions: ${map?.meta?.sessionCount || 0}\n\nParts on the map:\n${partsDesc}`;
+    const cooldownNote = APP.guideCooldown
+      ? '\n\nThe practitioner just finished a guide mode session. Stay in normal mode for follow-up messages unless they explicitly share NEW session material (a transcript, new parts discovered, significant new information). A simple acknowledgment or question is NOT new material. Do not re-enter guide mode.'
+      : '';
+    return `${BUDDY_PROMPT}${cooldownNote}\n\nCurrent map: ${map?.meta?.title || 'Untitled'}\nClient: ${map?.meta?.clientName || 'Unknown'}\nSessions: ${map?.meta?.sessionCount || 0}\n\nParts on the map:\n${partsDesc}`;
   }
 
   // Fuzzy part lookup: tries id, then exact name, then partial name
@@ -1425,6 +1428,8 @@ If no map changes needed, return empty actions array.`;
   async function sendChatMessage(text, isInternal = false) {
     text = text.trim();
     if (!text || !APP.mapData) return;
+    // Reset cooldown when user sends substantial new content (heuristic for real session material)
+    if (APP.guideCooldown && text.length > 80) APP.guideCooldown = false;
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
     if (!isInternal) {
@@ -2277,6 +2282,8 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
       APP.guideClosingNarrative = null;
       APP.guideClosingActions = null;
       APP.guideContext = null;
+      APP.guideMode = false;
+      APP.guideCooldown = true;
     }
   }
 
