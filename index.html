@@ -1289,6 +1289,7 @@ Action types:
 - { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
 - { "type": "update_part", "id": "part-id-or-name", "changes": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "...", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
   IMPORTANT: use update_part (not add_part) whenever a part already exists on the map and needs any change — name, color, description, status, or zone. update_part finds by name fuzzy match. Never add a duplicate.
+  Including zone in changes will automatically reposition the part on the map — use this when session notes show a part has clearly shifted (no confirmation needed). Use move_zone with confirm:true only when you want the practitioner to make an explicit decision about a zone change.
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
 - { "type": "add_connection", "from": "part-id-or-name", "to": "part-id-or-name", "connectionType": "allied|polarized", "confirm": true }
@@ -1531,6 +1532,12 @@ If no map changes needed, return empty actions array.`;
         if (part && action.changes) {
           Object.assign(part, action.changes);
           if (action.changes.name) part.label = shortenLabel(action.changes.name);
+          if (action.changes.zone) {
+            const z = parseInt(action.changes.zone, 10);
+            if (z === 3) part.y = 0.05 + Math.random() * 0.24;
+            else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
+            else part.y = 0.36 + Math.random() * 0.28;
+          }
           renderMap(); done.push(`updated "${part.name}"`);
         }
 
