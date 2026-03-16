@@ -1079,7 +1079,7 @@
     if (part) {
       Object.assign(part, pendingPartUpdate.changes);
       if (pendingPartUpdate.changes.name) part.label = shortenLabel(pendingPartUpdate.changes.name);
-      if (pendingPartUpdate.changes.zone) {
+      if (pendingPartUpdate.changes.zone || pendingPartUpdate.changes.suggestedTier) {
         const { x: px, y: py } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
         part.x = px; part.y = py;
       }
@@ -1679,7 +1679,7 @@ If no map changes needed, return empty actions array.`;
           } else {
             Object.assign(part, action.changes);
             if (action.changes.name) part.label = shortenLabel(action.changes.name);
-            if (action.changes.zone) {
+            if (action.changes.zone || action.changes.suggestedTier) {
               const { x: ux, y: uy } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
               part.x = ux; part.y = uy;
             }
