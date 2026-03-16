@@ -191,10 +191,16 @@
     .log-client-asks li { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; color: var(--text-dim); padding-left: 1rem; position: relative; line-height: 1.6; }
     .log-client-asks li::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
 
+    /* ── PIN SUBTITLE ── */
+    .pin-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--text-dim); text-align: center; max-width: 260px; line-height: 1.6; }
+
     /* ── DASHBOARD ── */
     #screen-dashboard { flex-direction: column; align-items: center; padding: 3rem 1.5rem; overflow-y: auto; background: var(--bg); }
     .dashboard-header { display: flex; align-items: baseline; justify-content: space-between; width: 100%; max-width: 680px; margin-bottom: 2rem; }
     .dashboard-title { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; }
+    .dashboard-header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .dashboard-how-toggle { background: none; border: none; font-size: 0.78rem; color: var(--text-faint); cursor: pointer; padding: 0; }
+    .dashboard-how-toggle:hover { text-decoration: underline; }
     .new-client-btn { padding: 0.55rem 1.1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 6px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.18s; }
     .new-client-btn:hover { background: rgba(138,106,32,0.15); }
     .map-list { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.45rem; }
@@ -203,6 +209,22 @@
     .map-row-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; flex: 1; }
     .map-row-meta { font-size: 0.77rem; color: var(--text-faint); text-align: right; }
     .empty-state { color: var(--text-faint); font-size: 0.88rem; text-align: center; padding: 3rem 1rem; line-height: 1.8; }
+    .dashboard-intro { width: 100%; max-width: 560px; text-align: center; }
+    .dashboard-intro-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; color: var(--text); margin-bottom: 0.65rem; }
+    .dashboard-intro-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--text-dim); margin-bottom: 2rem; }
+    .dashboard-divider { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+    .dashboard-how-heading { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.9rem; }
+    .dashboard-steps { text-align: left; display: flex; flex-direction: column; gap: 0.1rem; }
+    .dashboard-step { font-size: 0.9rem; line-height: 1.9; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+    .dashboard-step::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
+    .dashboard-feedback { font-size: 0.8rem; color: var(--text-faint); margin-top: 0.5rem; }
+    .dashboard-feedback a { color: var(--text-faint); text-decoration: none; }
+    .dashboard-feedback a:hover { text-decoration: underline; }
+    .dashboard-list-feedback { font-size: 0.8rem; color: var(--text-faint); text-align: center; margin-top: 1.5rem; }
+    .dashboard-list-feedback a { color: var(--text-faint); text-decoration: none; }
+    .dashboard-list-feedback a:hover { text-decoration: underline; }
+    .dashboard-how-panel { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.3rem; margin-bottom: 1.25rem; }
+    .dashboard-how-panel .dashboard-how-heading { margin-bottom: 0.6rem; }
 
     /* ── MODAL ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(60,40,20,0.35); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); padding: 1rem; }
@@ -248,6 +270,7 @@
   <div id="screen-pin" class="screen">
     <div class="pin-wordmark">Your Parts Map</div>
     <div class="pin-title" id="pin-map-title">Enter your password</div>
+    <div class="pin-subtitle">Ian shared a unique link with you.<br>Enter your password to open your map.</div>
     <div class="pin-box">
       <input type="password" class="pin-input" id="pin-input"
         placeholder="Your password" maxlength="20" autocomplete="off">
@@ -411,11 +434,42 @@
 
   <!-- ═══════════════════════════════ DASHBOARD ════════════════════════════════ -->
   <div id="screen-dashboard" class="screen">
-    <div class="dashboard-header">
+    <!-- Populated state header (hidden when empty) -->
+    <div class="dashboard-header hidden" id="dashboard-header">
       <h1 class="dashboard-title">Your Parts Map</h1>
-      <button class="new-client-btn" id="new-client-btn">+ New Client</button>
+      <div class="dashboard-header-actions">
+        <button class="dashboard-how-toggle" id="dashboard-how-toggle">How it works</button>
+        <button class="new-client-btn" id="new-client-btn">+ New Client</button>
+      </div>
+    </div>
+    <!-- Collapsible "How it works" for populated state -->
+    <div class="dashboard-how-panel hidden" id="dashboard-how-panel">
+      <p class="dashboard-how-heading">How it works</p>
+      <div class="dashboard-steps">
+        <div class="dashboard-step">Create a map for each client — they get a private, password-protected link</div>
+        <div class="dashboard-step">Add parts as they emerge in session — each part lives on the map</div>
+        <div class="dashboard-step">Log sessions with Bob, your AI assistant — he tracks what shifted</div>
+        <div class="dashboard-step">Export clinical notes or the client's personal journey at any time</div>
+      </div>
+    </div>
+    <!-- Empty state intro (hidden when populated) -->
+    <div class="dashboard-intro hidden" id="dashboard-intro">
+      <div class="dashboard-intro-title">Your Parts Map</div>
+      <div class="dashboard-intro-subtitle">A living map of your clients' inner worlds.</div>
+      <button class="new-client-btn" id="new-client-btn-empty">+ New Client</button>
+      <hr class="dashboard-divider">
+      <p class="dashboard-how-heading">How it works</p>
+      <div class="dashboard-steps">
+        <div class="dashboard-step">Create a map for each client — they get a private, password-protected link</div>
+        <div class="dashboard-step">Add parts as they emerge in session — each part lives on the map</div>
+        <div class="dashboard-step">Log sessions with Bob, your AI assistant — he tracks what shifted</div>
+        <div class="dashboard-step">Export clinical notes or the client's personal journey at any time</div>
+      </div>
+      <hr class="dashboard-divider">
+      <div class="dashboard-feedback">Got feedback? <a href="mailto:ian@yourpartsmap.com">ian@yourpartsmap.com</a></div>
     </div>
     <div class="map-list" id="map-list"></div>
+    <div class="dashboard-list-feedback hidden" id="dashboard-list-feedback">Got feedback? <a href="mailto:ian@yourpartsmap.com">ian@yourpartsmap.com</a></div>
   </div>
 
   <!-- ═══════════════════════════════ NEW MAP MODAL ════════════════════════════ -->
@@ -1341,9 +1395,28 @@ If no map changes needed, return empty actions array.`;
   function showDashboard() { showScreen('screen-dashboard'); renderDashboard(); }
 
   function renderDashboard() {
-    const list = document.getElementById('map-list');
+    const list        = document.getElementById('map-list');
+    const header      = document.getElementById('dashboard-header');
+    const intro       = document.getElementById('dashboard-intro');
+    const howPanel    = document.getElementById('dashboard-how-panel');
+    const listFeedback = document.getElementById('dashboard-list-feedback');
     const maps = getLocalIndex();
-    if (!maps.length) { list.innerHTML = '<div class="empty-state">No maps yet.<br>Create your first client map to get started.</div>'; return; }
+
+    if (!maps.length) {
+      header.classList.add('hidden');
+      howPanel.classList.add('hidden');
+      listFeedback.classList.add('hidden');
+      list.innerHTML = '';
+      intro.classList.remove('hidden');
+      document.getElementById('new-client-btn-empty').onclick = openNewMapModal;
+      return;
+    }
+
+    intro.classList.add('hidden');
+    howPanel.classList.add('hidden'); // start collapsed
+    header.classList.remove('hidden');
+    listFeedback.classList.remove('hidden');
+
     list.innerHTML = '';
     for (const m of maps) {
       const a = document.createElement('a');
@@ -1351,6 +1424,14 @@ If no map changes needed, return empty actions array.`;
       a.innerHTML = `<div class="map-row-name">${escHtml(m.name)}</div><div class="map-row-meta">${m.lastSession || '—'}<br>${m.partCount !== undefined ? `${m.partCount} parts` : ''}</div>`;
       list.appendChild(a);
     }
+
+    // "How it works" toggle
+    const toggle = document.getElementById('dashboard-how-toggle');
+    toggle.onclick = () => {
+      const open = !howPanel.classList.contains('hidden');
+      howPanel.classList.toggle('hidden', open);
+      toggle.textContent = open ? 'How it works' : 'Hide';
+    };
   }
 
   function getLocalIndex() { try { return JSON.parse(localStorage.getItem('ypm-index') || '[]'); } catch { return []; } }
@@ -1428,8 +1509,173 @@ If no map changes needed, return empty actions array.`;
     return 'present with you now';
   }
 
-  function exportClinicalNotes() { console.log('export clinical notes'); }
-  function exportClientJourney() { console.log('export client journey'); }
+  function exportClinicalNotes() {
+    const d = APP.mapData;
+    if (!d) return;
+    const title = escHtml(d.meta.title || 'Clinical Notes');
+    const clientName = escHtml(d.meta.clientName || '');
+    const sessions = [...d.log].sort((a, b) => a.session - b.session);
+
+    let rows = '';
+    for (const s of sessions) {
+      const parts = (s.partsAppeared || []).map(escHtml).join(', ') || '—';
+      const keyMoment = escHtml(s.keyMoment || '');
+      const shifted   = escHtml(s.whatShifted || '');
+      const unresolved = escHtml(s.unresolved || '');
+      const patterns  = escHtml(s.patternsNoted || '');
+      const practNote = escHtml(s.practitionerNote || '');
+      const clientAsk = (s.clientAskedFor || []).map(escHtml).join('; ') || '';
+      rows += `
+        <div class="session">
+          <div class="session-header">
+            <span class="session-num">Session ${s.session}</span>
+            <span class="session-date">${escHtml(s.date || '')}</span>
+          </div>
+          ${keyMoment ? `<div class="field"><span class="label">Key Moment</span><p>${keyMoment}</p></div>` : ''}
+          <div class="field"><span class="label">Parts Present</span><p>${parts}</p></div>
+          ${shifted    ? `<div class="field"><span class="label">What Shifted</span><p>${shifted}</p></div>` : ''}
+          ${unresolved ? `<div class="field"><span class="label">Still Open</span><p>${unresolved}</p></div>` : ''}
+          ${patterns   ? `<div class="field"><span class="label">Patterns Noted</span><p>${patterns}</p></div>` : ''}
+          ${clientAsk  ? `<div class="field"><span class="label">Client's Stated Needs</span><p>${clientAsk}</p></div>` : ''}
+          ${practNote  ? `<div class="field"><span class="label">Practitioner Notes</span><p class="pract-note">${practNote}</p></div>` : ''}
+        </div>`;
+    }
+
+    const partsTable = d.parts.map(p => {
+      const color = COLORS[p.color] || COLORS.gray;
+      return `<tr><td>${escHtml(p.name)}</td><td>${escHtml(color.label)}</td><td>${escHtml(p.suggestedTier || '')}</td><td>${escHtml(p.status || '')}</td><td>${warmZoneDescription(p)}</td></tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>${title} — Clinical Notes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; font-size: 13px; color: #1A1A2E; background: #fff; padding: 2.5rem 3rem; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; font-weight: 400; color: #2E8B8B; margin-bottom: 0.25rem; }
+  .meta { font-size: 0.8rem; color: #666; margin-bottom: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 1rem; }
+  h2 { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: #2E8B8B; margin: 2rem 0 0.75rem; }
+  .session { margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .session-header { display: flex; justify-content: space-between; background: #2E8B8B; color: #fff; padding: 0.55rem 0.9rem; }
+  .session-num { font-weight: bold; font-size: 0.85rem; }
+  .session-date { font-size: 0.8rem; opacity: 0.85; }
+  .field { padding: 0.55rem 0.9rem; border-bottom: 1px solid #f0f0f0; }
+  .field:last-child { border-bottom: none; }
+  .label { display: block; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 0.2rem; }
+  p { line-height: 1.65; }
+  .pract-note { font-style: italic; color: #444; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
+  th { text-align: left; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #888; padding: 0.4rem 0.6rem; border-bottom: 2px solid #2E8B8B; }
+  td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #eee; }
+  tr:last-child td { border-bottom: none; }
+  @media print { body { padding: 1rem; } }
+</style></head><body>
+<h1>${title}</h1>
+<div class="meta">Client: ${clientName} &nbsp;·&nbsp; Sessions: ${sessions.length} &nbsp;·&nbsp; Exported: ${todayStr()}</div>
+${sessions.length ? `<h2>Session Log</h2>${rows}` : '<p style="color:#888;font-style:italic;">No sessions logged yet.</p>'}
+${d.parts.length ? `<h2>Parts Map — Current State</h2><table><thead><tr><th>Name</th><th>Category</th><th>Tier</th><th>Status</th><th>Location</th></tr></thead><tbody>${partsTable}</tbody></table>` : ''}
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+  }
+
+  function exportClientJourney() {
+    const d = APP.mapData;
+    if (!d) return;
+    const clientName = escHtml(d.meta.clientName || 'you');
+    const sessions = [...d.log].sort((a, b) => a.session - b.session);
+
+    // Collect all clientAskedFor across sessions (deduplicated)
+    const allAsks = [];
+    const seenAsks = new Set();
+    for (const s of sessions) {
+      for (const ask of (s.clientAskedFor || [])) {
+        const k = ask.toLowerCase().trim();
+        if (!seenAsks.has(k)) { seenAsks.add(k); allAsks.push(escHtml(ask)); }
+      }
+    }
+
+    // Group parts by zone
+    const byZone = { 3: [], 2: [], 1: [] };
+    for (const p of d.parts) {
+      const z = p.zone || 2;
+      (byZone[z] || byZone[2]).push(p);
+    }
+    const zoneName = { 3: 'Source — Returned Home', 2: 'Present With You', 1: 'Still Being Held' };
+
+    let partsHtml = '';
+    for (const z of [3, 2, 1]) {
+      if (!byZone[z].length) continue;
+      const color = z === 3 ? '#7b68b0' : z === 2 ? '#2E8B8B' : '#bc6858';
+      partsHtml += `<h3 style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:${color};margin:1.5rem 0 0.6rem;">${zoneName[z]}</h3>`;
+      partsHtml += '<ul class="parts-list">';
+      for (const p of byZone[z]) {
+        const desc = p.description ? `<span class="part-desc"> — ${escHtml(p.description)}</span>` : '';
+        partsHtml += `<li><span class="part-name">${escHtml(p.name)}</span>${desc} <span class="part-where">(${warmZoneDescription(p)})</span></li>`;
+      }
+      partsHtml += '</ul>';
+    }
+
+    let sessionRows = '';
+    for (const s of sessions) {
+      const keyMoment = escHtml(s.keyMoment || '');
+      const shifted   = escHtml(s.whatShifted || '');
+      const clientNote = escHtml(s.clientNote || '');
+      const asks = (s.clientAskedFor || []).map(escHtml);
+      sessionRows += `
+        <div class="session">
+          <div class="session-header">
+            <span class="session-num">Session ${s.session}</span>
+            <span class="session-date">${escHtml(s.date || '')}</span>
+          </div>
+          ${keyMoment  ? `<div class="field"><span class="label">What happened</span><p>${keyMoment}</p></div>` : ''}
+          ${shifted    ? `<div class="field"><span class="label">What shifted</span><p>${shifted}</p></div>` : ''}
+          ${clientNote ? `<div class="field"><span class="label">Your reflection</span><p class="client-note">${clientNote}</p></div>` : ''}
+          ${asks.length ? `<div class="field"><span class="label">What your parts needed</span><p>${asks.join(' · ')}</p></div>` : ''}
+        </div>`;
+    }
+
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>${clientName}'s Journey</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; font-size: 13px; color: #2a2520; background: #faf6f0; padding: 2.5rem 3rem; max-width: 780px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; font-weight: 300; color: #2a2520; margin-bottom: 0.2rem; font-style: italic; }
+  .tagline { font-size: 0.95rem; color: #7a6a60; font-style: italic; margin-bottom: 2rem; border-bottom: 1px solid #e0d8d0; padding-bottom: 1rem; }
+  h2 { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: #a09488; margin: 2rem 0 0.75rem; }
+  .session { margin-bottom: 1.75rem; border: 1px solid #e8dfd4; border-radius: 6px; overflow: hidden; background: #fff; }
+  .session-header { display: flex; justify-content: space-between; background: #c9a96e; color: #fff; padding: 0.55rem 0.9rem; }
+  .session-num { font-weight: bold; font-size: 0.85rem; }
+  .session-date { font-size: 0.8rem; opacity: 0.85; }
+  .field { padding: 0.55rem 0.9rem; border-bottom: 1px solid #f5f0ea; }
+  .field:last-child { border-bottom: none; }
+  .label { display: block; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #a09488; margin-bottom: 0.2rem; }
+  p { line-height: 1.7; }
+  .client-note { font-style: italic; }
+  .parts-list { list-style: none; padding: 0; }
+  .parts-list li { padding: 0.35rem 0; border-bottom: 1px solid #ede8e0; line-height: 1.5; }
+  .parts-list li:last-child { border-bottom: none; }
+  .part-name { font-weight: bold; }
+  .part-desc { color: #6a5e54; }
+  .part-where { font-size: 0.82rem; color: #a09488; font-style: italic; }
+  .asks-list { list-style: none; padding: 0; }
+  .asks-list li { padding: 0.3rem 0 0.3rem 1.2rem; position: relative; border-bottom: 1px solid #ede8e0; line-height: 1.5; }
+  .asks-list li:last-child { border-bottom: none; }
+  .asks-list li::before { content: '—'; position: absolute; left: 0; color: #c9a96e; }
+  @media print { body { background: #fff; padding: 1rem; } }
+</style></head><body>
+<h1>${clientName}'s Journey</h1>
+<div class="tagline">A record of your inner work — the parts you've met, what they carried, and what shifted.</div>
+${sessions.length ? `<h2>Your Sessions</h2>${sessionRows}` : ''}
+${d.parts.length ? `<h2>Your Parts Map</h2>${partsHtml}` : ''}
+${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list">${allAsks.map(a => `<li>${a}</li>`).join('')}</ul>` : ''}
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+  }
 
   // ════════════════════════════════════════════════════════════════════════
   // EVENT BINDINGS
