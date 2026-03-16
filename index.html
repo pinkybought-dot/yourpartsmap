@@ -623,35 +623,25 @@
 
   function renderZones() {
     const g = document.getElementById('map-zones');
-    const W = 800, H = 600;
     const defs = document.querySelector('#map-svg defs');
 
-    if (!defs.querySelector('#grad-z3')) {
-      const mkLin = (id, stops) => {
-        const gr = svgEl('linearGradient', { id, x1:'0', y1:'0', x2:'0', y2:'1' });
-        gr.innerHTML = stops; defs.appendChild(gr);
-      };
-      mkLin('grad-z3', '<stop offset="0%" stop-color="#fdf6e3"/><stop offset="100%" stop-color="#f8edbe"/>');
-      mkLin('grad-z2', '<stop offset="0%" stop-color="#faf6f0"/><stop offset="100%" stop-color="#f2ebe0"/>');
-      mkLin('grad-z1', '<stop offset="0%" stop-color="#e8dcc8"/><stop offset="100%" stop-color="#c8b898"/>');
-      // blend strips: top of each zone blends into zone above
-      mkLin('grad-blend32', '<stop offset="0%" stop-color="#f8edbe" stop-opacity="0"/><stop offset="100%" stop-color="#faf6f0" stop-opacity="0"/>');
+    if (!defs.querySelector('#grad-field')) {
+      const lin = svgEl('linearGradient', { id:'grad-field', x1:'0', y1:'0', x2:'0', y2:'1' });
+      lin.innerHTML =
+        '<stop offset="0%" stop-color="#f5e8b0"/>' +
+        '<stop offset="50%" stop-color="#faf6f0"/>' +
+        '<stop offset="100%" stop-color="#b8a080"/>';
+      defs.appendChild(lin);
+
+      const rad = svgEl('radialGradient', { id:'grad-self', cx:'50%', cy:'50%', r:'55%' });
+      rad.innerHTML =
+        '<stop offset="0%" stop-color="rgba(255,252,245,0.7)"/>' +
+        '<stop offset="100%" stop-color="rgba(255,252,245,0)"/>';
+      defs.appendChild(rad);
     }
 
-    g.appendChild(svgEl('rect', { x:0, y:0,       width:W, height:H*0.34, fill:'url(#grad-z3)' }));
-    g.appendChild(svgEl('rect', { x:0, y:H*0.34,  width:W, height:H*0.33, fill:'url(#grad-z2)' }));
-    g.appendChild(svgEl('rect', { x:0, y:H*0.67,  width:W, height:H*0.33, fill:'url(#grad-z1)' }));
-
-    // Soft blur transition at boundaries
-    const blend = (y, c1, c2) => {
-      const id = 'blend-' + Math.random().toString(36).slice(2);
-      const gr = svgEl('linearGradient', { id, x1:'0', y1:'0', x2:'0', y2:'1' });
-      gr.innerHTML = `<stop offset="0%" stop-color="${c1}" stop-opacity="0.9"/><stop offset="100%" stop-color="${c2}" stop-opacity="0"/>`;
-      defs.appendChild(gr);
-      return svgEl('rect', { x:0, y:y, width:W, height:H*0.08, fill:`url(#${id})`, opacity:'0.55' });
-    };
-    g.appendChild(blend(H*0.30, '#f8edbe', '#faf6f0'));
-    g.appendChild(blend(H*0.63, '#f2ebe0', '#e8dcc8'));
+    g.appendChild(svgEl('rect', { x:0, y:0, width:800, height:600, fill:'url(#grad-field)' }));
+    g.appendChild(svgEl('rect', { x:0, y:0, width:800, height:600, fill:'url(#grad-self)' }));
   }
 
   function renderConnections() {
@@ -1026,7 +1016,7 @@ If no map changes needed, return empty actions array.`;
     try {
       const res = await fetch(CONFIG.PROXY_URL, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1024, system: buildBuddySystem(), messages })
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2048, system: buildBuddySystem(), messages })
       });
       if (!res.ok) throw new Error(`Proxy ${res.status}`);
       const data = await res.json();
@@ -1042,11 +1032,11 @@ If no map changes needed, return empty actions array.`;
           const retryMsgs = [
             ...messages,
             { role: 'assistant', content: raw },
-            { role: 'user', content: 'Please reformat your previous response as valid JSON only, no prose outside JSON: {"message":"...","actions":[]}' }
+            { role: 'user', content: 'Your previous response was too long and the JSON was truncated. Please reformat as valid JSON only. Keep the message field under 100 words. Truncate practitionerNote and clientNote to 150 characters each. Return only: {"message":"...","actions":[...]}' }
           ];
           const r2 = await fetch(CONFIG.PROXY_URL, {
             method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 512, system: buildBuddySystem(), messages: retryMsgs })
+            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildBuddySystem(), messages: retryMsgs })
           });
           if (r2.ok) {
             const d2 = await r2.json();
