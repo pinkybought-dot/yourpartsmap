@@ -1519,7 +1519,7 @@ If no map changes needed, return empty actions array.`;
     try {
       const res = await fetch(CONFIG.PROXY_URL, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2048, system: buildBuddySystem(), messages })
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, system: buildBuddySystem(), messages })
       });
       if (!res.ok) throw new Error(`Proxy ${res.status}`);
       const data = await res.json();
@@ -1539,14 +1539,20 @@ If no map changes needed, return empty actions array.`;
           ];
           const r2 = await fetch(CONFIG.PROXY_URL, {
             method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: buildBuddySystem(), messages: retryMsgs })
+            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, system: buildBuddySystem(), messages: retryMsgs })
           });
           if (r2.ok) {
             const d2 = await r2.json();
             const raw2 = d2.content[0].text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
             parsed = JSON.parse(raw2);
           } else { parsed = { mode: 'normal', message: raw, actions: [] }; }
-        } catch { parsed = { mode: 'normal', message: raw, actions: [] }; }
+        } catch {
+          _hideTyping();
+          _appendBubble('assistant', "That was a lot to hold — I ran into a limit processing it. Could you share it in a few smaller pieces?", null);
+          sendBtn.disabled = false;
+          if (!isInternal) input.focus();
+          return;
+        }
       }
 
       _hideTyping();
