@@ -1489,10 +1489,11 @@ If no map changes needed, return empty actions array.`;
       if (parsed.mode === 'guide') {
         // Guide mode response
         APP.guideContext = APP.guideContext || 'the session';
-        let displayText = null;
-        if (parsed.contact) {
-          // Opening turn — show contact + summary, then "Let's go" beat
-          displayText = [parsed.contact, parsed.summary].filter(Boolean).join('\n\n');
+        const isOpeningTurn = !!(parsed.contact && parsed.contact.length > 0);
+
+        if (isOpeningTurn) {
+          // Opening turn — gated behind "Let's go →" button, no proposal card yet
+          const displayText = [parsed.contact, parsed.summary].filter(Boolean).join('\n\n');
           APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
           _appendBubble('assistant', displayText, null);
 
@@ -1512,10 +1513,11 @@ If no map changes needed, return empty actions array.`;
             readyBtn.textContent = "Let's go →";
             readyBtn.onclick = () => {
               readyWrap.remove();
-              if (APP.pendingOpeningProposal) {
-                renderProposalCard(APP.pendingOpeningProposal.proposal, APP.pendingOpeningProposal.remaining);
-                APP.pendingOpeningProposal = null;
+              const pending = APP.pendingOpeningProposal;
+              if (pending && pending.proposal && pending.proposal.parts?.length) {
+                renderProposalCard(pending.proposal, pending.remaining);
               }
+              APP.pendingOpeningProposal = null;
             };
 
             readyWrap.appendChild(leadBubble);
@@ -1525,26 +1527,26 @@ If no map changes needed, return empty actions array.`;
             hist.scrollTop = hist.scrollHeight;
           }, 400);
 
-          APP.pendingOpeningProposal = { proposal: parsed.proposal, remaining: parsed.remaining };
+          // Store proposal — only if one actually exists
+          APP.pendingOpeningProposal = parsed.proposal ? { proposal: parsed.proposal, remaining: parsed.remaining } : null;
           const actionSummary = applyBuddyActions(parsed.actions || []);
           if (actionSummary) scheduleSave();
           sendBtn.disabled = false;
-          return;
+          return; // hard gate — renderProposalCard must NOT be called on opening turn
 
-        } else if (parsed.narrative) {
-          // Subsequent or closing turn
-          displayText = parsed.narrative;
-          APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
-          _appendBubble('assistant', displayText, null);
-        }
-        // Apply any direct actions (e.g. add_log on final turn)
-        const actionSummary = applyBuddyActions(parsed.actions || []);
-        if (actionSummary) scheduleSave();
-        // Render or clear proposal card
-        if (parsed.proposal) {
-          renderProposalCard(parsed.proposal, parsed.remaining);
         } else {
-          clearProposalCard();
+          // Subsequent or closing turn — render narrative then proposal card
+          if (parsed.narrative) {
+            APP.chatHistory.push({ role: 'assistant', content: parsed.narrative, actionsSummary: null });
+            _appendBubble('assistant', parsed.narrative, null);
+          }
+          const actionSummary = applyBuddyActions(parsed.actions || []);
+          if (actionSummary) scheduleSave();
+          if (parsed.proposal) {
+            renderProposalCard(parsed.proposal, parsed.remaining);
+          } else {
+            clearProposalCard();
+          }
         }
       } else {
         // Normal mode
