@@ -1529,7 +1529,9 @@ If no map changes needed, return empty actions array.`;
 
           // Store proposal — only if one actually exists
           APP.pendingOpeningProposal = parsed.proposal ? { proposal: parsed.proposal, remaining: parsed.remaining } : null;
-          const actionSummary = applyBuddyActions(parsed.actions || []);
+          // Opening turn: defer add_part / add_connection — they belong to the proposal, not here
+          const safeActions = (parsed.actions || []).filter(a => a.type !== 'add_part' && a.type !== 'add_connection');
+          const actionSummary = applyBuddyActions(safeActions);
           if (actionSummary) scheduleSave();
           sendBtn.disabled = false;
           return; // hard gate — renderProposalCard must NOT be called on opening turn
@@ -1667,9 +1669,14 @@ If no map changes needed, return empty actions array.`;
           pendingConnection = { from: f.id, to: t.id, type: connType };
           showConnectionConfirm(f.name, t.name, connType);
         } else if (f && t) {
-          APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: connType });
-          renderConnections();
-          done.push(`connected "${f.name}" and "${t.name}"`);
+          const alreadyExists = APP.mapData.connections.some(
+            c => (c.from === f.id && c.to === t.id) || (c.from === t.id && c.to === f.id)
+          );
+          if (!alreadyExists) {
+            APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: connType });
+            renderConnections();
+            done.push(`connected "${f.name}" and "${t.name}"`);
+          }
         }
       }
     }
@@ -2218,7 +2225,12 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
       const f = findPartFuzzy(conn.from || '');
       const t = findPartFuzzy(conn.to || '');
       if (f && t) {
-        APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: conn.connectionType || 'allied' });
+        const alreadyExists = APP.mapData.connections.some(
+          c => (c.from === f.id && c.to === t.id) || (c.from === t.id && c.to === f.id)
+        );
+        if (!alreadyExists) {
+          APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: conn.connectionType || 'allied' });
+        }
       }
     }
     if (done.length) { renderMap(); scheduleSave(); }
