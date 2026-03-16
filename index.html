@@ -936,6 +936,7 @@
   // ── DRAG & DROP ─────────────────────────────────────────────────────────
   let pendingZoneMove = null;
   let pendingConnection = null;
+  let pendingPartUpdate = null;
 
   function initDrag() {
     const svg = document.getElementById('map-svg');
@@ -1042,6 +1043,59 @@
   function rejectConnection() {
     pendingConnection = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+  }
+
+  // ── PART UPDATE CONFIRM ───────────────────────────────────────────────────
+  function _buildUpdateSummary(partName, changes) {
+    const zoneDesc = { 1: 'deeper into the past', 2: 'closer to the present', 3: 'back toward the source' };
+    const parts = [];
+    if (changes.zone) parts.push(`Move ${partName} — ${zoneDesc[changes.zone] || 'new position'}`);
+    if (changes.suggestedTier) parts.push(`Tier: ${changes.suggestedTier}`);
+    if (changes.desc) parts.push(changes.desc.slice(0, 80) + (changes.desc.length > 80 ? '…' : ''));
+    if (changes.status) parts.push(`Status: ${changes.status}`);
+    return parts.join(' · ') || `Update ${partName}`;
+  }
+
+  function showPartUpdateConfirm(partId, partName, changes) {
+    pendingPartUpdate = { partId, changes };
+    document.getElementById('zone-confirm-msg').textContent = _buildUpdateSummary(partName, changes);
+    document.getElementById('zone-confirm-yes').textContent = `Update ${partName}`;
+    document.getElementById('zone-confirm-no').textContent = 'Skip for now';
+    document.getElementById('zone-confirm-yes').onclick = confirmPartUpdate;
+    document.getElementById('zone-confirm-no').onclick = rejectPartUpdate;
+    document.getElementById('zone-confirm-overlay').classList.remove('hidden');
+  }
+
+  function confirmPartUpdate() {
+    if (!pendingPartUpdate) return;
+    const part = APP.mapData?.parts?.find(p => p.id === pendingPartUpdate.partId);
+    if (part) {
+      Object.assign(part, pendingPartUpdate.changes);
+      if (pendingPartUpdate.changes.name) part.label = shortenLabel(pendingPartUpdate.changes.name);
+      if (pendingPartUpdate.changes.zone) {
+        const z = parseInt(pendingPartUpdate.changes.zone, 10);
+        if (z === 3) part.y = 0.05 + Math.random() * 0.24;
+        else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
+        else part.y = 0.36 + Math.random() * 0.28;
+      }
+      renderMap();
+      scheduleSave();
+    }
+    pendingPartUpdate = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    document.getElementById('zone-confirm-yes').textContent = 'Move';
+    document.getElementById('zone-confirm-no').textContent = 'Keep here';
+    document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
+    document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+  }
+
+  function rejectPartUpdate() {
+    pendingPartUpdate = null;
+    document.getElementById('zone-confirm-overlay').classList.add('hidden');
+    document.getElementById('zone-confirm-yes').textContent = 'Move';
+    document.getElementById('zone-confirm-no').textContent = 'Keep here';
     document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
     document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
   }
@@ -1290,6 +1344,7 @@ Action types:
 - { "type": "update_part", "id": "part-id-or-name", "changes": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "...", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
   IMPORTANT: use update_part (not add_part) whenever a part already exists on the map and needs any change — name, color, description, status, or zone. update_part finds by name fuzzy match. Never add a duplicate.
   Including zone in changes will automatically reposition the part on the map — use this when session notes show a part has clearly shifted (no confirmation needed). Use move_zone with confirm:true only when you want the practitioner to make an explicit decision about a zone change.
+  Add "confirm": true to update_part when the change is significant — zone shift, major desc rewrite, liberation/unburdening, or status change reflecting deep psyche movement. Omit confirm for minor tweaks (color, small status label).
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
 - { "type": "add_connection", "from": "part-id-or-name", "to": "part-id-or-name", "connectionType": "allied|polarized", "confirm": true }
@@ -1530,15 +1585,20 @@ If no map changes needed, return empty actions array.`;
       } else if (action.type === 'update_part') {
         const part = findPartFuzzy(action.id || action.name || '');
         if (part && action.changes) {
-          Object.assign(part, action.changes);
-          if (action.changes.name) part.label = shortenLabel(action.changes.name);
-          if (action.changes.zone) {
-            const z = parseInt(action.changes.zone, 10);
-            if (z === 3) part.y = 0.05 + Math.random() * 0.24;
-            else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
-            else part.y = 0.36 + Math.random() * 0.28;
+          if (action.confirm) {
+            showPartUpdateConfirm(part.id, part.name, action.changes);
+            done.push(`confirming update for "${part.name}"`);
+          } else {
+            Object.assign(part, action.changes);
+            if (action.changes.name) part.label = shortenLabel(action.changes.name);
+            if (action.changes.zone) {
+              const z = parseInt(action.changes.zone, 10);
+              if (z === 3) part.y = 0.05 + Math.random() * 0.24;
+              else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
+              else part.y = 0.36 + Math.random() * 0.28;
+            }
+            renderMap(); done.push(`updated "${part.name}"`);
           }
-          renderMap(); done.push(`updated "${part.name}"`);
         }
 
       } else if (action.type === 'remove_part') {
