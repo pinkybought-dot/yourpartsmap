@@ -1715,6 +1715,85 @@ If no map changes needed, return empty actions array.`;
   // ════════════════════════════════════════════════════════════════════════
   // NEW MAP MODAL
   // ════════════════════════════════════════════════════════════════════════
+  function generatePoeticHash() {
+    const adjectives = [
+      'amber','ancient','azure','boundless','brave','bright','broad','burning',
+      'calm','clear','climbing','cosmic','crystal','dawn','deep','distant',
+      'divine','dreaming','drifting','dynamic','eager','earnest','electric',
+      'emerald','endless','eternal','ever','expansive','fierce','flowing',
+      'fluent','flying','free','fresh','full','generous','gentle','glowing',
+      'golden','graceful','grand','grateful','great','growing','harmonic',
+      'healing','honest','hopeful','humble','illumined','infinite','inner',
+      'joyful','kind','knowing','lasting','lavender','legendary','light',
+      'limitless','living','loving','luminous','majestic','mighty','noble',
+      'nurturing','oceanic','open','patient','peaceful','present','pure',
+      'radiant','resilient','rising','rooted','sacred','serene','shining',
+      'silver','soaring','sovereign','spacious','steady','stellar','still',
+      'strong','sunlit','supple','tender','thankful','thriving','timeless',
+      'vast','vibrant','vivid','warm','wide','wild','willing','wise',
+      'wondrous','worthy','zenith','truthful','valiant','abundant','agile',
+      'alive','awake','aware','balanced','blazing','blooming','bold',
+      'brilliant','buoyant','candid','capable','caring','centered','certain',
+      'champion','clear','compassionate','confident','connected','conscious',
+      'courageous','creative','curious','daring','dedicated','devoted',
+      'dignified','discerning','empowered','enduring','enlightened','evolving',
+      'excellent','expansive','expressive','faithful','fearless','fertile',
+      'flourishing','focused','forgiving','forthright','forward','free',
+      'fulfilled','galactic','gifted','gleaming','glorious','grounded',
+      'hallowed','harmonious','healed','heartfelt','heroic','holistic',
+      'inspired','integral','intentional','intuitive','invincible','jubilant',
+      'keen','knowledgeable','liberated','lively','magnificent','mature',
+      'mindful','motivated','moving','natural','nurturing','optimistic',
+      'original','overflowing','passionate','perceptive','playful','positive',
+      'powerful','pioneering','profound','progressive','prolific','purposeful',
+      'receptive','renewed','resourceful','reverent','rhythmic','robust',
+      'secure','selfless','sensitive','serene','sincere','skillful','solar',
+      'soulful','spirited','spontaneous','stoic','sublime','sunlit','supple',
+      'sustaining','thorough','thoughtful','tidal','tireless','transcendent',
+      'transforming','transparent','triumphant','trusting','understanding',
+      'unfolding','unified','universal','unstoppable','uplifting','visionary',
+      'vital','volcanic','welcoming','whole','wholesome','willing','windswept',
+      'winged','wondering','yielding','youthful','zealous'
+    ];
+    const organisms = [
+      'albatross','alder','aloe','amaranth','antelope','apple','arbutus',
+      'aspen','aster','aurora','avocado','azalea','bamboo','baobab','basil',
+      'bay','beech','birch','bison','bluebell','bonsai','boreal','bougainvillea',
+      'buffalo','butterfly','cactus','camellia','canyon','cardinal','cedar',
+      'chamomile','chestnut','chrysanthemum','clover','condor','coral',
+      'cottonwood','crane','cypress','dahlia','daisy','dandelion','deer',
+      'dolphin','dove','dragonfly','eagle','elderberry','elk','elm','eucalyptus',
+      'falcon','fir','firefly','fjord','flicker','foxglove','freesia',
+      'gardenia','ginkgo','glacier','gladiola','goshawk','harbor','harvest',
+      'hawthorne','hazel','heather','hibiscus','horizon','hummingbird',
+      'hyacinth','ibis','iris','ironwood','jasmine','juniper','kestrel',
+      'kingfisher','larch','laurel','lavender','leopard','lighthouse','linden',
+      'loon','lotus','lupine','lynx','magnolia','maple','marigold','meadow',
+      'merlin','mimosa','monarch','moonflower','moose','morning','mountain',
+      'mulberry','narcissus','nightingale','oak','ocean','olive','orchid',
+      'osprey','otter','owl','panther','pasture','peony','peregrine','pine',
+      'plover','plum','poplar','poppy','prairie','primrose','rainbow','redwood',
+      'reindeer','rhododendron','river','robin','rosemary','rowan','sage',
+      'salmon','sandpiper','sassafras','savanna','sequoia','skylark','solstice',
+      'sparrow','spruce','starling','stellar','stork','summit','sunflower',
+      'sycamore','tamarack','teal','thistle','tiger','tulip','tundra',
+      'turquoise','valley','verbena','violet','vista','walnut','warbler',
+      'waterfall','watershed','waxwing','whale','wildflower','willow','wolf',
+      'wren','yarrow','yew','yucca','zinnia','buffalo','crane','dune',
+      'estuary','fjord','glade','grove','haven','heath','highland','inlet',
+      'islet','lagoon','lowland','mallow','mangrove','marsh','mesa','moor',
+      'narwhal','nectar','nimbus','oasis','plateau','pronghorn','riparian',
+      'shoreline','snowdrop','solstice','sorrel','steppe','stonecrop',
+      'streamside','sunrise','sweetgrass','talon','tamarind','thicket',
+      'thornbird','tidewater','tigerlily','timberline','torrent','treeline',
+      'trillium','tundra','upland','verdant','wetland','whimbrel','windward',
+      'woodland','wisteria','wolfberry','yellowwood','zenith'
+    ];
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const org = organisms[Math.floor(Math.random() * organisms.length)];
+    return `${adj}-${org}`;
+  }
+
   function openNewMapModal() {
     document.getElementById('modal-form-fields').classList.remove('hidden');
     document.getElementById('created-info').classList.add('hidden');
@@ -1733,9 +1812,7 @@ If no map changes needed, return empty actions array.`;
     const btn = document.getElementById('modal-create-btn');
     btn.disabled = true; btn.textContent = 'Creating…';
     try {
-      const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
-      const rand = Math.random().toString(36).slice(2, 6);
-      const hash = `${slug}-${rand}`;
+      const hash = generatePoeticHash();
       const [practHash, clientHash] = await Promise.all([hashPIN(practPin), hashPIN(clientPin)]);
       const mapData = emptyMapData(name);
       const encrypted = await encryptData(mapData, hash);
