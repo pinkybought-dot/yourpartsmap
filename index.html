@@ -164,6 +164,19 @@
     .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
     .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes typing-dot { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+    /* ── PROPOSAL CARD ── */
+    .proposal-card { background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1rem 1rem 0.75rem; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+    .proposal-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); }
+    .proposal-narrative { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.7; color: var(--text); }
+    .proposal-parts { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .proposal-part-chip { font-size: 0.75rem; padding: 0.2rem 0.55rem; border-radius: 20px; border: 1px solid var(--border-strong); color: var(--text-dim); background: var(--surface); }
+    .proposal-actions { display: flex; gap: 0.5rem; }
+    .proposal-btn-primary { padding: 0.5rem 1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 6px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; cursor: pointer; transition: all 0.18s; }
+    .proposal-btn-primary:hover { background: rgba(138,106,32,0.15); }
+    .proposal-btn-alt { padding: 0.5rem 1rem; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.83rem; cursor: pointer; transition: all 0.18s; }
+    .proposal-btn-alt:hover { background: var(--bg2); color: var(--text); }
+    .proposal-remaining { font-size: 0.72rem; color: var(--text-faint); text-align: right; }
+
     .chat-bar { display: flex; align-items: flex-end; gap: 0.45rem; padding: 0.6rem 0.7rem; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
     .chat-input { flex: 1; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; line-height: 1.5; padding: 0.58rem 0.8rem; resize: none; outline: none; min-height: 38px; max-height: 160px; overflow-y: auto; transition: border-color 0.18s; }
     .chat-input:focus { border-color: var(--gold); }
@@ -424,6 +437,16 @@
           <span class="panel-title">Bob</span>
         </div>
         <div class="chat-history" id="chat-history"></div>
+        <div id="proposal-card" class="proposal-card hidden">
+          <div class="proposal-label" id="proposal-label"></div>
+          <div class="proposal-narrative" id="proposal-narrative"></div>
+          <div class="proposal-parts" id="proposal-parts"></div>
+          <div class="proposal-actions">
+            <button class="proposal-btn-primary" id="proposal-primary"></button>
+            <button class="proposal-btn-alt" id="proposal-alt"></button>
+          </div>
+          <div class="proposal-remaining hidden" id="proposal-remaining"></div>
+        </div>
         <div class="chat-bar">
           <textarea class="chat-input" id="chat-input" rows="1"
             placeholder="What's up?"></textarea>
@@ -581,7 +604,7 @@
   // ════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ════════════════════════════════════════════════════════════════════════
-  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [] };
+  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null };
 
   function emptyMapData(name) {
     return { meta: { title: `${name}'s Map`, clientName: name, sessionCount: 0, createdAt: todayStr(), lastSession: null }, parts: [], connections: [], log: [] };
@@ -1168,8 +1191,75 @@ The map has a Self center-point at the middle (x=0.5, y=0.5). In Zone 2, integra
 
 When suggesting a zone move, describe it in terms of the present-moment meter: e.g. "This part sounds like it's moved closer to the present — want to move it up?"
 
-Always respond with valid JSON in exactly this format:
-{ "message": "your conversational response here", "actions": [] }
+GUIDE MODE
+
+When you receive a transcript, session notes, or significant new information (anything that describes what happened in a session), enter guide mode. For simple questions or small updates, stay in normal mode.
+
+In guide mode, respond with this JSON structure:
+
+Opening turn (first response to new material):
+{
+  "mode": "guide",
+  "contact": "one sentence of genuine empathic contact — specific to what was shared, never generic. Example: 'That sounds like the system worked really hard to stay in control — and something got through anyway.'",
+  "summary": "2-4 sentences — what the system was doing, what emerged, key moment. Use their exact language. Alive and concise.",
+  "lead": "Let's build the map together, starting with [most prominent part or cluster name].",
+  "proposal": {
+    "label": "short name for this cluster, e.g. 'The Warrior and his crew'",
+    "narrative": "1-3 sentences describing this part or cluster — why they belong together, what they're doing, where they belong on the map. Warm and specific.",
+    "parts": [
+      { "name": "...", "color": "...", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "zone": 1, "suggestedTier": "..." }
+    ],
+    "connections": [
+      { "from": "name", "to": "name", "connectionType": "allied|polarized" }
+    ],
+    "primaryAction": "Add both | Add all three | Add [name]",
+    "alternateAction": "Add separately | Skip for now"
+  },
+  "remaining": 3,
+  "actions": []
+}
+
+Subsequent turns (after user confirms or skips):
+{
+  "mode": "guide",
+  "narrative": "1-2 sentence transition — 'Now, underneath all of that...' or 'Then there's...' or 'The last piece I'm seeing today...'",
+  "proposal": { },
+  "remaining": 2,
+  "actions": []
+}
+
+Final turn (all clusters presented):
+{
+  "mode": "guide",
+  "narrative": "closing sentence — 'I think that covers what came up today. Anything feel off or missing?'",
+  "proposal": null,
+  "remaining": 0,
+  "actions": [ ]
+}
+The final turn actions array should contain the add_log entry with full structured fields.
+
+Normal mode (questions, small updates):
+{
+  "mode": "normal",
+  "message": "...",
+  "actions": []
+}
+
+Clustering rules:
+- Group parts that are directly interacting — same team, complementary strategies, or in direct polarity (1-3 parts per cluster max)
+- Order clusters from most prominent/energized to peripheral
+- Parts that protect the same exile belong in the same cluster
+- An exile and its direct protector can be introduced together if the relationship was explicit in the session
+- Work outward from the most defended/active part toward the most tender
+
+Zone placement in guide mode:
+- Always reason about distance from Self center (0.5, 0.5)
+- Burdened/fragmented parts: further from center
+- Integrated/liberated: near center
+- Describe placement in terms of the present-moment meter when relevant
+
+Always respond with valid JSON in exactly this format for normal mode:
+{ "mode": "normal", "message": "your conversational response here", "actions": [] }
 
 Action types:
 - { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
@@ -1258,16 +1348,19 @@ If no map changes needed, return empty actions array.`;
   }
   function _hideTyping() { document.getElementById('chat-typing')?.remove(); }
 
-  async function sendChatMessage(text) {
+  async function sendChatMessage(text, isInternal = false) {
     text = text.trim();
     if (!text || !APP.mapData) return;
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
-    input.value = ''; input.style.height = 'auto'; sendBtn.disabled = true;
-    rotateBobPlaceholder();
+    if (!isInternal) {
+      input.value = ''; input.style.height = 'auto';
+      rotateBobPlaceholder();
+    }
+    sendBtn.disabled = true;
     APP.chatHistory = APP.chatHistory || [];
     APP.chatHistory.push({ role: 'user', content: text });
-    _appendBubble('user', text);
+    if (!isInternal) _appendBubble('user', text);
     _showTyping();
     const messages = APP.chatHistory.map(m => ({ role: m.role, content: m.content }));
     try {
@@ -1289,7 +1382,7 @@ If no map changes needed, return empty actions array.`;
           const retryMsgs = [
             ...messages,
             { role: 'assistant', content: raw },
-            { role: 'user', content: 'Your previous response was too long and the JSON was truncated. Please reformat as valid JSON only. Keep the message field under 100 words. Truncate practitionerNote and clientNote to 150 characters each. Return only: {"message":"...","actions":[...]}' }
+            { role: 'user', content: 'Your previous response was too long and the JSON was truncated. Please reformat as valid JSON only. Keep the message field under 100 words. Truncate practitionerNote and clientNote to 150 characters each. Return only valid JSON.' }
           ];
           const r2 = await fetch(CONFIG.PROXY_URL, {
             method: 'POST', headers: { 'content-type': 'application/json' },
@@ -1299,17 +1392,46 @@ If no map changes needed, return empty actions array.`;
             const d2 = await r2.json();
             const raw2 = d2.content[0].text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
             parsed = JSON.parse(raw2);
-          } else { parsed = { message: raw, actions: [] }; }
-        } catch { parsed = { message: raw, actions: [] }; }
+          } else { parsed = { mode: 'normal', message: raw, actions: [] }; }
+        } catch { parsed = { mode: 'normal', message: raw, actions: [] }; }
       }
 
-      const message = parsed.message || raw;
-      const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
-      const summary = applyBuddyActions(actions);
       _hideTyping();
-      APP.chatHistory.push({ role: 'assistant', content: message, actionsSummary: summary });
-      _appendBubble('assistant', message, summary);
-      if (actions.length) scheduleSave();
+
+      if (parsed.mode === 'guide') {
+        // Guide mode response
+        APP.guideContext = APP.guideContext || 'the session';
+        let displayText = null;
+        if (parsed.contact) {
+          // Opening turn
+          displayText = [parsed.contact, parsed.summary, parsed.lead].filter(Boolean).join('\n\n');
+        } else if (parsed.narrative) {
+          // Subsequent or closing turn
+          displayText = parsed.narrative;
+        }
+        if (displayText) {
+          APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
+          _appendBubble('assistant', displayText, null);
+        }
+        // Apply any direct actions (e.g. add_log on final turn)
+        const actionSummary = applyBuddyActions(parsed.actions || []);
+        if (actionSummary) scheduleSave();
+        // Render or clear proposal card
+        if (parsed.proposal) {
+          renderProposalCard(parsed.proposal, parsed.remaining);
+        } else {
+          clearProposalCard();
+        }
+      } else {
+        // Normal mode
+        const message = parsed.message || raw;
+        const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
+        const summary = applyBuddyActions(actions);
+        APP.chatHistory.push({ role: 'assistant', content: message, actionsSummary: summary });
+        _appendBubble('assistant', message, summary);
+        if (actions.length) scheduleSave();
+        clearProposalCard();
+      }
     } catch (e) {
       _hideTyping();
       const errMsg = 'Something went wrong: ' + e.message;
@@ -1317,7 +1439,8 @@ If no map changes needed, return empty actions array.`;
       _appendBubble('assistant', errMsg);
       console.error(e);
     } finally {
-      sendBtn.disabled = false; input.focus();
+      sendBtn.disabled = false;
+      if (!isInternal) input.focus();
     }
   }
 
@@ -1823,6 +1946,105 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  // GUIDE MODE
+  // ════════════════════════════════════════════════════════════════════════
+
+  function renderProposalCard(proposal, remaining) {
+    if (!proposal) { clearProposalCard(); return; }
+    APP.pendingProposal = proposal;
+    APP.guideMode = true;
+    document.getElementById('proposal-label').textContent = proposal.label || 'Next on the map';
+    document.getElementById('proposal-narrative').textContent = proposal.narrative || '';
+    const chipsEl = document.getElementById('proposal-parts');
+    chipsEl.innerHTML = '';
+    for (const p of (proposal.parts || [])) {
+      const chip = document.createElement('span');
+      chip.className = 'proposal-part-chip';
+      chip.textContent = p.name;
+      chipsEl.appendChild(chip);
+    }
+    document.getElementById('proposal-primary').textContent = proposal.primaryAction || 'Add to map';
+    document.getElementById('proposal-alt').textContent = proposal.alternateAction || 'Skip';
+    const remEl = document.getElementById('proposal-remaining');
+    if (remaining && remaining > 0) {
+      remEl.textContent = `${remaining} more cluster${remaining > 1 ? 's' : ''} to go`;
+      remEl.classList.remove('hidden');
+    } else {
+      remEl.classList.add('hidden');
+    }
+    document.getElementById('proposal-card').classList.remove('hidden');
+  }
+
+  function clearProposalCard() {
+    APP.pendingProposal = null;
+    APP.guideMode = false;
+    document.getElementById('proposal-card').classList.add('hidden');
+  }
+
+  function applyProposalParts(proposal) {
+    if (!proposal) return [];
+    const done = [];
+    for (const p of (proposal.parts || [])) {
+      const added = addPartToMap({
+        name: p.name, description: p.desc || p.description || '',
+        suggestedColor: p.color, zone: p.zone || null,
+        suggestedTier: p.suggestedTier || 'protector'
+      });
+      if (added) {
+        if (p.status) added.status = p.status;
+        if (p.shape)  added.shape  = p.shape;
+        done.push(`added "${p.name}"`);
+      }
+    }
+    for (const conn of (proposal.connections || [])) {
+      const f = findPartFuzzy(conn.from || '');
+      const t = findPartFuzzy(conn.to || '');
+      if (f && t) {
+        APP.mapData.connections.push({ from: f.id, to: t.id, style: 'solid', type: conn.connectionType || 'allied' });
+      }
+    }
+    if (done.length) { renderMap(); scheduleSave(); }
+    return done;
+  }
+
+  async function handleProposalPrimary() {
+    const proposal = APP.pendingProposal;
+    if (!proposal) return;
+    const done = applyProposalParts(proposal);
+    clearProposalCard();
+    if (done.length) _appendBubble('assistant', '↳ ' + done.join(', '), null);
+    await sendGuideFollowUp('confirmed');
+  }
+
+  async function handleProposalAlt() {
+    const proposal = APP.pendingProposal;
+    if (!proposal) return;
+    const altText = (proposal.alternateAction || '').toLowerCase();
+    if (altText.includes('separate')) {
+      const done = [];
+      for (const p of (proposal.parts || [])) {
+        const added = addPartToMap({
+          name: p.name, description: p.desc || p.description || '',
+          suggestedColor: p.color, zone: p.zone || null,
+          suggestedTier: p.suggestedTier || 'protector'
+        });
+        if (added) done.push(`added "${p.name}"`);
+      }
+      if (done.length) { renderMap(); scheduleSave(); }
+      if (done.length) _appendBubble('assistant', '↳ ' + done.join(', ') + ' (separately)', null);
+      clearProposalCard();
+      await sendGuideFollowUp('added separately');
+    } else {
+      clearProposalCard();
+      await sendGuideFollowUp('skipped');
+    }
+  }
+
+  async function sendGuideFollowUp(action) {
+    await sendChatMessage(`User ${action} this proposal. Continue guide mode — what's next?`, true);
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   // EVENT BINDINGS
   // ════════════════════════════════════════════════════════════════════════
 
@@ -1843,6 +2065,10 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
   // Zone confirm (use .onclick so connection confirm can override without double-firing)
   document.getElementById('zone-confirm-yes').onclick = confirmZoneMove;
   document.getElementById('zone-confirm-no').onclick = rejectZoneMove;
+
+  // Proposal card
+  document.getElementById('proposal-primary').addEventListener('click', handleProposalPrimary);
+  document.getElementById('proposal-alt').addEventListener('click', handleProposalAlt);
 
   // Add part
   document.getElementById('btn-add-part').addEventListener('click', () => {
