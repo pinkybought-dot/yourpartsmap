@@ -1001,10 +1001,15 @@
   function confirmZoneMove() {
     if (!pendingZoneMove) return;
     const part = APP.mapData?.parts?.find(p => p.id === pendingZoneMove.partId);
-    if (part) { part.zone = pendingZoneMove.newZone; scheduleSave(); }
+    if (part) {
+      part.zone = pendingZoneMove.newZone;
+      const { x: cx, y: cy } = computePartPlacement(part.suggestedTier || 'protector', pendingZoneMove.newZone);
+      part.x = cx; part.y = cy;
+      scheduleSave();
+    }
     pendingZoneMove = null;
     document.getElementById('zone-confirm-overlay').classList.add('hidden');
-    renderConnections();
+    renderMap();
   }
 
   function rejectZoneMove() {
@@ -1075,10 +1080,8 @@
       Object.assign(part, pendingPartUpdate.changes);
       if (pendingPartUpdate.changes.name) part.label = shortenLabel(pendingPartUpdate.changes.name);
       if (pendingPartUpdate.changes.zone) {
-        const z = parseInt(pendingPartUpdate.changes.zone, 10);
-        if (z === 3) part.y = 0.05 + Math.random() * 0.24;
-        else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
-        else part.y = 0.36 + Math.random() * 0.28;
+        const { x: px, y: py } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
+        part.x = px; part.y = py;
       }
       renderMap();
       scheduleSave();
@@ -1177,48 +1180,71 @@
     scheduleSave();
   }
 
+  function computePartPlacement(tier, zone) {
+    const t = tier || 'protector';
+    const z = parseInt(zone, 10) || 1;
+    let xMin, xMax, yMin, yMax;
+
+    // Horizontal x by role
+    if (t === 'firefighter') {
+      xMin = 0.10; xMax = 0.35;
+    } else if (t === 'manager') {
+      xMin = 0.65; xMax = 0.90;
+    } else if (t === 'exile' || t === 'unattached' || t === 'ancestral' || t === 'guide') {
+      xMin = 0.38; xMax = 0.62;
+    } else if (t === 'liberated') {
+      xMin = 0.44; xMax = 0.56;
+    } else if (t === 'integrated') {
+      xMin = 0.40; xMax = 0.60;
+    } else {
+      xMin = 0.30; xMax = 0.70; // protector unknown
+    }
+
+    // Zone 3 horizontal overrides
+    if (z === 3) {
+      if (t === 'ancestral')       { xMin = 0.10; xMax = 0.35; }
+      else if (t === 'unattached') { xMin = 0.65; xMax = 0.90; }
+      else if (t === 'guide')      { xMin = 0.38; xMax = 0.62; }
+    }
+
+    // Vertical y by zone + sub-zone
+    if (z === 1) {
+      if (t === 'exile' || t === 'unattached' || t === 'ancestral') { yMin = 0.88; yMax = 1.05; }
+      else if (t === 'firefighter')                                  { yMin = 0.78; yMax = 0.87; }
+      else if (t === 'manager')                                      { yMin = 0.73; yMax = 0.87; }
+      else                                                           { yMin = 0.70; yMax = 0.87; }
+    } else if (z === 2) {
+      if (t === 'liberated')       { yMin = 0.44; yMax = 0.52; }
+      else if (t === 'integrated') { yMin = 0.42; yMax = 0.54; }
+      else if (t === 'guide')      { yMin = 0.36; yMax = 0.41; }
+      else                         { yMin = 0.42; yMax = 0.66; }
+    } else { // zone 3
+      if (t === 'ancestral' || t === 'unattached') { yMin = -0.05; yMax = 0.07; }
+      else if (t === 'guide')                      { yMin = 0.08;  yMax = 0.19; }
+      else                                         { yMin = 0.20;  yMax = 0.35; }
+    }
+
+    const jitter = (Math.random() - 0.5) * 0.04;
+    const x = Math.max(0.02, Math.min(0.98, xMin + Math.random() * (xMax - xMin) + jitter));
+    const y = Math.max(-0.1, yMin + Math.random() * (yMax - yMin) + jitter);
+    return { x, y };
+  }
+
   function addPartToMap(partData) {
     if (!APP.mapData) return;
     let zone = partData.zone ? parseInt(partData.zone, 10) : null;
+    const tier = partData.suggestedTier || 'protector';
     if (!zone) {
-      const tier = partData.suggestedTier;
       if (tier === 'guide' || tier === 'archetypal') zone = 3;
       else if (tier === 'integrated' || tier === 'liberated') zone = 2;
       else zone = 1;
     }
-    let x, y;
-    if (zone === 3) {
-      const isAncestral = (partData.suggestedTier === 'ancestral' || partData.suggestedTier === 'unattached');
-      x = 0.12 + Math.random() * 0.76;
-      y = isAncestral ? 0.01 + Math.random() * 0.03 : 0.12 + Math.random() * 0.12;
-    } else if (zone === 1) {
-      const isAncestralBurden = (partData.suggestedTier === 'ancestral' || partData.suggestedTier === 'unattached');
-      const isExile = partData.suggestedTier === 'exile';
-      x = 0.12 + Math.random() * 0.76;
-      if (isAncestralBurden) y = 0.93 + Math.random() * 0.05;
-      else if (isExile) y = 0.78 + Math.random() * 0.14;
-      else y = 0.70 + Math.random() * 0.12;
-    } else {
-      // Zone 2 — bias toward or away from Self center
-      const isIntegrated = partData.suggestedTier === 'integrated'
-        || partData.suggestedTier === 'liberated'
-        || partData.suggestedColor === 'gold';
-      if (isIntegrated) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 0.06 + Math.random() * 0.08;
-        x = 0.5 + Math.cos(angle) * radius;
-        y = 0.35 + Math.sin(angle) * radius * 0.6;
-      } else {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 0.18 + Math.random() * 0.18;
-        x = Math.max(0.05, Math.min(0.95, 0.5 + Math.cos(angle) * radius));
-        y = Math.max(0.34, Math.min(0.66, 0.42 + Math.sin(angle) * radius * 0.5));
-      }
-    }
+    const { x, y } = computePartPlacement(tier, zone);
     const part = {
       id: genId(), name: partData.name, label: shortenLabel(partData.name),
       color: partData.suggestedColor || 'gray', shape: 'circle', size: 32, zone,
       x, y,
+      suggestedTier: tier,
       desc: partData.description || '', status: '',
       firstSession: (APP.mapData.meta.sessionCount || 0) + 1, keyMoments: []
     };
@@ -1254,16 +1280,64 @@ Zone 3 (top) — Source / The Luminous:
 - Guides and archetypal resources: placed near the Zone 2/3 boundary (y around 0.15–0.25), straddling both.
 - Unattached and ancestral burdens AFTER being returned to source: float to the top, partially off the top edge (suggestedTier: "ancestral" or "unattached", zone: 3).
 
-Zone placement defaults:
-- New protector → zone 1 (burdened until proven otherwise)
-- New exile → zone 1, placed low
-- Unattached/ancestral burden → zone 1, near/off bottom edge
-- Guide or archetypal resource → zone 3, near boundary with zone 2
-- Updated/integrated part → zone 2
-- Liberated part → zone 2, near center
-- Ancestral burden returned to source → zone 3, near/off top edge
+Part roles (use for suggestedTier):
+- firefighter: reactive protector — activates AFTER exile pain breaks through, uses any strategy to soothe/distract/numb. Placed LEFT on the map.
+- manager: proactive protector — works constantly to PREVENT exile pain from surfacing. Placed RIGHT on the map.
+- protector: use only when you genuinely can't tell which type.
+- exile: wounded, burdened, carrying the original pain. Center of map.
+- unattached/ancestral: burdens not yet attached to a single part. Center in Zone 1, right in Zone 3 (unattached) or left in Zone 3 (ancestral).
+- guide: archetypal resource. Center horizontally.
+- integrated: part that knows the current date, working with Self. Zone 2, pulled toward center.
+- liberated: exile or protector that has fully unburdened. Zone 2, very close to center.
 
-The map has a Self center-point at the middle (x=0.5, y=0.5). In Zone 2, integrated and liberated parts should be placed near the center. Burdened or fragmented parts should be placed further from center. When suggesting zone moves toward Zone 2, describe the movement toward center as increased integration with Self.
+SPATIAL PLACEMENT RULES — the JS uses these to position parts. Your tier and zone choices directly determine where a part lands:
+
+Horizontal axis (x) = role type:
+- firefighter → x 0.10–0.35 (left)
+- exile, unattached, ancestral → x 0.38–0.62 (center)
+- manager → x 0.65–0.90 (right)
+- protector (unknown) → x 0.30–0.70
+- guide → x 0.38–0.62 (center)
+- integrated/liberated → pulled toward x=0.5 (the more integrated, the closer to center)
+
+In Zone 3:
+- ancestral burdens → x 0.10–0.35 (left)
+- guides → x 0.38–0.62 (center)
+- unattached burdens → x 0.65–0.90 (right)
+
+Vertical axis (y) = zone + sub-zone depth:
+Zone 1 (burdened/past):
+- exile, unattached, ancestral: y 0.88–1.05 (bottom, most buried)
+- firefighter: y 0.78–0.87 (middle — reactive but not the deepest)
+- manager: y 0.73–0.87 (middle-to-top — more controlled)
+- protector (unknown): y 0.70–0.87
+
+Zone 2 (present/integrated):
+- general zone 2: y 0.42–0.66
+- guide in zone 2: y 0.36–0.41 (top sub-zone)
+- integrated: y 0.42–0.54, x pulled toward 0.5
+- liberated: y 0.44–0.52, x very close to 0.5
+
+Zone 3 (source/luminous):
+- general: y 0.20–0.35 (bottom sub-zone)
+- guide: y 0.08–0.19 (middle sub-zone)
+- ancestral/unattached fully unburdened: y −0.05–0.07 (partially off top edge)
+
+USE THE FULL MAP. Parts should spread across horizontal space by role. Avoid clustering. Place with intention — the map should look alive, not bunched.
+
+Zone placement defaults:
+- New manager → zone 1, right side
+- New firefighter → zone 1, left side
+- New protector (unknown) → zone 1
+- New exile → zone 1, center, placed low
+- Unattached/ancestral burden → zone 1, near/off bottom edge
+- Guide or archetypal resource → zone 3, center
+- Updated/integrated part → zone 2, near center
+- Liberated part → zone 2, very close to center
+- Ancestral burden returned to source → zone 3, left, near/off top edge
+- Unattached burden returned to source → zone 3, right, near/off top edge
+
+The Self center-point is at (x=0.5, y=0.5). Integrated/liberated parts gravitate toward it. Burdened/fragmented parts are placed further away, using the horizontal role axis.
 
 When suggesting a zone move, describe it in terms of the present-moment meter: e.g. "This part sounds like it's moved closer to the present — want to move it up?"
 
@@ -1332,8 +1406,8 @@ Always respond with valid JSON in exactly this format for normal mode:
 { "mode": "normal", "message": "your conversational response here", "actions": [] }
 
 Action types:
-- { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
-- { "type": "update_part", "id": "part-id-or-name", "changes": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "...", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
+- { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3, "suggestedTier": "protector|firefighter|manager|exile|unattached|ancestral|guide|integrated|liberated" } }
+- { "type": "update_part", "id": "part-id-or-name", "changes": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "...", "zone": 1|2|3, "suggestedTier": "protector|firefighter|manager|exile|unattached|ancestral|guide|integrated|liberated" } }
   IMPORTANT: use update_part (not add_part) whenever a part already exists on the map and needs any change — name, color, description, status, or zone. update_part finds by name fuzzy match. Never add a duplicate.
   Including zone in changes will automatically reposition the part on the map — use this when session notes show a part has clearly shifted (no confirmation needed). Use move_zone with confirm:true only when you want the practitioner to make an explicit decision about a zone change.
   Add "confirm": true to update_part when the change is significant — zone shift, major desc rewrite, liberation/unburdening, or status change reflecting deep psyche movement. Omit confirm for minor tweaks (color, small status label).
@@ -1600,10 +1674,8 @@ If no map changes needed, return empty actions array.`;
             Object.assign(part, action.changes);
             if (action.changes.name) part.label = shortenLabel(action.changes.name);
             if (action.changes.zone) {
-              const z = parseInt(action.changes.zone, 10);
-              if (z === 3) part.y = 0.05 + Math.random() * 0.24;
-              else if (z === 1) part.y = 0.70 + Math.random() * 0.22;
-              else part.y = 0.36 + Math.random() * 0.28;
+              const { x: ux, y: uy } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
+              part.x = ux; part.y = uy;
             }
             renderMap(); done.push(`updated "${part.name}"`);
           }
@@ -1626,9 +1698,8 @@ If no map changes needed, return empty actions array.`;
             showZoneConfirm(part.name, action.zone);
           } else {
             part.zone = action.zone;
-            if (action.zone === 3) part.y = 0.05 + Math.random() * 0.24;
-            else if (action.zone === 1) part.y = 0.70 + Math.random() * 0.22;
-            else part.y = 0.36 + Math.random() * 0.28;
+            const { x: mx, y: my } = computePartPlacement(part.suggestedTier || 'protector', action.zone);
+            part.x = mx; part.y = my;
             renderMap(); done.push(`moved "${part.name}" to ${ZONE_NAMES[action.zone]}`);
           }
         }
