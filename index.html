@@ -633,7 +633,7 @@
   // ════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ════════════════════════════════════════════════════════════════════════
-  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null, pendingOpeningProposal: null };
+  const APP = { hash: null, mode: null, mapData: null, dbRow: null, saveTimer: null, selectedPartId: null, chatHistory: [], guideMode: false, pendingProposal: null, guideContext: null, pendingOpeningProposal: null, pendingClusters: [], guideClosingNarrative: null, guideClosingActions: null };
 
   function emptyMapData(name) {
     return { meta: { title: `${name}'s Map`, clientName: name, sessionCount: 0, createdAt: todayStr(), lastSession: null }, parts: [], connections: [], log: [] };
@@ -1279,48 +1279,34 @@ In guide mode, a single new part still gets a full proposal card — label, narr
 
 BEFORE proposing any part in guide mode, check the current map state. If a part with the same name (or very close — "Foggy" and "The Foggy" are the same) already exists, NEVER use add_part. Use update_part with confirm:true instead, with the relevant changes. Duplicate parts are a critical error. When in doubt, update — never add.
 
-In guide mode, respond with this JSON structure:
+In guide mode, return ALL clusters in a single response. The app queues them locally — do NOT wait for follow-up calls between clusters.
 
-Opening turn (first response to new material):
+Guide mode JSON structure (one response, all clusters):
 {
   "mode": "guide",
   "contact": "one sentence of genuine empathic contact — specific to what was shared, never generic. Example: 'That sounds like the system worked really hard to stay in control — and something got through anyway.'",
   "summary": "2-4 sentences — what the system was doing, what emerged, key moment. Use their exact language. Alive and concise.",
   "lead": "Let's build the map together, starting with [most prominent part or cluster name].",
-  "proposal": {
-    "label": "short name for this cluster, e.g. 'The Warrior and his crew'",
-    "narrative": "1-3 sentences describing this part or cluster — why they belong together, what they're doing, where they belong on the map. Warm and specific.",
-    "parts": [
-      { "name": "...", "color": "...", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "zone": 1, "suggestedTier": "..." }
-    ],
-    "connections": [
-      { "from": "name", "to": "name", "connectionType": "allied|polarized" }
-    ],
-    "primaryAction": "Add both | Add all three | Add [name]",
-    "alternateAction": "Add separately | Skip for now"
-  },
-  "remaining": 3,
-  "actions": []
-}
-
-Subsequent turns (after user confirms or skips):
-{
-  "mode": "guide",
-  "narrative": "1-2 sentence transition — 'Now, underneath all of that...' or 'Then there's...' or 'The last piece I'm seeing today...'",
-  "proposal": { },
-  "remaining": 2,
-  "actions": []
-}
-
-Final turn (all clusters presented):
-{
-  "mode": "guide",
-  "narrative": "closing sentence — 'I think that covers what came up today. Anything feel off or missing?'",
-  "proposal": null,
-  "remaining": 0,
+  "clusters": [
+    {
+      "label": "short name for this cluster, e.g. 'The Warrior and his crew'",
+      "narrative": "1-3 sentences describing this cluster — why they belong together, what they're doing, where they belong on the map. Each cluster gets its own transition sentence ('Now, underneath all of that...' / 'Then there's...'). Warm and specific.",
+      "parts": [
+        { "name": "...", "color": "...", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "zone": 1, "suggestedTier": "..." }
+      ],
+      "connections": [
+        { "from": "name", "to": "name", "connectionType": "allied|polarized" }
+      ],
+      "primaryAction": "Add both | Add all three | Add [name]",
+      "alternateAction": "Add separately | Skip for now"
+    }
+  ],
+  "closingNarrative": "closing sentence shown after all clusters — 'I think that covers what came up today. Anything feel off or missing?'",
   "actions": [ ]
 }
-The final turn actions array should contain the add_log entry with full structured fields.
+
+IMPORTANT: actions[] is only for add_log (and only when warranted). It fires after all clusters are confirmed. NEVER put add_part or add_connection in actions[] — those belong inside cluster objects only.
+IMPORTANT: Return ALL clusters in a single response. Do not wait for round-trips between clusters.
 
 Normal mode (questions, small updates):
 {
@@ -1487,12 +1473,17 @@ If no map changes needed, return empty actions array.`;
       _hideTyping();
 
       if (parsed.mode === 'guide') {
-        // Guide mode response
+        // Guide mode — all clusters returned upfront, advanced locally (no follow-up API calls)
         APP.guideContext = APP.guideContext || 'the session';
         const isOpeningTurn = !!(parsed.contact && parsed.contact.length > 0);
 
         if (isOpeningTurn) {
-          // Opening turn — gated behind "Let's go →" button, no proposal card yet
+          // Load cluster queue
+          APP.pendingClusters = Array.isArray(parsed.clusters) ? [...parsed.clusters] : [];
+          APP.guideClosingNarrative = parsed.closingNarrative || null;
+          APP.guideClosingActions = Array.isArray(parsed.actions) ? parsed.actions : [];
+
+          // Render contact + summary — nothing else fires
           const displayText = [parsed.contact, parsed.summary].filter(Boolean).join('\n\n');
           APP.chatHistory.push({ role: 'assistant', content: displayText, actionsSummary: null });
           _appendBubble('assistant', displayText, null);
@@ -1513,11 +1504,7 @@ If no map changes needed, return empty actions array.`;
             readyBtn.textContent = "Let's go →";
             readyBtn.onclick = () => {
               readyWrap.remove();
-              const pending = APP.pendingOpeningProposal;
-              if (pending && pending.proposal && pending.proposal.parts?.length) {
-                renderProposalCard(pending.proposal, pending.remaining);
-              }
-              APP.pendingOpeningProposal = null;
+              _advanceClusterQueue();
             };
 
             readyWrap.appendChild(leadBubble);
@@ -1527,26 +1514,31 @@ If no map changes needed, return empty actions array.`;
             hist.scrollTop = hist.scrollHeight;
           }, 400);
 
-          // Store proposal — only if one actually exists
-          APP.pendingOpeningProposal = parsed.proposal ? { proposal: parsed.proposal, remaining: parsed.remaining } : null;
-          // Opening turn: defer add_part / add_connection — they belong to the proposal, not here
-          const safeActions = (parsed.actions || []).filter(a => a.type !== 'add_part' && a.type !== 'add_connection');
-          const actionSummary = applyBuddyActions(safeActions);
-          if (actionSummary) scheduleSave();
           sendBtn.disabled = false;
-          return; // hard gate — renderProposalCard must NOT be called on opening turn
+          return; // hard gate — no actions, no renderProposalCard, nothing until "Let's go →"
 
         } else {
-          // Subsequent or closing turn — render narrative then proposal card
+          // Continuation response from a typed user message during guide mode
+          // Treat as a single-cluster response (no opening gate)
           if (parsed.narrative) {
             APP.chatHistory.push({ role: 'assistant', content: parsed.narrative, actionsSummary: null });
             _appendBubble('assistant', parsed.narrative, null);
           }
-          const actionSummary = applyBuddyActions(parsed.actions || []);
-          if (actionSummary) scheduleSave();
-          if (parsed.proposal) {
-            renderProposalCard(parsed.proposal, parsed.remaining);
+          // Merge any returned clusters into queue
+          if (Array.isArray(parsed.clusters) && parsed.clusters.length) {
+            APP.pendingClusters = [...parsed.clusters, ...(APP.pendingClusters || [])];
+            if (parsed.closingNarrative) APP.guideClosingNarrative = parsed.closingNarrative;
+            if (Array.isArray(parsed.actions)) APP.guideClosingActions = parsed.actions;
+            _advanceClusterQueue();
+          } else if (parsed.proposal) {
+            // Legacy single-proposal format — render directly
+            const actionSummary = applyBuddyActions((parsed.actions || []).filter(a => a.type !== 'add_part' && a.type !== 'add_connection'));
+            if (actionSummary) scheduleSave();
+            renderProposalCard(parsed.proposal, parsed.remaining ?? 0);
           } else {
+            // Closing / no proposal
+            const actionSummary = applyBuddyActions(parsed.actions || []);
+            if (actionSummary) scheduleSave();
             clearProposalCard();
           }
         }
@@ -2237,16 +2229,16 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
     return done;
   }
 
-  async function handleProposalPrimary() {
+  function handleProposalPrimary() {
     const proposal = APP.pendingProposal;
     if (!proposal) return;
     const done = applyProposalParts(proposal);
     clearProposalCard();
     if (done.length) _appendBubble('assistant', '↳ ' + done.join(', '), null);
-    await sendGuideFollowUp('confirmed');
+    _advanceClusterQueue();
   }
 
-  async function handleProposalAlt() {
+  function handleProposalAlt() {
     const proposal = APP.pendingProposal;
     if (!proposal) return;
     const altText = (proposal.alternateAction || '').toLowerCase();
@@ -2262,16 +2254,30 @@ ${allAsks.length ? `<h2>What Your Parts Have Asked For</h2><ul class="asks-list"
       }
       if (done.length) { renderMap(); scheduleSave(); }
       if (done.length) _appendBubble('assistant', '↳ ' + done.join(', ') + ' (separately)', null);
-      clearProposalCard();
-      await sendGuideFollowUp('added separately');
-    } else {
-      clearProposalCard();
-      await sendGuideFollowUp('skipped');
     }
+    clearProposalCard();
+    _advanceClusterQueue();
   }
 
-  async function sendGuideFollowUp(action) {
-    await sendChatMessage(`User ${action} this proposal. Continue guide mode — what's next?`, true);
+  function _advanceClusterQueue() {
+    if (APP.pendingClusters && APP.pendingClusters.length > 0) {
+      const cluster = APP.pendingClusters.shift();
+      const remaining = APP.pendingClusters.length;
+      renderProposalCard(cluster, remaining);
+    } else {
+      // All clusters done — show closing narrative and fire log action
+      clearProposalCard();
+      const closing = APP.guideClosingNarrative;
+      if (closing) {
+        APP.chatHistory.push({ role: 'assistant', content: closing, actionsSummary: null });
+        _appendBubble('assistant', closing, null);
+      }
+      const actionSummary = applyBuddyActions(APP.guideClosingActions || []);
+      if (actionSummary) scheduleSave();
+      APP.guideClosingNarrative = null;
+      APP.guideClosingActions = null;
+      APP.guideContext = null;
+    }
   }
 
   // ════════════════════════════════════════════════════════════════════════
