@@ -221,11 +221,11 @@
   <!-- ═══════════════════════════════ PIN SCREEN ═══════════════════════════════ -->
   <div id="screen-pin" class="screen">
     <div class="pin-wordmark">Your Parts Map</div>
-    <div class="pin-title" id="pin-map-title">Enter your PIN</div>
+    <div class="pin-title" id="pin-map-title">Enter your password</div>
     <div class="pin-box">
       <input type="password" class="pin-input" id="pin-input"
-        placeholder="· · · ·" maxlength="20" autocomplete="off" inputmode="numeric">
-      <button class="pin-btn" id="pin-submit-btn">Enter</button>
+        placeholder="Your password" maxlength="20" autocomplete="off">
+      <button class="pin-btn" id="pin-submit-btn">Open Map</button>
       <div class="pin-hint" id="pin-hint"></div>
     </div>
   </div>
@@ -389,19 +389,19 @@
   <!-- ═══════════════════════════════ NEW MAP MODAL ════════════════════════════ -->
   <div class="modal-overlay hidden" id="new-map-modal">
     <div class="modal">
-      <div class="modal-title">New Client Map</div>
+      <div class="modal-title">New Client</div>
       <div id="modal-form-fields">
         <div class="form-field" style="margin-bottom:0.7rem;">
-          <label class="form-label">Client Name or Code</label>
-          <input class="form-input" id="new-client-name" type="text" placeholder="e.g. Roman or R-001">
+          <label class="form-label">Client</label>
+          <input class="form-input" id="new-client-name" type="text" placeholder="e.g. Jessica">
         </div>
         <div class="form-field" style="margin-bottom:0.7rem;">
-          <label class="form-label">Practitioner PIN</label>
-          <input class="form-input" id="new-pract-pin" type="password" placeholder="Choose a PIN you'll remember">
+          <label class="form-label">Your Password</label>
+          <input class="form-input" id="new-pract-pin" type="password" placeholder="Something you'll remember">
         </div>
         <div class="form-field" style="margin-bottom:0.7rem;">
-          <label class="form-label">Client PIN</label>
-          <input class="form-input" id="new-client-pin" type="password" placeholder="PIN to share with client">
+          <label class="form-label">Client Password</label>
+          <input class="form-input" id="new-client-pin" type="password" placeholder="Something easy to share">
         </div>
         <div class="modal-actions">
           <button class="btn-secondary" id="modal-cancel-btn">Cancel</button>
@@ -535,7 +535,7 @@
   function showPINScreen(hash) {
     APP.hash = hash;
     showScreen('screen-pin');
-    document.getElementById('pin-map-title').textContent = 'Enter your PIN';
+    document.getElementById('pin-map-title').textContent = 'Enter your password';
     document.getElementById('pin-hint').textContent = '';
     document.getElementById('pin-input').value = '';
     setTimeout(() => document.getElementById('pin-input').focus(), 100);
@@ -554,7 +554,7 @@
       if (ph === row.practitioner_pin_hash) { APP.mode = 'practitioner'; }
       else if (ph === row.client_pin_hash) { APP.mode = 'client'; }
       else {
-        hint.textContent = 'Incorrect PIN. Try again.';
+        hint.textContent = 'Incorrect password. Try again.';
         const inp = document.getElementById('pin-input');
         inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
         inp.value = ''; inp.focus(); return;
@@ -1304,7 +1304,7 @@ If no map changes needed, return empty actions array.`;
       updateLocalIndex(hash, mapData.meta.title, 0);
       const url = `${location.origin}${location.pathname}#${hash}`;
       const info = document.getElementById('created-info');
-      info.innerHTML = `<strong>Map created!</strong><br><br>Client URL:<br><span class="url-line"><strong>${escHtml(url)}</strong></span><br><br>Client PIN: <strong>${escHtml(clientPin)}</strong><br><br>Share the URL and PIN with your client. Keep your practitioner PIN safe.`;
+      info.innerHTML = `<strong>Map created!</strong><br><br>Client URL:<br><span class="url-line"><strong>${escHtml(url)}</strong></span><br><br>Client password: <strong>${escHtml(clientPin)}</strong><br><br>Share the URL and password with your client. Keep your own password safe.`;
       const openBtn = document.createElement('button');
       openBtn.className = 'btn-primary'; openBtn.style.marginTop = '1rem'; openBtn.textContent = 'Open Map';
       openBtn.addEventListener('click', () => { document.getElementById('new-map-modal').classList.add('hidden'); window.location.hash = hash; });
