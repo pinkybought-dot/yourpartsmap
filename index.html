@@ -1003,7 +1003,7 @@
     const part = APP.mapData?.parts?.find(p => p.id === pendingZoneMove.partId);
     if (part) {
       part.zone = pendingZoneMove.newZone;
-      const { x: cx, y: cy } = computePartPlacement(part.suggestedTier || 'protector', pendingZoneMove.newZone);
+      const { x: cx, y: cy } = computePartPlacement(part.suggestedTier || 'protector', pendingZoneMove.newZone, APP.mapData?.parts || []);
       part.x = cx; part.y = cy;
       scheduleSave();
     }
@@ -1080,7 +1080,7 @@
       Object.assign(part, pendingPartUpdate.changes);
       if (pendingPartUpdate.changes.name) part.label = shortenLabel(pendingPartUpdate.changes.name);
       if (pendingPartUpdate.changes.zone || pendingPartUpdate.changes.suggestedTier) {
-        const { x: px, y: py } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
+        const { x: px, y: py } = computePartPlacement(part.suggestedTier || 'protector', part.zone, APP.mapData?.parts || []);
         part.x = px; part.y = py;
       }
       renderMap();
@@ -1180,7 +1180,7 @@
     scheduleSave();
   }
 
-  function computePartPlacement(tier, zone) {
+  function computePartPlacement(tier, zone, existingParts) {
     const t = tier || 'protector';
     const z = parseInt(zone, 10) || 1;
     let xMin, xMax, yMin, yMax;
@@ -1225,8 +1225,28 @@
     }
 
     const jitter = (Math.random() - 0.5) * 0.04;
-    const x = Math.max(0.02, Math.min(0.98, xMin + Math.random() * (xMax - xMin) + jitter));
-    const y = Math.max(-0.1, yMin + Math.random() * (yMax - yMin) + jitter);
+    let x = Math.max(0.02, Math.min(0.98, xMin + Math.random() * (xMax - xMin) + jitter));
+    let y = Math.max(-0.1, yMin + Math.random() * (yMax - yMin) + jitter);
+
+    // Collision nudge — push away from existing parts that are too close
+    const existing = existingParts || [];
+    const MIN_DIST = 0.12;
+    for (let iter = 0; iter < 8; iter++) {
+      let closest = null, closestDist = Infinity;
+      for (const p of existing) {
+        const dx = x - p.x, dy = y - p.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < MIN_DIST && d < closestDist) { closestDist = d; closest = p; }
+      }
+      if (!closest) break;
+      const dx = x - closest.x, dy = y - closest.y;
+      const d = closestDist || 0.001;
+      x += (dx / d) * 0.06;
+      y += (dy / d) * 0.06;
+      x = Math.max(0.02, Math.min(0.98, x));
+      y = Math.max(-0.1, y);
+    }
+
     return { x, y };
   }
 
@@ -1239,7 +1259,7 @@
       else if (tier === 'integrated' || tier === 'liberated') zone = 2;
       else zone = 1;
     }
-    const { x, y } = computePartPlacement(tier, zone);
+    const { x, y } = computePartPlacement(tier, zone, APP.mapData?.parts || []);
     const part = {
       id: genId(), name: partData.name, label: shortenLabel(partData.name),
       color: partData.suggestedColor || 'gray', shape: 'circle', size: 32, zone,
@@ -1680,7 +1700,7 @@ If no map changes needed, return empty actions array.`;
             Object.assign(part, action.changes);
             if (action.changes.name) part.label = shortenLabel(action.changes.name);
             if (action.changes.zone || action.changes.suggestedTier) {
-              const { x: ux, y: uy } = computePartPlacement(part.suggestedTier || 'protector', part.zone);
+              const { x: ux, y: uy } = computePartPlacement(part.suggestedTier || 'protector', part.zone, APP.mapData?.parts || []);
               part.x = ux; part.y = uy;
             }
             renderMap(); done.push(`updated "${part.name}"`);
@@ -1704,7 +1724,7 @@ If no map changes needed, return empty actions array.`;
             showZoneConfirm(part.name, action.zone);
           } else {
             part.zone = action.zone;
-            const { x: mx, y: my } = computePartPlacement(part.suggestedTier || 'protector', action.zone);
+            const { x: mx, y: my } = computePartPlacement(part.suggestedTier || 'protector', action.zone, APP.mapData?.parts || []);
             part.x = mx; part.y = my;
             renderMap(); done.push(`moved "${part.name}" to ${ZONE_NAMES[action.zone]}`);
           }
