@@ -214,6 +214,8 @@
     .dashboard-header-actions { display: flex; align-items: center; gap: 0.75rem; }
     .dashboard-how-toggle { background: none; border: none; font-size: 0.78rem; color: var(--text-faint); cursor: pointer; padding: 0; }
     .dashboard-how-toggle:hover { text-decoration: underline; }
+    .dashboard-how-toggle-link { font-size: 0.82rem; color: var(--text-faint); cursor: pointer; text-decoration: none; border: none; background: none; padding: 0; margin-top: 0.5rem; display: inline-block; }
+    .dashboard-how-toggle-link:hover { color: var(--text-dim); }
     .new-client-btn { padding: 0.55rem 1.1rem; background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 6px; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.18s; }
     .new-client-btn:hover { background: rgba(138,106,32,0.15); }
     .map-list { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.45rem; }
@@ -230,9 +232,9 @@
     .dashboard-intro-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--text-dim); margin-bottom: 2rem; }
     .dashboard-divider { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
     .dashboard-how-heading { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.9rem; }
-    .dashboard-steps { text-align: left; display: flex; flex-direction: column; gap: 0.1rem; }
-    .dashboard-step { font-size: 0.9rem; line-height: 1.9; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
-    .dashboard-step::before { content: '—'; position: absolute; left: 0; color: var(--text-faint); }
+    .dashboard-steps-numbered { text-align: left; width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem; }
+    .dashboard-step-numbered { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; display: grid; grid-template-columns: 1.5rem 1fr; gap: 0.5rem; }
+    .dashboard-step-num { font-size: 0.75rem; color: var(--gold); font-weight: 500; padding-top: 0.1rem; }
     .dashboard-feedback { font-size: 0.8rem; color: var(--text-faint); margin-top: 0.5rem; }
     .dashboard-feedback a { color: var(--text-faint); text-decoration: none; }
     .dashboard-feedback a:hover { text-decoration: underline; }
@@ -464,18 +466,18 @@
     <div class="dashboard-header hidden" id="dashboard-header">
       <h1 class="dashboard-title">Your Parts Map</h1>
       <div class="dashboard-header-actions">
-        <button class="dashboard-how-toggle" id="dashboard-how-toggle">How it works</button>
+        <button class="dashboard-how-toggle" id="dashboard-how-toggle">How does this work? ▾</button>
         <button class="new-client-btn" id="new-client-btn">+ New Client</button>
       </div>
     </div>
     <!-- Collapsible "How it works" for populated state -->
     <div class="dashboard-how-panel hidden" id="dashboard-how-panel">
-      <p class="dashboard-how-heading">How it works</p>
-      <div class="dashboard-steps">
-        <div class="dashboard-step">Create a map for each client — they get a private, password-protected link</div>
-        <div class="dashboard-step">Add parts as they emerge in session — each part lives on the map</div>
-        <div class="dashboard-step">Log sessions with Bob, your AI assistant — he tracks what shifted</div>
-        <div class="dashboard-step">Export clinical notes or the client's personal journey at any time</div>
+      <div class="dashboard-steps-numbered">
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">1.</span><span>Click + New Client. Enter the client's name, your practitioner password, and a client password.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">2.</span><span>You'll get a unique URL for that client. Share the URL and their password with them — that's all they need to access their map.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">3.</span><span>Your password opens the practitioner view: full clinical notes, session log, and export tools. Their password opens the client view: their personal journey, what shifted, and what their parts asked for.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">4.</span><span>Use Bob (the chat panel) to build and update the map. Paste a session transcript, jot notes after a session, or just tell him what came up — he'll add parts, update the map, and write the log.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">5.</span><span>Parts live on the map spatially — Zone 1 (bottom) holds burdened parts and exiles, Zone 2 (middle) is the present and Self, Zone 3 (top) is for guides and anything returned to source. Parts move between zones as the work progresses.</span></div>
       </div>
     </div>
     <!-- Empty state intro (hidden when populated) -->
@@ -483,19 +485,19 @@
       <div class="dashboard-intro-title">Your Parts Map</div>
       <div class="dashboard-intro-subtitle">A living map of your clients' inner worlds.</div>
       <button class="new-client-btn" id="new-client-btn-empty">+ New Client</button>
-      <hr class="dashboard-divider">
-      <p class="dashboard-how-heading">How it works</p>
-      <div class="dashboard-steps">
-        <div class="dashboard-step">Create a map for each client — they get a private, password-protected link</div>
-        <div class="dashboard-step">Add parts as they emerge in session — each part lives on the map</div>
-        <div class="dashboard-step">Log sessions with Bob, your AI assistant — he tracks what shifted</div>
-        <div class="dashboard-step">Export clinical notes or the client's personal journey at any time</div>
+      <button class="dashboard-how-toggle-link" id="dashboard-how-toggle-empty">How does this work? ▾</button>
+      <div class="dashboard-steps-numbered hidden" id="dashboard-steps-empty">
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">1.</span><span>Click + New Client. Enter the client's name, your practitioner password, and a client password.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">2.</span><span>You'll get a unique URL for that client. Share the URL and their password with them — that's all they need to access their map.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">3.</span><span>Your password opens the practitioner view: full clinical notes, session log, and export tools. Their password opens the client view: their personal journey, what shifted, and what their parts asked for.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">4.</span><span>Use Bob (the chat panel) to build and update the map. Paste a session transcript, jot notes after a session, or just tell him what came up — he'll add parts, update the map, and write the log.</span></div>
+        <div class="dashboard-step-numbered"><span class="dashboard-step-num">5.</span><span>Parts live on the map spatially — Zone 1 (bottom) holds burdened parts and exiles, Zone 2 (middle) is the present and Self, Zone 3 (top) is for guides and anything returned to source. Parts move between zones as the work progresses.</span></div>
       </div>
       <hr class="dashboard-divider">
-      <div class="dashboard-feedback">Got feedback? <a href="mailto:ian@yourpartsmap.com">ian@yourpartsmap.com</a></div>
+      <div class="dashboard-feedback">Got feedback? <a href="mailto:ian@santacruzmedicine.com">ian@santacruzmedicine.com</a></div>
     </div>
     <div class="map-list" id="map-list"></div>
-    <div class="dashboard-list-feedback hidden" id="dashboard-list-feedback">Got feedback? <a href="mailto:ian@yourpartsmap.com">ian@yourpartsmap.com</a></div>
+    <div class="dashboard-list-feedback hidden" id="dashboard-list-feedback">Got feedback? <a href="mailto:ian@santacruzmedicine.com">ian@santacruzmedicine.com</a></div>
   </div>
 
   <!-- ═══════════════════════════════ NEW MAP MODAL ════════════════════════════ -->
@@ -1667,6 +1669,13 @@ If no map changes needed, return empty actions array.`;
       list.innerHTML = '';
       intro.classList.remove('hidden');
       document.getElementById('new-client-btn-empty').onclick = openNewMapModal;
+      const howToggleEmpty = document.getElementById('dashboard-how-toggle-empty');
+      howToggleEmpty.onclick = () => {
+        const steps = document.getElementById('dashboard-steps-empty');
+        const open = !steps.classList.contains('hidden');
+        steps.classList.toggle('hidden', open);
+        howToggleEmpty.textContent = open ? 'How does this work? ▾' : 'Hide ▴';
+      };
       return;
     }
 
@@ -1691,7 +1700,7 @@ If no map changes needed, return empty actions array.`;
     toggle.onclick = () => {
       const open = !howPanel.classList.contains('hidden');
       howPanel.classList.toggle('hidden', open);
-      toggle.textContent = open ? 'How it works' : 'Hide';
+      toggle.textContent = open ? 'How does this work? ▾' : 'Hide ▴';
     };
   }
 
