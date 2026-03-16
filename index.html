@@ -991,8 +991,9 @@
 
   // ── ZONE CONFIRM ─────────────────────────────────────────────────────────
   function showZoneConfirm(partName, newZone) {
+    const zoneDesc = { 1: 'deeper into the past', 2: 'closer to the present', 3: 'back toward the source' };
     document.getElementById('zone-confirm-msg').textContent =
-      `Move "${partName}" to the ${ZONE_NAMES[newZone]} zone?`;
+      `Move "${partName}" — ${zoneDesc[newZone]}?`;
     document.getElementById('zone-confirm-overlay').classList.remove('hidden');
   }
 
@@ -1212,6 +1213,8 @@ The map has a Self center-point at the middle (x=0.5, y=0.5). In Zone 2, integra
 
 When suggesting a zone move, describe it in terms of the present-moment meter: e.g. "This part sounds like it's moved closer to the present — want to move it up?"
 
+NEVER use the words "Zone 1", "Zone 2", "Zone 3", or zone numbers in any user-facing text — narrative, contact, summary, proposal narrative, or message. Always describe movement in present-moment language: "closer to now", "deeper into the past", "back toward the source", "more integrated with Self", "still carrying old weight", etc.
+
 GUIDE MODE
 
 When you receive a transcript, session notes, or significant new information (anything that describes what happened in a session), enter guide mode. For simple questions or small updates, stay in normal mode.
@@ -1284,7 +1287,8 @@ Always respond with valid JSON in exactly this format for normal mode:
 
 Action types:
 - { "type": "add_part", "part": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
-- { "type": "update_part", "id": "part-id-or-name", "changes": { "color": "teal", "status": "◎ Merged", "desc": "..." } }
+- { "type": "update_part", "id": "part-id-or-name", "changes": { "name": "...", "color": "purple|blue|teal|amber|coral|green|gray|gold", "shape": "circle|ellipse|diamond|dashed", "desc": "...", "status": "...", "zone": 1|2|3, "suggestedTier": "protector|exile|ancestral|unattached|guide|integrated|liberated" } }
+  IMPORTANT: use update_part (not add_part) whenever a part already exists on the map and needs any change — name, color, description, status, or zone. update_part finds by name fuzzy match. Never add a duplicate.
 - { "type": "remove_part", "id": "part-id-or-name" }
 - { "type": "move_zone", "id": "part-id-or-name", "zone": 1|2|3, "confirm": true }
 - { "type": "add_connection", "from": "part-id-or-name", "to": "part-id-or-name", "connectionType": "allied|polarized", "confirm": true }
