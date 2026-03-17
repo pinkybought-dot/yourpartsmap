@@ -1495,7 +1495,7 @@ Guide mode JSON structure (one response, all clusters):
       "alternateAction": "Add separately | Skip for now"
     }
   ],
-  "closingNarrative": "closing sentence shown after all clusters — 'I think that covers what came up today. Anything feel off or missing?'",
+  "closingNarrative": "closing sentence shown after all clusters — a soft close, NOT an open invitation for more map content. End with something grounding like 'That feels complete for today.' or 'The map is holding all of that now.' A gentle check is fine ('Does anything feel off?') but do NOT ask questions that invite new parts or new material.",
   "actions": [ ]
 }
 
@@ -1623,7 +1623,7 @@ If no map changes needed, return empty actions array.`;
     text = text.trim();
     if (!text || !APP.mapData) return;
     // Reset cooldown when user sends substantial new content (heuristic for real session material)
-    if (APP.guideCooldown && text.length > 80) APP.guideCooldown = false;
+    if (APP.guideCooldown && text.length > 200 && /today|session|found|discovered|\bpart\b|came up/i.test(text)) APP.guideCooldown = false;
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send-btn');
     if (!isInternal) {
